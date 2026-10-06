@@ -1,0 +1,2730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>അൽ-അലഖ് | Word by Word</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+Malayalam:wght@400;600&family=Noto+Serif+Devanagari:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'UthmanicHafs';
+    src: url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2') format('woff2'),
+         url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf') format('truetype');
+    font-display: swap;
+  }
+  :root{
+    --parchment: #FFFFFF;
+    --parchment-deep: #FFFFFF;
+    --card: #FFFFFF;
+    --ink: #000000;
+    --ink-soft: #000000;
+    --teal: #000000;
+    --teal-deep: #000000;
+    --gold: #000000;
+    --gold-soft: #000000;
+    --line: rgba(0,0,0,0.08);
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'Lora', serif;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ---------- Controls ---------- */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    margin-bottom: 6px;
+  }
+
+  .chapter-row {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+  }
+
+  .chapter-sheet-btn {
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', 'Lora', serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 4px 9px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .chapter-sheet-btn .chapter-sheet-translit {
+    font-size: 13px;
+  }
+
+  .chapter-sheet-chevron {
+    color: var(--ink-soft);
+    font-size: 10px;
+  }
+
+  .chapter-sheet-overlay {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--vvtop, 0px);
+    height: var(--vvh, 100%);
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+  }
+
+  /* keyboard open: put the search box at the top so results stay visible */
+  .chapter-sheet-overlay.kb-open {
+    align-items: flex-start;
+    padding-top: 10px;
+  }
+
+  .chapter-sheet-overlay[hidden] {
+    display: none;
+  }
+
+  .chapter-sheet {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 16px;
+    padding: 6px 0 6px;
+    max-height: min(62vh, calc(var(--vvh, 100vh) - 20px));
+    display: flex;
+    flex-direction: column;
+    animation: chapterSheetIn 0.2s ease-out;
+  }
+
+  @keyframes chapterSheetIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .chapter-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--line);
+    border-radius: 999px;
+    margin: 0 auto 8px;
+  }
+
+  .chapter-sheet-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+    margin: 0 0 4px;
+  }
+
+  .chapter-sheet-search {
+    margin: 0 16px 6px;
+    padding: 6px 12px;
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #f7f7f7;
+    color: var(--ink);
+  }
+
+  .chapter-sheet-search:focus { outline: none; }
+
+  .chapter-sheet-row.hidden-by-search { display: none; }
+
+  .chapter-sheet-list {
+    overflow-y: auto;
+    padding: 0 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(158px, calc(var(--vvh, 100vh) - 110px));
+  }
+
+  .chapter-sheet-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 4px 4px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Lora', serif;
+  }
+
+  .chapter-sheet-row:last-child {
+    border-bottom: none;
+  }
+
+  .chapter-sheet-row.active {
+    background: #f6f6f6;
+  }
+
+  .chapter-sheet-num {
+    font-size: 12px;
+    color: var(--ink-soft);
+    min-width: 16px;
+  }
+
+  .chapter-sheet-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .chapter-sheet-name {
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif;
+    direction: ltr;
+    font-size: 15px;
+    line-height: 1.35;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .chapter-sheet-translit {
+    font-family: 'Lora', serif;
+    direction: ltr;
+    font-size: 13px;
+    font-weight: 400;
+    white-space: nowrap;
+    color: var(--ink-soft);
+  }
+
+  .chapter-sheet-meaning {
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+
+  .chapter-sheet-info {
+    margin-inline-start: auto;
+    flex: 0 0 auto;
+    font-size: 11px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    text-align: right;
+    font-family: 'Lora', serif;
+    padding-left: 8px;
+  }
+  .chapter-sheet-info-makki { color: #c1553a; font-weight: 400; }
+  .chapter-sheet-info-madani { color: #2e8080; font-weight: 400; }
+
+  .chapter-note {
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin: 0;
+    flex-basis: 100%;
+  }
+
+  .chapter-sheet-btn.box-selected {
+    border-color: #90c978;
+    border-width: 1.5px;
+  }
+
+  .chapter-select-label {
+    font-size: 14px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .toggle-label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+
+  .font-size-row {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0;
+  }
+
+  .translator-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-inline-start: 10px;
+    font-size: 14px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .font-size-label {
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .font-size-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--ink);
+    cursor: pointer;
+    padding: 0 8px;
+    line-height: 1;
+  }
+
+  #fontSizeValue {
+    font-size: 13px;
+    color: var(--ink);
+    min-width: 14px;
+    text-align: center;
+  }
+
+  .lang-toggles {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .lang-toggles label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .lang-toggles input {
+    accent-color: var(--teal);
+    width: 15px;
+    height: 15px;
+  }
+
+  .word-search-row {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .word-search-wrap {
+    position: relative;
+    flex: 0 1 170px;
+    min-width: 0;
+  }
+
+  .word-search-input {
+    width: 100%;
+    padding: 5px 26px 5px 10px;
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #f7f7f7;
+    color: var(--ink);
+    text-overflow: ellipsis;
+  }
+
+  .word-search-input:focus { outline: none; border-color: var(--ink-soft); }
+
+  .word-search-clear {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 6px 8px;
+    line-height: 1;
+  }
+
+  .word-search-count {
+    font-size: 11px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .word-search-fab {
+    position: fixed;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    z-index: 900;
+  }
+
+  .word-search-fab[hidden] { display: none; }
+
+  .word-search-fabbtn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: var(--ink);
+    cursor: pointer;
+    padding: 12px 13px;
+    line-height: 1;
+  }
+
+  .word-search-fabcount {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: center;
+    white-space: nowrap;
+    padding: 7px 6px;
+    min-width: 46px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .word-search-fabbtn:active { background: #e6e6e6; }
+
+  .word-block.search-match {
+    background: #fffbd9;
+    box-shadow: 0 0 0 2px #f6e992 inset;
+    border-radius: var(--radius);
+  }
+
+  .word-block.search-current {
+    background: #fff7ab;
+    box-shadow: 0 0 0 2px #ecdb6b inset;
+  }
+
+  .word-block.search-dim {
+    opacity: 0.32;
+  }
+
+  /* Arabic search hits inside the full-verse text */
+  mark.ar-hit {
+    background: #fff7ab;
+    color: inherit;
+    border-radius: 3px;
+    box-shadow: 0 0 0 2px #fff7ab;
+  }
+  mark.ar-hit.search-current {
+    background: #ffe27a;
+    box-shadow: 0 0 0 2px #ffe27a, 0 0 0 3px #e9b930;
+  }
+
+  /* ---------- Ayah block ---------- */
+  .bismillah-line {
+    direction: rtl;
+    text-align: center;
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif;
+    font-size: 1.3rem;
+    color: var(--ink);
+    margin: 10px 0 14px;
+    padding: 8px 0 10px;
+    border-top: 1.5px solid #8fcf6f;     /* green lines above and below */
+    border-bottom: 1.5px solid #8fcf6f;
+  }
+
+  .ayah {
+    background: var(--card);
+    border-bottom: 1.5px solid #b9e0a5; /* light green divider */
+    padding: 4px 0 2px;
+    margin-bottom: 0;
+  }
+
+  .ayah.hidden-by-search {
+    display: none;
+  }
+
+  .ayah-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+
+  .ayah-number {
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+  }
+
+  .share-btn {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 2px 3px;
+    cursor: pointer;
+  }
+
+  .share-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: #a8a8a8; /* faded grey */
+    fill: none;
+    stroke-width: 1.6;
+    opacity: 0.8;
+    transition: stroke 0.15s ease;
+  }
+
+  .share-btn:active svg {
+    stroke: #555;
+  }
+
+  .share-toast {
+    position: absolute;
+    top: -26px;
+    right: 0;
+    background: var(--ink);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .ayah-end-num {
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif;
+    font-size: 1.3rem;
+    color: var(--ink);
+    margin-inline-start: 6px;
+  }
+
+  body.hide-ayah .ayah-full-arabic { display: none; }
+
+  .ayah-full-arabic {
+    direction: rtl;
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif;
+    font-size: 1.3rem;
+    color: var(--ink);
+    line-height: 2.2;
+    text-align: right;
+    margin-top: 10px;
+    margin-bottom: 8px;
+  }
+
+  .ayah-translations {
+    margin-top: 10px;
+    margin-bottom: 0;
+  }
+
+  .ayah-translations.ayah-translations-hidden {
+    display: none;
+  }
+
+  .ayah-translations .translation-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .ayah-translations .translation-block:last-child .translation-line:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .ayah-translations > .translation-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .translation-loading {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .translation-line {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 4px;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  /* a small black dot marks the start of each translation */
+  .translation-line::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: calc(0.54rem + 1px);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  .translation-line.en { font-family: 'Inter', sans-serif; font-style: normal; }
+  .translation-line.ml { font-family: 'Noto Serif Malayalam', serif; }
+  .translation-line.hi { font-family: 'Noto Serif Devanagari', serif; }
+  /* word-by-word grid, reads right to left like the ayah */
+  .word-row {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .word-row.word-row-hidden {
+    display: none;
+  }
+
+  .word-block {
+    background: var(--parchment);
+    border-radius: var(--radius);
+    padding: 12px 14px 14px;
+    min-width: 108px;
+    text-align: center;
+    transition: background 0.15s ease;
+    position: relative;
+  }
+
+  /* thin grey line under every word (separate line per word, gap between words) */
+  .word-block::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: #e6e6e6;
+    pointer-events: none;
+  }
+
+  .word-block:hover,
+  .word-block.active {
+    background: #FFFFFF;
+  }
+
+  .word-arabic {
+    direction: rtl;
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif;
+    font-size: 1.3rem;
+    color: var(--teal-deep);
+    margin-bottom: 4px;
+  }
+
+  .word-gloss {
+    font-size: 0.93rem;
+    line-height: 1.5;
+    padding-top: 6px;
+    text-align: left;
+  }
+
+  .word-gloss.lang-hidden,
+  .translation-line.lang-hidden,
+  .translation-attr.lang-hidden { display: none; }
+
+  .word-gloss .tag {
+    display: inline-block;
+    width: 20px;
+    font-size: 0.65rem;
+    color: var(--gold);
+    font-family: 'Lora', serif;
+    font-weight: 600;
+  }
+
+  .word-gloss.en { font-family: 'Inter', sans-serif; }
+  .word-gloss.ml { font-family: 'Noto Serif Malayalam', serif; }
+  .word-gloss.hi { font-family: 'Noto Serif Devanagari', serif; }
+  .translation-block {
+    margin-bottom: 8px;
+  }
+
+  .translation-attr {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    padding-left: 16px;
+    margin: 6px 0 0;
+    display: none;   /* hidden unless the "Translator" checkbox is on */
+  }
+
+  body.show-translator .translation-attr {
+    display: block;
+  }
+  body.show-translator .translation-attr.lang-hidden {
+    display: none;
+  }
+
+  /* ---------- Sources & credits ---------- */
+  .sources-link {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .sources-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .sources-overlay[hidden] { display: none; }
+  .sources-box {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    max-height: 82vh;
+    overflow-y: auto;
+    border: 1.5px solid #b9e0a5;
+    border-radius: 16px;
+    padding: 12px 16px 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  }
+  .sources-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .sources-title { font-size: 15px; }
+  .sources-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .sources-item:last-of-type { border-bottom: none; }
+  .sources-what { color: var(--ink-soft); font-size: 12px; }
+  .sources-item a { color: var(--ink); text-decoration: underline; }
+  .sources-note { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin-top: 6px; }
+
+  footer {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 40px;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 480px) {
+    .word-block { min-width: 92px; padding: 10px 10px 12px; }
+  }
+
+  /* ---------- Floating settings button + modal ---------- */
+  .page { padding-top: 68px; }
+
+  .settings-fab {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    left: 14px;
+    z-index: 60;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.5px solid #b9e0a5;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .settings-fab svg { width: 22px; height: 22px; stroke: #000; stroke-width: 2; stroke-linecap: round; }
+  .settings-fab:active { background: #f0f0f0; }
+
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 34px) 14px 14px;
+  }
+  .settings-overlay[hidden] { display: none; }
+
+  .settings-modal {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    max-height: 100%;
+    overflow-y: auto;
+    border: 1.5px solid #b9e0a5;
+    border-radius: 16px;
+    padding: 10px 16px 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    animation: settingsPop 0.18s ease-out;
+  }
+  @keyframes settingsPop {
+    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .settings-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .settings-modal-title { font-size: 14px; font-weight: 600; }
+  .settings-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  /* keep the search arrows underneath the settings modal, never on top of it */
+  .word-search-fab { z-index: 70; }
+
+  /* up/down arrows inside the settings modal (the floating ones hide while it is open) */
+  body.settings-open .word-search-fab { visibility: hidden; }
+  .wsm-go-btn {
+    flex: 0 0 auto;
+    height: 34px;
+    margin-left: auto;
+    padding: 0 12px;
+    border-radius: 9px;
+    border: none;
+    background: #d3eebc;
+    color: #24500f;
+    box-shadow: 0 2px 8px rgba(150, 205, 110, 0.35);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wsm-go-btn:active { background: #c1e5a5; box-shadow: 0 1px 4px rgba(150, 205, 110, 0.3); }
+  .wsm-go-btn[hidden] { display: none; }
+  .word-search-fabbtn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .word-search-fabbtn { display: flex; align-items: center; justify-content: center; }
+  .settings-controls .word-search-row { flex-wrap: nowrap; gap: 8px; }
+
+  /* Compact spacing inside the settings modal */
+  .settings-controls { gap: 8px 14px; margin-bottom: 0; }
+  .settings-controls .chapter-row { gap: 8px; }
+  .settings-controls .chapter-row + .chapter-row { margin-top: 0 !important; }
+  .settings-controls .chapter-note:empty { display: none; }
+  .settings-controls .chapter-sheet-btn { padding: 6px 12px; line-height: 1.3; font-size: 1rem; border-radius: 10px; }
+  .settings-controls .toggle-label { margin-bottom: 0; }
+  .settings-controls .lang-toggles { gap: 12px; }
+  .settings-controls .font-size-btn { padding: 0 10px; }
+  .settings-controls .word-search-row { margin-top: 0; }
+
+  .settings-controls.search-focused > *:not(.word-search-row) { display: none !important; }
+  .settings-controls.search-focused .word-search-row { margin-top: 2px; }
+  .settings-controls .word-search-wrap { flex: 0 1 165px; }
+  .settings-controls .word-search-input { padding: 3px 26px 3px 12px; font-size: 16px; }
+  .settings-controls .word-search-clear { right: 4px; font-size: 13px; }
+
+  /* Current surah name next to the settings button */
+  .surah-title-wrap {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 16px);
+    left: 66px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: calc(100vw - 76px);
+  }
+  .surah-title-pill {
+    height: 36px;
+    min-width: 0;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid #b9e0a5;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .surah-order-tag {
+    flex: 0 0 auto;
+    height: 24px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #b9e0a5;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #4d7a35;
+    white-space: nowrap;
+  }
+  .surah-order-tag:empty { display: none; }
+  .surah-title-pill:active { background: #f0f0f0; }
+  .surah-title-pill .stp-num { font-weight: 600; }
+  .surah-title-pill .stp-en { overflow: hidden; text-overflow: ellipsis; }
+  .surah-title-pill .stp-ar { font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; font-size: 17px; font-weight: 700; line-height: 1; }
+
+  /* Jump-to-ayah picker: centred card with a number box, a drum wheel and Go */
+  html { touch-action: manipulation; } /* no double-tap zoom, so double tap can open the picker */
+  .verse-sheet-overlay {
+    position: fixed;
+    left: 0; right: 0; top: 0;
+    height: 100%;
+    z-index: 95;
+    background: rgba(0,0,0,0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .verse-sheet-overlay[hidden] { display: none; }
+  .verse-pop {
+    background: #fff;
+    width: min(300px, calc(100vw - 48px));
+    border: 1.5px solid #b9e0a5;
+    border-radius: 16px;
+    box-shadow: 0 8px 26px rgba(0,0,0,0.22);
+    padding: 14px 14px 10px;
+    animation: versePopIn 0.15s ease-out;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  @keyframes versePopIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .vp-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 15px; color: #222; margin-bottom: 8px;
+  }
+  .vp-sub { color: #777; }
+  .vp-cur {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #f1f5ee; border-radius: 9px; padding: 4px 5px 4px 12px;
+    font-size: 15px; color: #222; margin-bottom: 8px;
+  }
+  .vp-curnum {
+    min-width: 38px; text-align: center; background: #fff; border-radius: 7px;
+    padding: 5px 10px; font-size: 15px; box-shadow: 0 0 0 1px #d3e9c6;
+    font-variant-numeric: tabular-nums;
+  }
+  .vp-search {
+    display: flex; align-items: center; gap: 8px;
+    border: 1.5px solid #b9e0a5; border-radius: 9px; padding: 0 10px; height: 38px;
+    margin-bottom: 8px; background: #fff;
+  }
+  .vp-search:focus-within { border-color: #7fc25f; }
+  .vp-search svg { flex: none; width: 16px; height: 16px; color: #555; }
+  .verse-input {
+    flex: 1; min-width: 0; height: 100%;
+    border: none; outline: none; background: transparent;
+    font-family: inherit; font-size: 16px; color: #111;   /* 16px stops iPhone zooming in when typing */
+    -webkit-appearance: none;
+  }
+  .verse-input::placeholder { color: #777; font-size: 14px; }
+  .vp-go-btn {
+    flex: none; height: 28px; padding: 0 12px; margin-inline-start: 2px;
+    border: none; border-radius: 7px; background: #e5f5d9; color: #2e5a1c;
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .vp-go-btn:active { background: #cdeeba; }
+
+  .vp-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    max-height: 220px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; border-top: 1px solid #d3e9c6; padding-top: 4px;
+  }
+  .vp-cell {
+    height: 36px; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; color: #222; border-radius: 9px; cursor: pointer;
+    font-variant-numeric: tabular-nums; -webkit-tap-highlight-color: transparent;
+    user-select: none; -webkit-user-select: none;
+  }
+  .vp-cell:active { background: #ededf0; }
+  .vp-cell.cur { background: #e3f2da; color: #2e5a1c; font-weight: 600; }
+  .vp-empty { padding: 10px 0 4px; text-align: center; color: #888; font-size: 14px; }
+  .vp-empty[hidden] { display: none; }
+</style>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+
+<div id="chapterSheetOverlay" class="chapter-sheet-overlay" hidden>
+  <div class="chapter-sheet">
+    <div class="chapter-sheet-handle"></div>
+    <p class="chapter-sheet-title">Select Surah (Revelation Order)</p>
+    <input type="text" id="chapterSheetSearch" class="chapter-sheet-search" placeholder="Search surah…">
+    <div class="chapter-sheet-list" id="chapterSheetList">
+      <button type="button" class="chapter-sheet-row active" data-value="96">
+        <span class="chapter-sheet-num">1</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">العلق <span class="chapter-sheet-translit">(Al-'Alaq)-96</span></span>
+          <span class="chapter-sheet-meaning">കട്ടപിടിച്ച രക്തം / The Clot</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="68">
+        <span class="chapter-sheet-num">2</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">القلم <span class="chapter-sheet-translit">(Al-Qalam)-68</span></span>
+          <span class="chapter-sheet-meaning">പേന / The Pen</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="73">
+        <span class="chapter-sheet-num">3</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">المزمل <span class="chapter-sheet-translit">(Al-Muzzammil)-73</span></span>
+          <span class="chapter-sheet-meaning">പുതച്ചു മൂടിയവൻ / The Enshrouded One</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="74">
+        <span class="chapter-sheet-num">4</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">المدثر <span class="chapter-sheet-translit">(Al-Muddathir)-74</span></span>
+          <span class="chapter-sheet-meaning">പുതപ്പണിഞ്ഞവൻ / The Cloaked One</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="1">
+        <span class="chapter-sheet-num">5</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)-1</span></span>
+          <span class="chapter-sheet-meaning">ആമുഖം / The Opening</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="111">
+        <span class="chapter-sheet-num">6</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">المسد <span class="chapter-sheet-translit">(Al-Masad)-111</span></span>
+          <span class="chapter-sheet-meaning">ഈന്തപ്പനനാര് / The Palm Fibre</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="81">
+        <span class="chapter-sheet-num">7</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">التكوير <span class="chapter-sheet-translit">(At-Takwir)-81</span></span>
+          <span class="chapter-sheet-meaning">ചുരുട്ടിക്കൂട്ടൽ / The Overthrowing</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="87">
+        <span class="chapter-sheet-num">8</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">الأعلى <span class="chapter-sheet-translit">(Al-A'la)-87</span></span>
+          <span class="chapter-sheet-meaning">അത്യുന്നതൻ / The Most High</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="92">
+        <span class="chapter-sheet-num">9</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">الليل <span class="chapter-sheet-translit">(Al-Lail)-92</span></span>
+          <span class="chapter-sheet-meaning">രാത്രി / The Night</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="89">
+        <span class="chapter-sheet-num">10</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">الفجر <span class="chapter-sheet-translit">(Al-Fajr)-89</span></span>
+          <span class="chapter-sheet-meaning">പ്രഭാതം / The Dawn</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="93">
+        <span class="chapter-sheet-num">11</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">الضحى <span class="chapter-sheet-translit">(Ad-Duha)-93</span></span>
+          <span class="chapter-sheet-meaning">പൂർവ്വാഹ്നം / The Morning Hours</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="94">
+        <span class="chapter-sheet-num">12</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">الشرح <span class="chapter-sheet-translit">(Ash-Sharh)-94</span></span>
+          <span class="chapter-sheet-meaning">ഹൃദയവിശാലത / The Relief</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="103">
+        <span class="chapter-sheet-num">13</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">العصر <span class="chapter-sheet-translit">(Al-Asr)-103</span></span>
+          <span class="chapter-sheet-meaning">കാലം / The Declining Day</span>
+        </span>
+      </button>
+      <button type="button" class="chapter-sheet-row" data-value="100">
+        <span class="chapter-sheet-num">14</span>
+        <span class="chapter-sheet-text">
+          <span class="chapter-sheet-name">العاديات <span class="chapter-sheet-translit">(Al-Adiyat)-100</span></span>
+          <span class="chapter-sheet-meaning">പായുന്ന കുതിരകൾ / The Chargers</span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="chapterSheetOverlayNormal" class="chapter-sheet-overlay" hidden>
+  <div class="chapter-sheet">
+    <div class="chapter-sheet-handle"></div>
+    <p class="chapter-sheet-title">Select Surah (Mushaf Order)</p>
+    <input type="text" id="chapterSheetSearchNormal" class="chapter-sheet-search" placeholder="Search surah…">
+    <div class="chapter-sheet-list" id="chapterSheetListNormal">
+      <button type="button" class="chapter-sheet-row active" data-value="1"><span class="chapter-sheet-num">1</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)</span></span><span class="chapter-sheet-meaning">ആമുഖം / The Opening</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="2"><span class="chapter-sheet-num">2</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">البقرة <span class="chapter-sheet-translit">(Al-Baqarah)</span></span><span class="chapter-sheet-meaning">പശു / The Cow</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="3"><span class="chapter-sheet-num">3</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">آل عمران <span class="chapter-sheet-translit">(Aal-i-Imraan)</span></span><span class="chapter-sheet-meaning">ഇംറാൻ കുടുംബം / The Family of Imraan</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="4"><span class="chapter-sheet-num">4</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النساء <span class="chapter-sheet-translit">(An-Nisa)</span></span><span class="chapter-sheet-meaning">സ്ത്രീകൾ / The Women</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="5"><span class="chapter-sheet-num">5</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المائدة <span class="chapter-sheet-translit">(Al-Maidah)</span></span><span class="chapter-sheet-meaning">വിഭവം നിറഞ്ഞ മേശ / The Table Spread</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="6"><span class="chapter-sheet-num">6</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الأنعام <span class="chapter-sheet-translit">(Al-An'am)</span></span><span class="chapter-sheet-meaning">കന്നുകാലികൾ / The Cattle</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="7"><span class="chapter-sheet-num">7</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الأعراف <span class="chapter-sheet-translit">(Al-A'raf)</span></span><span class="chapter-sheet-meaning">ഉന്നത സ്ഥലങ്ങൾ / The Heights</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="8"><span class="chapter-sheet-num">8</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الأنفال <span class="chapter-sheet-translit">(Al-Anfal)</span></span><span class="chapter-sheet-meaning">യുദ്ധമുതലുകൾ / The Spoils of War</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="9"><span class="chapter-sheet-num">9</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">التوبة <span class="chapter-sheet-translit">(At-Tawbah)</span></span><span class="chapter-sheet-meaning">പശ്ചാത്താപം / The Repentance</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="10"><span class="chapter-sheet-num">10</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">يونس <span class="chapter-sheet-translit">(Yunus)</span></span><span class="chapter-sheet-meaning">യൂനുസ് / Jonah</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="11"><span class="chapter-sheet-num">11</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">هود <span class="chapter-sheet-translit">(Hud)</span></span><span class="chapter-sheet-meaning">ഹൂദ് / Hud</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="12"><span class="chapter-sheet-num">12</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">يوسف <span class="chapter-sheet-translit">(Yusuf)</span></span><span class="chapter-sheet-meaning">യൂസുഫ് / Joseph</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="13"><span class="chapter-sheet-num">13</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الرعد <span class="chapter-sheet-translit">(Ar-Ra'd)</span></span><span class="chapter-sheet-meaning">ഇടിനാദം / The Thunder</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="14"><span class="chapter-sheet-num">14</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">ابراهيم <span class="chapter-sheet-translit">(Ibrahim)</span></span><span class="chapter-sheet-meaning">ഇബ്റാഹീം / Abraham</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="15"><span class="chapter-sheet-num">15</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الحجر <span class="chapter-sheet-translit">(Al-Hijr)</span></span><span class="chapter-sheet-meaning">പാറക്കെട്ടുകൾ / The Rocky Tract</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="16"><span class="chapter-sheet-num">16</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النحل <span class="chapter-sheet-translit">(An-Nahl)</span></span><span class="chapter-sheet-meaning">തേനീച്ച / The Bee</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="17"><span class="chapter-sheet-num">17</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الإسراء <span class="chapter-sheet-translit">(Al-Isra)</span></span><span class="chapter-sheet-meaning">രാപ്രയാണം / The Night Journey</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="18"><span class="chapter-sheet-num">18</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الكهف <span class="chapter-sheet-translit">(Al-Kahf)</span></span><span class="chapter-sheet-meaning">ഗുഹ / The Cave</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="19"><span class="chapter-sheet-num">19</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">مريم <span class="chapter-sheet-translit">(Maryam)</span></span><span class="chapter-sheet-meaning">മർയം / Mary</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="20"><span class="chapter-sheet-num">20</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">طه <span class="chapter-sheet-translit">(Ta-Ha)</span></span><span class="chapter-sheet-meaning">ത്വാഹാ / Ta-Ha</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="21"><span class="chapter-sheet-num">21</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الأنبياء <span class="chapter-sheet-translit">(Al-Anbiya)</span></span><span class="chapter-sheet-meaning">പ്രവാചകന്മാർ / The Prophets</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="22"><span class="chapter-sheet-num">22</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الحج <span class="chapter-sheet-translit">(Al-Hajj)</span></span><span class="chapter-sheet-meaning">തീർത്ഥാടനം / The Pilgrimage</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="23"><span class="chapter-sheet-num">23</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المؤمنون <span class="chapter-sheet-translit">(Al-Mu'minun)</span></span><span class="chapter-sheet-meaning">സത്യവിശ്വാസികൾ / The Believers</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="24"><span class="chapter-sheet-num">24</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النور <span class="chapter-sheet-translit">(An-Nur)</span></span><span class="chapter-sheet-meaning">പ്രകാശം / The Light</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="25"><span class="chapter-sheet-num">25</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الفرقان <span class="chapter-sheet-translit">(Al-Furqan)</span></span><span class="chapter-sheet-meaning">വിവേചന മാനദണ്ഡം / The Criterion</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="26"><span class="chapter-sheet-num">26</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الشعراء <span class="chapter-sheet-translit">(Ash-Shu'ara)</span></span><span class="chapter-sheet-meaning">കവികൾ / The Poets</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="27"><span class="chapter-sheet-num">27</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النمل <span class="chapter-sheet-translit">(An-Naml)</span></span><span class="chapter-sheet-meaning">ഉറുമ്പ് / The Ant</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="28"><span class="chapter-sheet-num">28</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">القصص <span class="chapter-sheet-translit">(Al-Qasas)</span></span><span class="chapter-sheet-meaning">ചരിത്ര കഥകൾ / The Stories</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="29"><span class="chapter-sheet-num">29</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">العنكبوت <span class="chapter-sheet-translit">(Al-Ankabut)</span></span><span class="chapter-sheet-meaning">ചിലന്തി / The Spider</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="30"><span class="chapter-sheet-num">30</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الروم <span class="chapter-sheet-translit">(Ar-Rum)</span></span><span class="chapter-sheet-meaning">റോമക്കാർ / The Romans</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="31"><span class="chapter-sheet-num">31</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">لقمان <span class="chapter-sheet-translit">(Luqman)</span></span><span class="chapter-sheet-meaning">ലുഖ്മാൻ / Luqman</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="32"><span class="chapter-sheet-num">32</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">السجدة <span class="chapter-sheet-translit">(As-Sajdah)</span></span><span class="chapter-sheet-meaning">സാഷ്ടാംഗ നമസ്കാരം / The Prostration</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="33"><span class="chapter-sheet-num">33</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الأحزاب <span class="chapter-sheet-translit">(Al-Ahzab)</span></span><span class="chapter-sheet-meaning">സംഘങ്ങൾ / The Combined Forces</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="34"><span class="chapter-sheet-num">34</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">سبإ <span class="chapter-sheet-translit">(Saba)</span></span><span class="chapter-sheet-meaning">സബഅ് / Sheba</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="35"><span class="chapter-sheet-num">35</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">فاطر <span class="chapter-sheet-translit">(Fatir)</span></span><span class="chapter-sheet-meaning">സൃഷ്ടികർത്താവ് / Originator</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="36"><span class="chapter-sheet-num">36</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">يس <span class="chapter-sheet-translit">(Ya-Sin)</span></span><span class="chapter-sheet-meaning">യാസീൻ / Ya-Sin</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="37"><span class="chapter-sheet-num">37</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الصافات <span class="chapter-sheet-translit">(As-Saffat)</span></span><span class="chapter-sheet-meaning">അണിനിരന്നവർ / Those who set the Ranks</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="38"><span class="chapter-sheet-num">38</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">ص <span class="chapter-sheet-translit">(Sad)</span></span><span class="chapter-sheet-meaning">സ്വാദ് / The Letter Saad</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="39"><span class="chapter-sheet-num">39</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الزمر <span class="chapter-sheet-translit">(Az-Zumar)</span></span><span class="chapter-sheet-meaning">സംഘങ്ങൾ / The Troops</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="40"><span class="chapter-sheet-num">40</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">غافر <span class="chapter-sheet-translit">(Ghafir)</span></span><span class="chapter-sheet-meaning">പൊറുക്കുന്നവൻ / The Forgiver</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="41"><span class="chapter-sheet-num">41</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">فصلت <span class="chapter-sheet-translit">(Fussilat)</span></span><span class="chapter-sheet-meaning">വിശദീകരിക്കപ്പെട്ടത് / Explained in Detail</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="42"><span class="chapter-sheet-num">42</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الشورى <span class="chapter-sheet-translit">(Ash-Shura)</span></span><span class="chapter-sheet-meaning">കൂടിയാലോചന / The Consultation</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="43"><span class="chapter-sheet-num">43</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الزخرف <span class="chapter-sheet-translit">(Az-Zukhruf)</span></span><span class="chapter-sheet-meaning">സ്വർണ്ണാഭരണങ്ങൾ / The Ornaments of Gold</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="44"><span class="chapter-sheet-num">44</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الدخان <span class="chapter-sheet-translit">(Ad-Dukhan)</span></span><span class="chapter-sheet-meaning">പുക / The Smoke</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="45"><span class="chapter-sheet-num">45</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الجاثية <span class="chapter-sheet-translit">(Al-Jathiyah)</span></span><span class="chapter-sheet-meaning">മുട്ടുകുത്തിയവർ / The Crouching</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="46"><span class="chapter-sheet-num">46</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الأحقاف <span class="chapter-sheet-translit">(Al-Ahqaf)</span></span><span class="chapter-sheet-meaning">മണൽ കുന്നുകൾ / The Wind-Curved Sandhills</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="47"><span class="chapter-sheet-num">47</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">محمد <span class="chapter-sheet-translit">(Muhammad)</span></span><span class="chapter-sheet-meaning">മുഹമ്മദ് / Muhammad</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="48"><span class="chapter-sheet-num">48</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الفتح <span class="chapter-sheet-translit">(Al-Fath)</span></span><span class="chapter-sheet-meaning">വിജയം / The Victory</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="49"><span class="chapter-sheet-num">49</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الحجرات <span class="chapter-sheet-translit">(Al-Hujurat)</span></span><span class="chapter-sheet-meaning">മുറികൾ / The Rooms</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="50"><span class="chapter-sheet-num">50</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">ق <span class="chapter-sheet-translit">(Qaf)</span></span><span class="chapter-sheet-meaning">ഖാഫ് / The Letter Qaf</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="51"><span class="chapter-sheet-num">51</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الذاريات <span class="chapter-sheet-translit">(Adh-Dhariyat)</span></span><span class="chapter-sheet-meaning">പറത്തിക്കളയുന്ന കാറ്റുകൾ / The Winnowing Winds</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="52"><span class="chapter-sheet-num">52</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الطور <span class="chapter-sheet-translit">(At-Tur)</span></span><span class="chapter-sheet-meaning">പർവ്വതം / The Mount</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="53"><span class="chapter-sheet-num">53</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النجم <span class="chapter-sheet-translit">(An-Najm)</span></span><span class="chapter-sheet-meaning">നക്ഷത്രം / The Star</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="54"><span class="chapter-sheet-num">54</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">القمر <span class="chapter-sheet-translit">(Al-Qamar)</span></span><span class="chapter-sheet-meaning">ചന്ദ്രൻ / The Moon</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="55"><span class="chapter-sheet-num">55</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الرحمن <span class="chapter-sheet-translit">(Ar-Rahman)</span></span><span class="chapter-sheet-meaning">പരമകാരുണികൻ / The Beneficent</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="56"><span class="chapter-sheet-num">56</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الواقعة <span class="chapter-sheet-translit">(Al-Waqi'ah)</span></span><span class="chapter-sheet-meaning">സംഭവിക്കാനിരിക്കുന്നത് / The Inevitable</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="57"><span class="chapter-sheet-num">57</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الحديد <span class="chapter-sheet-translit">(Al-Hadid)</span></span><span class="chapter-sheet-meaning">ഇരുമ്പ് / The Iron</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="58"><span class="chapter-sheet-num">58</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المجادلة <span class="chapter-sheet-translit">(Al-Mujadila)</span></span><span class="chapter-sheet-meaning">തർക്കിക്കുന്ന സ്ത്രീ / The Pleading Woman</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="59"><span class="chapter-sheet-num">59</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الحشر <span class="chapter-sheet-translit">(Al-Hashr)</span></span><span class="chapter-sheet-meaning">സമാഹരണം / The Exile</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="60"><span class="chapter-sheet-num">60</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الممتحنة <span class="chapter-sheet-translit">(Al-Mumtahanah)</span></span><span class="chapter-sheet-meaning">പരീക്ഷിക്കപ്പെടുന്നവൾ / She that is to be Examined</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="61"><span class="chapter-sheet-num">61</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الصف <span class="chapter-sheet-translit">(As-Saff)</span></span><span class="chapter-sheet-meaning">അണിനിരക്കൽ / The Ranks</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="62"><span class="chapter-sheet-num">62</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الجمعة <span class="chapter-sheet-translit">(Al-Jumu'ah)</span></span><span class="chapter-sheet-meaning">വെള്ളിയാഴ്ച / The Congregation, Friday</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="63"><span class="chapter-sheet-num">63</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المنافقون <span class="chapter-sheet-translit">(Al-Munafiqun)</span></span><span class="chapter-sheet-meaning">കപടവിശ്വാസികൾ / The Hypocrites</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="64"><span class="chapter-sheet-num">64</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">التغابن <span class="chapter-sheet-translit">(At-Taghabun)</span></span><span class="chapter-sheet-meaning">നഷ്ടം വെളിവാകൽ / The Mutual Disillusion</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="65"><span class="chapter-sheet-num">65</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الطلاق <span class="chapter-sheet-translit">(At-Talaq)</span></span><span class="chapter-sheet-meaning">വിവാഹമോചനം / The Divorce</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="66"><span class="chapter-sheet-num">66</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">التحريم <span class="chapter-sheet-translit">(At-Tahrim)</span></span><span class="chapter-sheet-meaning">നിഷിദ്ധമാക്കൽ / The Prohibition</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="67"><span class="chapter-sheet-num">67</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الملك <span class="chapter-sheet-translit">(Al-Mulk)</span></span><span class="chapter-sheet-meaning">ആധിപത്യം / The Sovereignty</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="68"><span class="chapter-sheet-num">68</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">القلم <span class="chapter-sheet-translit">(Al-Qalam)</span></span><span class="chapter-sheet-meaning">പേന / The Pen</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="69"><span class="chapter-sheet-num">69</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الحاقة <span class="chapter-sheet-translit">(Al-Haqqah)</span></span><span class="chapter-sheet-meaning">യാഥാർത്ഥ്യം / The Reality</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="70"><span class="chapter-sheet-num">70</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المعارج <span class="chapter-sheet-translit">(Al-Ma'arij)</span></span><span class="chapter-sheet-meaning">ഉയർച്ചയുടെ പടികൾ / The Ascending Stairways</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="71"><span class="chapter-sheet-num">71</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">نوح <span class="chapter-sheet-translit">(Nuh)</span></span><span class="chapter-sheet-meaning">നൂഹ് / Noah</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="72"><span class="chapter-sheet-num">72</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الجن <span class="chapter-sheet-translit">(Al-Jinn)</span></span><span class="chapter-sheet-meaning">ജിന്ന് / The Jinn</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="73"><span class="chapter-sheet-num">73</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المزمل <span class="chapter-sheet-translit">(Al-Muzzammil)</span></span><span class="chapter-sheet-meaning">പുതച്ചു മൂടിയവൻ / The Enshrouded One</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="74"><span class="chapter-sheet-num">74</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المدثر <span class="chapter-sheet-translit">(Al-Muddathir)</span></span><span class="chapter-sheet-meaning">മൂടുപടമണിഞ്ഞവൻ / The Cloaked One</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="75"><span class="chapter-sheet-num">75</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">القيامة <span class="chapter-sheet-translit">(Al-Qiyamah)</span></span><span class="chapter-sheet-meaning">ഉയിർത്തെഴുന്നേൽപ്പ് / The Resurrection</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="76"><span class="chapter-sheet-num">76</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الانسان <span class="chapter-sheet-translit">(Al-Insan)</span></span><span class="chapter-sheet-meaning">മനുഷ്യൻ / Man</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="77"><span class="chapter-sheet-num">77</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المرسلات <span class="chapter-sheet-translit">(Al-Mursalat)</span></span><span class="chapter-sheet-meaning">അയക്കപ്പെടുന്നവ / The Emissaries</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="78"><span class="chapter-sheet-num">78</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النبإ <span class="chapter-sheet-translit">(An-Naba)</span></span><span class="chapter-sheet-meaning">വാർത്ത / The Tidings</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="79"><span class="chapter-sheet-num">79</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النازعات <span class="chapter-sheet-translit">(An-Nazi'at)</span></span><span class="chapter-sheet-meaning">പിടിച്ചുപറിക്കുന്നവ / Those who drag Forth</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="80"><span class="chapter-sheet-num">80</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">عبس <span class="chapter-sheet-translit">(Abasa)</span></span><span class="chapter-sheet-meaning">മുഖം ചുളിച്ചു / He Frowned</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="81"><span class="chapter-sheet-num">81</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">التكوير <span class="chapter-sheet-translit">(At-Takwir)</span></span><span class="chapter-sheet-meaning">ചുരുട്ടിക്കൂട്ടൽ / The Overthrowing</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="82"><span class="chapter-sheet-num">82</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الإنفطار <span class="chapter-sheet-translit">(Al-Infitar)</span></span><span class="chapter-sheet-meaning">പിളരൽ / The Cleaving</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="83"><span class="chapter-sheet-num">83</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المطففين <span class="chapter-sheet-translit">(Al-Mutaffifin)</span></span><span class="chapter-sheet-meaning">അളവിൽ കുറവ് വരുത്തുന്നവർ / Defrauding</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="84"><span class="chapter-sheet-num">84</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الإنشقاق <span class="chapter-sheet-translit">(Al-Inshiqaq)</span></span><span class="chapter-sheet-meaning">പിളരൽ / The Sundering</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="85"><span class="chapter-sheet-num">85</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">البروج <span class="chapter-sheet-translit">(Al-Buruj)</span></span><span class="chapter-sheet-meaning">നക്ഷത്രഗണങ്ങൾ / The Mansions of the Stars</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="86"><span class="chapter-sheet-num">86</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الطارق <span class="chapter-sheet-translit">(At-Tariq)</span></span><span class="chapter-sheet-meaning">രാത്രി വരുന്നത് / The Morning Star</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="87"><span class="chapter-sheet-num">87</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الأعلى <span class="chapter-sheet-translit">(Al-A'la)</span></span><span class="chapter-sheet-meaning">അത്യുന്നതൻ / The Most High</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="88"><span class="chapter-sheet-num">88</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الغاشية <span class="chapter-sheet-translit">(Al-Ghashiyah)</span></span><span class="chapter-sheet-meaning">മൂടിക്കളയുന്നത് / The Overwhelming</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="89"><span class="chapter-sheet-num">89</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الفجر <span class="chapter-sheet-translit">(Al-Fajr)</span></span><span class="chapter-sheet-meaning">പ്രഭാതം / The Dawn</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="90"><span class="chapter-sheet-num">90</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">البلد <span class="chapter-sheet-translit">(Al-Balad)</span></span><span class="chapter-sheet-meaning">നാട് / The City</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="91"><span class="chapter-sheet-num">91</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الشمس <span class="chapter-sheet-translit">(Ash-Shams)</span></span><span class="chapter-sheet-meaning">സൂര്യൻ / The Sun</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="92"><span class="chapter-sheet-num">92</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الليل <span class="chapter-sheet-translit">(Al-Lail)</span></span><span class="chapter-sheet-meaning">രാത്രി / The Night</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="93"><span class="chapter-sheet-num">93</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الضحى <span class="chapter-sheet-translit">(Ad-Duha)</span></span><span class="chapter-sheet-meaning">പൂർവാഹ്നം / The Morning Hours</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="94"><span class="chapter-sheet-num">94</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الشرح <span class="chapter-sheet-translit">(Ash-Sharh)</span></span><span class="chapter-sheet-meaning">വിശാലമാക്കൽ / The Relief</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="95"><span class="chapter-sheet-num">95</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">التين <span class="chapter-sheet-translit">(At-Tin)</span></span><span class="chapter-sheet-meaning">അത്തിപ്പഴം / The Fig</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="96"><span class="chapter-sheet-num">96</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">العلق <span class="chapter-sheet-translit">(Al-'Alaq)</span></span><span class="chapter-sheet-meaning">കട്ടപിടിച്ച രക്തം / The Clot</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="97"><span class="chapter-sheet-num">97</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">القدر <span class="chapter-sheet-translit">(Al-Qadr)</span></span><span class="chapter-sheet-meaning">ശ്രേഷ്ഠരാവ് / The Power, Fate</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="98"><span class="chapter-sheet-num">98</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">البينة <span class="chapter-sheet-translit">(Al-Bayyinah)</span></span><span class="chapter-sheet-meaning">വ്യക്തമായ തെളിവ് / The Clear Proof</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="99"><span class="chapter-sheet-num">99</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الزلزلة <span class="chapter-sheet-translit">(Az-Zalzalah)</span></span><span class="chapter-sheet-meaning">ഭൂകമ്പം / The Earthquake</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="100"><span class="chapter-sheet-num">100</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">العاديات <span class="chapter-sheet-translit">(Al-Adiyat)</span></span><span class="chapter-sheet-meaning">പായുന്ന കുതിരകൾ / The Chargers</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="101"><span class="chapter-sheet-num">101</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">القارعة <span class="chapter-sheet-translit">(Al-Qari'ah)</span></span><span class="chapter-sheet-meaning">ഘോര സംഭവം / The Calamity</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="102"><span class="chapter-sheet-num">102</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">التكاثر <span class="chapter-sheet-translit">(At-Takathur)</span></span><span class="chapter-sheet-meaning">പെരുപ്പം കാണിക്കൽ / The Rivalry in World Increase</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="103"><span class="chapter-sheet-num">103</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">العصر <span class="chapter-sheet-translit">(Al-Asr)</span></span><span class="chapter-sheet-meaning">കാലം / The Declining Day</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="104"><span class="chapter-sheet-num">104</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الهمزة <span class="chapter-sheet-translit">(Al-Humazah)</span></span><span class="chapter-sheet-meaning">ഏഷണിക്കാരൻ / The Traducer</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="105"><span class="chapter-sheet-num">105</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الفيل <span class="chapter-sheet-translit">(Al-Fil)</span></span><span class="chapter-sheet-meaning">ആന / The Elephant</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="106"><span class="chapter-sheet-num">106</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">قريش <span class="chapter-sheet-translit">(Quraysh)</span></span><span class="chapter-sheet-meaning">ഖുറൈശ് / Quraysh</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="107"><span class="chapter-sheet-num">107</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الماعون <span class="chapter-sheet-translit">(Al-Ma'un)</span></span><span class="chapter-sheet-meaning">സാധാരണ സഹായവസ്തുക്കൾ / The Small Kindnesses</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="108"><span class="chapter-sheet-num">108</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الكوثر <span class="chapter-sheet-translit">(Al-Kawthar)</span></span><span class="chapter-sheet-meaning">സമൃദ്ധി / Abundance</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="109"><span class="chapter-sheet-num">109</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الكافرون <span class="chapter-sheet-translit">(Al-Kafirun)</span></span><span class="chapter-sheet-meaning">അവിശ്വാസികൾ / The Disbelievers</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="110"><span class="chapter-sheet-num">110</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">النصر <span class="chapter-sheet-translit">(An-Nasr)</span></span><span class="chapter-sheet-meaning">സഹായം / The Divine Support</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="111"><span class="chapter-sheet-num">111</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">المسد <span class="chapter-sheet-translit">(Al-Masad)</span></span><span class="chapter-sheet-meaning">ഈത്തപ്പന നാരുകൾ / The Palm Fiber</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="112"><span class="chapter-sheet-num">112</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الإخلاص <span class="chapter-sheet-translit">(Al-Ikhlas)</span></span><span class="chapter-sheet-meaning">നിഷ്കളങ്കത / Sincerity</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="113"><span class="chapter-sheet-num">113</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الفلق <span class="chapter-sheet-translit">(Al-Falaq)</span></span><span class="chapter-sheet-meaning">പ്രഭാതം / The Dawn (Daybreak)</span></span></button>
+      <button type="button" class="chapter-sheet-row" data-value="114"><span class="chapter-sheet-num">114</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الناس <span class="chapter-sheet-translit">(An-Nas)</span></span><span class="chapter-sheet-meaning">മനുഷ്യർ / Mankind</span></span></button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Floating settings button (top-left) + settings modal -->
+  <button type="button" id="settingsFab" class="settings-fab" aria-label="Settings" aria-haspopup="dialog">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+  </button>
+
+  <div class="surah-title-wrap">
+  <button type="button" id="surahTitle" class="surah-title-pill" aria-label="Current surah - open settings">
+      <span class="stp-num" id="stpNum"></span>
+      <span class="stp-en" id="stpEn"></span>
+      <span class="stp-ar" id="stpAr" dir="rtl"></span>
+    </button>
+    <span class="surah-order-tag" id="surahOrderTag"></span>
+  </div>
+
+  <!-- Go to Ayah (opens on double tap): search box + grid of ayah numbers -->
+  <div id="verseSheetOverlay" class="verse-sheet-overlay" hidden>
+    <div class="verse-pop" role="dialog" aria-modal="true" aria-label="Go to Ayah">
+      <div class="vp-head"><span>Go to Ayah</span><span class="vp-sub">Select Verse</span></div>
+      <div class="vp-cur"><span id="vpSurah"></span><span id="vpCur" class="vp-curnum"></span></div>
+      <div class="vp-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="15.5" y1="15.5" x2="21" y2="21"/></svg>
+        <input id="verseInput" class="verse-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Search" autocomplete="off" aria-label="Search ayah number">
+        <button type="button" id="verseGoBtn" class="vp-go-btn" aria-label="Go to entered ayah">Go</button>
+      </div>
+      <div id="verseGrid" class="vp-grid"></div>
+      <div id="vpEmpty" class="vp-empty" hidden>No ayah found</div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay" class="settings-overlay" hidden>
+    <div class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings">
+      <div class="settings-modal-head">
+        <span class="settings-modal-title">Settings</span>
+        <button type="button" id="settingsClose" class="settings-close" aria-label="Close settings">✕</button>
+      </div>
+
+  <div class="controls settings-controls">
+    <div class="chapter-row">
+      <span class="chapter-select-label">Mushaf Order:</span>
+      <button type="button" id="chapterSheetBtnNormal" class="chapter-sheet-btn">
+        <span id="chapterSheetLabelNormal">1. الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)</span></span>
+        <span class="chapter-sheet-chevron">⌄</span>
+      </button>
+      <p class="chapter-note" id="chapterNote"></p>
+    </div>
+    <div class="chapter-row" style="margin-top:-4px;">
+      <span class="chapter-select-label">Revelation Order:</span>
+      <button type="button" id="chapterSheetBtn" class="chapter-sheet-btn box-selected">
+        <span id="chapterSheetLabel">1. العلق <span class="chapter-sheet-translit">(Al-'Alaq)-96</span></span>
+        <span class="chapter-sheet-chevron">⌄</span>
+      </button>
+    </div>
+    <div>
+      <div class="toggle-label">Word-by-word:</div>
+      <div class="lang-toggles">
+        <label><input type="checkbox" class="lang-switch" data-lang="ml" checked> മലയാളം</label>
+        <label><input type="checkbox" class="lang-switch" data-lang="en"> English</label>
+        <label><input type="checkbox" class="lang-switch" data-lang="hi"> हिन्दी</label>
+      </div>
+    </div>
+    <div>
+      <div class="toggle-label">Translation:</div>
+      <div class="lang-toggles">
+        <label><input type="checkbox" class="trans-switch" data-lang="ml" checked> മലയാളം</label>
+        <label><input type="checkbox" class="trans-switch" data-lang="en"> English</label>
+        <label><input type="checkbox" class="trans-switch" data-lang="hi"> हिन्दी</label>
+      </div>
+    </div>
+    <div class="font-size-row">
+      <span class="font-size-label">Font size</span>
+      <button type="button" id="fontSizeMinus" class="font-size-btn" aria-label="Decrease font size">−</button>
+      <span id="fontSizeValue">4</span>
+      <button type="button" id="fontSizePlus" class="font-size-btn" aria-label="Increase font size">+</button>
+      <label class="translator-toggle-label"><input type="checkbox" id="translatorToggle"> Translator</label>
+      <label class="translator-toggle-label"><input type="checkbox" id="ayahToggle" checked> Ayah</label>
+    </div>
+    <div class="word-search-row">
+      <div class="word-search-wrap">
+        <input type="text" id="wordSearchInput" class="word-search-input" placeholder="Search: Arb/മലയ/Eng">
+        <button type="button" id="wordSearchClear" class="word-search-clear" aria-label="Clear search" hidden>✕</button>
+      </div>
+      <span class="word-search-count" id="wordSearchCount"></span>
+      <button type="button" id="wordSearchGoBtn" class="wsm-go-btn" hidden>Go/Tap page</button>
+    </div>
+  </div>
+
+    </div><!-- /settings-modal -->
+  </div><!-- /settings-overlay -->
+
+  <div id="sourcesOverlay" class="sources-overlay" hidden>
+    <div class="sources-box" role="dialog" aria-modal="true" aria-label="Sources and credits">
+      <div class="sources-head">
+        <span class="sources-title">Sources &amp; credits</span>
+        <button type="button" id="sourcesClose" class="settings-close" aria-label="Close sources">✕</button>
+      </div>
+      <div class="sources-item">
+        <b>Quran Foundation API (Quran.com)</b><br>
+        <span class="sources-what">Arabic text, word-by-word meanings (Malayalam, English, Hindi) and the Hindi translation by Maulana Azizul Haque al-Umari. Where one meaning covers several words, they are shown together.</span><br>
+        <a href="https://api-docs.quran.foundation" target="_blank" rel="noopener noreferrer">api-docs.quran.foundation</a>
+      </div>
+      <div class="sources-item">
+        <b>QuranEnc.com</b><br>
+        <span class="sources-what">Malayalam translation: Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad. Shown without changes.</span><br>
+        <a href="https://quranenc.com" target="_blank" rel="noopener noreferrer">quranenc.com</a>
+      </div>
+      <div class="sources-item">
+        <b>Al Quran Cloud (Islamic Network)</b><br>
+        <span class="sources-what">English translation (Saheeh International) and the live surah list (Arabic names, English meanings).</span><br>
+        <a href="https://alquran.cloud" target="_blank" rel="noopener noreferrer">alquran.cloud</a>
+      </div>
+      <div class="sources-item">
+        <b>Malayalam surah-name meanings</b><br>
+        <span class="sources-what">Collected by the site owner with AI help (Google Gemini). Not an authoritative translation and may contain mistakes.</span>
+      </div>
+      <div class="sources-item">
+        <b>Fonts</b><br>
+        <span class="sources-what">Arabic: KFGQPC Uthmanic Hafs, King Fahd Glorious Qur'an Printing Complex (served by Quran Foundation). Malayalam, Hindi, Latin and fallback Arabic fonts: Google Fonts.</span><br>
+        <a href="https://fonts.qurancomplex.gov.sa" target="_blank" rel="noopener noreferrer">fonts.qurancomplex.gov.sa</a> ·
+        <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer">fonts.google.com</a>
+      </div>
+      <p class="sources-note">All sources belong to their respective owners. Please check their own terms before reusing any content.</p>
+    </div>
+  </div>
+
+  <div class="word-search-fab" id="wordSearchFab" hidden>
+    <button type="button" id="wordSearchFabPrev" class="word-search-fabbtn" aria-label="Previous match"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
+    <div class="word-search-fabcount" id="wordSearchFabCount" aria-live="polite"></div>
+    <button type="button" id="wordSearchFabNext" class="word-search-fabbtn" aria-label="Next match"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+  </div>
+
+  <p class="bismillah-line" id="bismillahLine">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+
+  <main id="ayahList" style="display:none;"></main>
+
+  <main id="dynamicChapterContent" style="display:none;"></main>
+
+  <footer>
+    Arabic text of the Qur'an is not subject to copyright. Translations here are simplified word-by-word glosses for study, not an authoritative rendering — for formal reference, cross-check with a scholarly translation.<br>
+    <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>
+  </footer>
+
+</div>
+
+<script>
+  // Keeps whatever ayah is currently at the top of the viewport visually
+  // fixed in place across changes that alter content height (toggling
+  // translations/word-gloss visibility, changing font size) — without this,
+  // the page reflow makes it look like it "jumped" to a different ayah.
+  function withScrollAnchor(fn) {
+    var anchor = null;
+    var minAbsTop = Infinity;
+    document.querySelectorAll('.ayah').forEach(function (el) {
+      // Skip ayahs inside a hidden container (e.g. a cached chapter that
+      // isn't currently shown) — display:none elements report top:0/height:0,
+      // which would otherwise always "win" as the closest-to-top anchor.
+      if (el.offsetParent === null) return;
+      var top = el.getBoundingClientRect().top;
+      if (Math.abs(top) < minAbsTop) {
+        minAbsTop = Math.abs(top);
+        anchor = el;
+      }
+    });
+    var beforeTop = anchor ? anchor.getBoundingClientRect().top : null;
+    fn();
+    if (anchor) {
+      var afterTop = anchor.getBoundingClientRect().top;
+      if (afterTop !== beforeTop) {
+        window.scrollBy(0, afterTop - beforeTop);
+      }
+    }
+  }
+
+  // Language show/hide
+  function applyWordByWordVisibility() {
+    document.querySelectorAll('.lang-switch').forEach(function (box) {
+      var lang = box.dataset.lang;
+      var on = box.checked;
+      document.querySelectorAll('.word-gloss.' + lang).forEach(function (el) {
+        el.classList.toggle('lang-hidden', !on);
+      });
+    });
+    var anyChecked = Array.prototype.some.call(
+      document.querySelectorAll('.lang-switch'),
+      function (box) { return box.checked; }
+    );
+    document.querySelectorAll('.word-row').forEach(function (el) {
+      el.classList.toggle('word-row-hidden', !anyChecked);
+    });
+  }
+
+  document.querySelectorAll('.lang-switch').forEach(function(box){
+    box.addEventListener('change', function(){
+      withScrollAnchor(applyWordByWordVisibility);
+    });
+  });
+  applyWordByWordVisibility();
+
+  // Translation show/hide (default: Malayalam only)
+  function applyTranslationVisibility() {
+    document.querySelectorAll('.trans-switch').forEach(function (box) {
+      var lang = box.dataset.lang;
+      var on = box.checked;
+      document.querySelectorAll('.translation-line.' + lang + ', .translation-attr.' + lang).forEach(function (el) {
+        el.classList.toggle('lang-hidden', !on);
+      });
+    });
+    var anyTransChecked = Array.prototype.some.call(
+      document.querySelectorAll('.trans-switch'),
+      function (box) { return box.checked; }
+    );
+    document.querySelectorAll('.ayah-translations').forEach(function (el) {
+      el.classList.toggle('ayah-translations-hidden', !anyTransChecked);
+    });
+  }
+  document.querySelectorAll('.trans-switch').forEach(function (box) {
+    box.addEventListener('change', function () {
+      withScrollAnchor(applyTranslationVisibility);
+    });
+  });
+  applyTranslationVisibility();
+
+  // Sources & credits box (opened from the footer link)
+  (function () {
+    var box = document.getElementById('sourcesOverlay');
+    var closeBtn = document.getElementById('sourcesClose');
+    var settings = document.getElementById('settingsOverlay');
+    if (!box) return;
+    function openSources() {
+      box.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSources() {
+      box.hidden = true;
+      if (!settings || settings.hidden) document.body.style.overflow = '';
+    }
+    var footerBtn = document.getElementById('sourcesFooterBtn');
+    if (footerBtn) footerBtn.addEventListener('click', openSources);
+    if (closeBtn) closeBtn.addEventListener('click', closeSources);
+    box.addEventListener('click', function (e) { if (e.target === box) closeSources(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !box.hidden) closeSources();
+    });
+  })();
+
+  // Keep the surah-search sheets inside the visible area (above the keyboard)
+  function fitSheetsToVisibleArea() {
+    var vv = window.visualViewport;
+    var h = vv ? vv.height : window.innerHeight;
+    var top = vv ? vv.offsetTop : 0;
+    var root = document.documentElement.style;
+    root.setProperty('--vvh', h + 'px');
+    root.setProperty('--vvtop', top + 'px');
+    var keyboardOpen = h < window.innerHeight * 0.8;
+    document.querySelectorAll('.chapter-sheet-overlay').forEach(function (o) {
+      o.classList.toggle('kb-open', keyboardOpen);
+    });
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fitSheetsToVisibleArea);
+    window.visualViewport.addEventListener('scroll', fitSheetsToVisibleArea);
+  }
+  window.addEventListener('resize', fitSheetsToVisibleArea);
+  fitSheetsToVisibleArea();
+
+  // Font size stepper (1-10) — scales the whole page since all sizes are in rem
+  var fontSizeValue = document.getElementById('fontSizeValue');
+  var fontSizeMinus = document.getElementById('fontSizeMinus');
+  var fontSizePlus = document.getElementById('fontSizePlus');
+  var currentFontStep = 4;
+  function applyFontSize(v) {
+    v = Math.max(1, Math.min(10, v));
+    currentFontStep = v;
+    var px = Math.round(12 + (v - 1) * 1.33);
+    document.documentElement.style.fontSize = px + 'px';
+    fontSizeValue.textContent = v;
+  }
+  fontSizeMinus.addEventListener('click', function () { withScrollAnchor(function () { applyFontSize(currentFontStep - 1); }); });
+  fontSizePlus.addEventListener('click', function () { withScrollAnchor(function () { applyFontSize(currentFontStep + 1); }); });
+  applyFontSize(currentFontStep);
+
+  // Share button — Web Share API on mobile, clipboard copy as fallback
+  function showShareToast(btn, msg) {
+    var wrap = btn.parentNode;
+    wrap.style.position = 'relative';
+    var toast = document.createElement('span');
+    toast.className = 'share-toast';
+    toast.textContent = msg || 'Copied!';
+    wrap.appendChild(toast);
+    setTimeout(function () { toast.remove(); }, 1600);
+  }
+
+  function attachShareHandler(btn) {
+    btn.addEventListener('click', function () {
+      var section = btn.closest('.ayah');
+      if (!section) return;
+      var ayahNum = section.dataset.ayah;
+      var arabicEl = section.querySelector('.arabic-live');
+      var arabic = arabicEl ? arabicEl.textContent.trim() : '';
+
+      var wordRow = section.querySelector('.word-row');
+      var wordRowVisible = wordRow && !wordRow.classList.contains('word-row-hidden');
+      var wordLines = [];
+      if (wordRowVisible) {
+        wordLines = Array.prototype.slice.call(section.querySelectorAll('.word-block'))
+          .map(function (wb) {
+            var arSpan = wb.querySelector('.word-arabic');
+            var arText = arSpan ? arSpan.textContent.trim() : '';
+            var glosses = Array.prototype.slice.call(wb.querySelectorAll('.word-gloss'))
+              .filter(function (g) { return !g.classList.contains('lang-hidden'); })
+              .map(function (g) { return g.textContent.trim(); });
+            return glosses.length ? (arText + ' — ' + glosses.join(' / ')) : arText;
+          })
+          .filter(function (line) { return line; });
+      }
+
+      var translationsBox = section.querySelector('.ayah-translations');
+      var translationsVisible = translationsBox && !translationsBox.classList.contains('ayah-translations-hidden');
+      var translationLines = [];
+      if (translationsVisible) {
+        translationLines = Array.prototype.slice
+          .call(section.querySelectorAll('.translation-line'))
+          .filter(function (p) { return !p.classList.contains('lang-hidden'); })
+          .map(function (p) { return p.textContent.trim(); });
+      }
+
+      var shareText = "Ayah " + ayahNum + "\n" + arabic;
+      if (wordLines.length) shareText += '\n\nWord by word:\n' + wordLines.join('\n');
+      if (translationLines.length) shareText += '\n\nTranslation:\n' + translationLines.join('\n');
+
+      if (navigator.share) {
+        navigator.share({ text: shareText }).catch(function () {});
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareText)
+          .then(function () { showShareToast(btn, 'Copied!'); })
+          .catch(function () { showShareToast(btn, 'Could not copy'); });
+      } else {
+        showShareToast(btn, 'Sharing not supported');
+      }
+    });
+  }
+  document.querySelectorAll('.share-btn').forEach(attachShareHandler);
+
+
+  // Chapter selector (bottom sheet) — revelation order
+  var chapterSheetBtn = document.getElementById('chapterSheetBtn');
+  var chapterSheetLabel = document.getElementById('chapterSheetLabel');
+  var chapterSheetOverlay = document.getElementById('chapterSheetOverlay');
+  var chapterSheetList = document.getElementById('chapterSheetList');
+  var chapterSheetSearch = document.getElementById('chapterSheetSearch');
+  var chapterNote = document.getElementById('chapterNote');
+
+  function closeSettingsForChapterSearch() {
+    var so = document.getElementById('settingsOverlay');
+    if (so && !so.hidden) {
+      so.hidden = true;
+      document.body.style.overflow = '';
+      document.body.classList.remove('settings-open');
+    }
+  }
+  function openChapterSheet() { closeSettingsForChapterSearch(); chapterSheetOverlay.hidden = false; chapterSheetList.scrollTop = 0; }
+  function closeChapterSheet() { chapterSheetOverlay.hidden = true; }
+  function resetChapterSheetSearch() {
+    chapterSheetSearch.value = '';
+    chapterSheetList.querySelectorAll('.chapter-sheet-row').forEach(function (row) {
+      row.classList.remove('hidden-by-search');
+    });
+  }
+
+  chapterSheetBtn.addEventListener('click', openChapterSheet);
+  chapterSheetOverlay.addEventListener('click', function (e) {
+    if (e.target === chapterSheetOverlay) { closeChapterSheet(); resetChapterSheetSearch(); }
+  });
+
+  chapterSheetSearch.addEventListener('input', function () {
+    var q = this.value.trim().toLowerCase();
+    chapterSheetList.querySelectorAll('.chapter-sheet-row').forEach(function (row) {
+      var hay = row.textContent.toLowerCase();
+      row.classList.toggle('hidden-by-search', q !== '' && hay.indexOf(q) === -1);
+    });
+    chapterSheetList.scrollTop = 0;
+  });
+
+  function attachChapterRowHandler(row) {
+    row.addEventListener('click', function () {
+      var value = row.dataset.value;
+      chapterSheetList.querySelectorAll('.chapter-sheet-row').forEach(function (r) { r.classList.toggle('active', r === row); });
+      var orderNum = row.querySelector('.chapter-sheet-num').textContent;
+      var nameHtml = row.querySelector('.chapter-sheet-name').innerHTML;
+      chapterSheetLabel.innerHTML = orderNum + '. ' + nameHtml;
+      chapterSheetBtn.classList.add('box-selected');
+      chapterSheetBtnNormal.classList.remove('box-selected');
+      closeChapterSheet();
+      resetChapterSheetSearch();
+      chapterNote.textContent = '';
+      switchToChapter(value);
+    });
+  }
+  chapterSheetList.querySelectorAll('.chapter-sheet-row').forEach(attachChapterRowHandler);
+
+  // Chapter selector (bottom sheet) — normal Mushaf order, 1 to 114
+  var chapterSheetBtnNormal = document.getElementById('chapterSheetBtnNormal');
+  var chapterSheetLabelNormal = document.getElementById('chapterSheetLabelNormal');
+  var chapterSheetOverlayNormal = document.getElementById('chapterSheetOverlayNormal');
+  var chapterSheetListNormal = document.getElementById('chapterSheetListNormal');
+  var chapterSheetSearchNormal = document.getElementById('chapterSheetSearchNormal');
+
+  function openChapterSheetNormal() { closeSettingsForChapterSearch(); chapterSheetOverlayNormal.hidden = false; chapterSheetListNormal.scrollTop = 0; }
+  function closeChapterSheetNormal() { chapterSheetOverlayNormal.hidden = true; }
+  function resetChapterSheetSearchNormal() {
+    chapterSheetSearchNormal.value = '';
+    chapterSheetListNormal.querySelectorAll('.chapter-sheet-row').forEach(function (row) {
+      row.classList.remove('hidden-by-search');
+    });
+  }
+
+  chapterSheetBtnNormal.addEventListener('click', openChapterSheetNormal);
+  chapterSheetOverlayNormal.addEventListener('click', function (e) {
+    if (e.target === chapterSheetOverlayNormal) { closeChapterSheetNormal(); resetChapterSheetSearchNormal(); }
+  });
+
+  chapterSheetSearchNormal.addEventListener('input', function () {
+    var q = this.value.trim().toLowerCase();
+    chapterSheetListNormal.querySelectorAll('.chapter-sheet-row').forEach(function (row) {
+      var hay = row.textContent.toLowerCase();
+      row.classList.toggle('hidden-by-search', q !== '' && hay.indexOf(q) === -1);
+    });
+    chapterSheetListNormal.scrollTop = 0;
+  });
+
+  function attachNormalChapterRowHandler(row) {
+    row.addEventListener('click', function () {
+      var value = row.dataset.value;
+      chapterSheetListNormal.querySelectorAll('.chapter-sheet-row').forEach(function (r) { r.classList.toggle('active', r === row); });
+      var num = row.querySelector('.chapter-sheet-num').textContent;
+      var nameHtml = row.querySelector('.chapter-sheet-name').innerHTML;
+      chapterSheetLabelNormal.innerHTML = num + '. ' + nameHtml;
+      chapterSheetBtnNormal.classList.add('box-selected');
+      chapterSheetBtn.classList.remove('box-selected');
+      closeChapterSheetNormal();
+      resetChapterSheetSearchNormal();
+      chapterNote.textContent = '';
+      switchToChapter(value);
+    });
+  }
+  chapterSheetListNormal.querySelectorAll('.chapter-sheet-row').forEach(attachNormalChapterRowHandler);
+
+  // Revelation (chronological) order — chapter numbers for orders 15-114,
+  // per the Egyptian Standard order documented at tanzil.net/docs/revelation_order.
+  var REVELATION_ORDER_REST = [
+    108, 102, 107, 109, 105, 113, 114, 112, 53, 80, 97, 91, 85, 95, 106, 101,
+    75, 104, 77, 50, 90, 86, 54, 38, 7, 72, 36, 25, 35, 19, 20, 56, 26, 27,
+    28, 17, 10, 11, 12, 15, 6, 37, 31, 34, 39, 40, 41, 42, 43, 44, 45, 46,
+    51, 88, 18, 16, 71, 14, 21, 23, 32, 52, 67, 69, 70, 78, 79, 82, 84, 30,
+    29, 83, 2, 8, 3, 33, 60, 4, 99, 57, 47, 13, 55, 76, 65, 98, 59, 24, 22,
+    63, 58, 49, 66, 64, 61, 62, 48, 5, 9, 110
+  ]; // orders 15 through 114, in sequence
+
+
+  // Malayalam meanings for all 114 surah names (for dropdown lists only).
+  var SURAH_MEANING_ML = {
+    1: 'ആമുഖം', 2: 'പശു', 3: 'ഇംറാൻ കുടുംബം', 4: 'സ്ത്രീകൾ', 5: 'വിഭവം നിറഞ്ഞ മേശ',
+    6: 'കന്നുകാലികൾ', 7: 'ഉന്നത സ്ഥലങ്ങൾ', 8: 'യുദ്ധമുതലുകൾ', 9: 'പശ്ചാത്താപം', 10: 'യൂനുസ്',
+    11: 'ഹൂദ്', 12: 'യൂസുഫ്', 13: 'ഇടിനാദം', 14: 'ഇബ്റാഹീം', 15: 'പാറക്കെട്ടുകൾ',
+    16: 'തേനീച്ച', 17: 'രാപ്രയാണം', 18: 'ഗുഹ', 19: 'മർയം', 20: 'ത്വാഹാ',
+    21: 'പ്രവാചകന്മാർ', 22: 'തീർത്ഥാടനം', 23: 'സത്യവിശ്വാസികൾ', 24: 'പ്രകാശം', 25: 'വിവേചന മാനദണ്ഡം',
+    26: 'കവികൾ', 27: 'ഉറുമ്പ്', 28: 'ചരിത്ര കഥകൾ', 29: 'ചിലന്തി', 30: 'റോമക്കാർ',
+    31: 'ലുഖ്മാൻ', 32: 'സാഷ്ടാംഗ നമസ്കാരം', 33: 'സംഘങ്ങൾ', 34: 'സബഅ്', 35: 'സൃഷ്ടികർത്താവ്',
+    36: 'യാസീൻ', 37: 'അണിനിരന്നവർ', 38: 'സ്വാദ്', 39: 'സംഘങ്ങൾ', 40: 'പൊറുക്കുന്നവൻ',
+    41: 'വിശദീകരിക്കപ്പെട്ടത്', 42: 'കൂടിയാലോചന', 43: 'സ്വർണ്ണാഭരണങ്ങൾ', 44: 'പുക', 45: 'മുട്ടുകുത്തിയവർ',
+    46: 'മണൽ കുന്നുകൾ', 47: 'മുഹമ്മദ്', 48: 'വിജയം', 49: 'മുറികൾ', 50: 'ഖാഫ്',
+    51: 'പറത്തിക്കളയുന്ന കാറ്റുകൾ', 52: 'പർവ്വതം', 53: 'നക്ഷത്രം', 54: 'ചന്ദ്രൻ', 55: 'പരമകാരുണികൻ',
+    56: 'സംഭവിക്കാനിരിക്കുന്നത്', 57: 'ഇരുമ്പ്', 58: 'തർക്കിക്കുന്ന സ്ത്രീ', 59: 'സമാഹരണം', 60: 'പരീക്ഷിക്കപ്പെടുന്നവൾ',
+    61: 'അണിനിരക്കൽ', 62: 'വെള്ളിയാഴ്ച', 63: 'കപടവിശ്വാസികൾ', 64: 'നഷ്ടം വെളിവാകൽ', 65: 'വിവാഹമോചനം',
+    66: 'നിഷിദ്ധമാക്കൽ', 67: 'ആധിപത്യം', 68: 'പേന', 69: 'യാഥാർത്ഥ്യം', 70: 'ഉയർച്ചയുടെ പടികൾ',
+    71: 'നൂഹ്', 72: 'ജിന്ന്', 73: 'പുതച്ചു മൂടിയവൻ', 74: 'മൂടുപടമണിഞ്ഞവൻ', 75: 'ഉയിർത്തെഴുന്നേൽപ്പ്',
+    76: 'മനുഷ്യൻ', 77: 'അയക്കപ്പെടുന്നവ', 78: 'വാർത്ത', 79: 'പിടിച്ചുപറിക്കുന്നവ', 80: 'മുഖം ചുളിച്ചു',
+    81: 'ചുരുട്ടിക്കൂട്ടൽ', 82: 'പിളരൽ', 83: 'അളവിൽ കുറവ് വരുത്തുന്നവർ', 84: 'പിളരൽ', 85: 'നക്ഷത്രഗണങ്ങൾ',
+    86: 'രാത്രി വരുന്നത്', 87: 'അത്യുന്നതൻ', 88: 'മൂടിക്കളയുന്നത്', 89: 'പ്രഭാതം', 90: 'നാട്',
+    91: 'സൂര്യൻ', 92: 'രാത്രി', 93: 'പൂർവാഹ്നം', 94: 'വിശാലമാക്കൽ', 95: 'അത്തിപ്പഴം',
+    96: 'കട്ടപിടിച്ച രക്തം', 97: 'ശ്രേഷ്ഠരാവ്', 98: 'വ്യക്തമായ തെളിവ്', 99: 'ഭൂകമ്പം', 100: 'പായുന്ന കുതിരകൾ',
+    101: 'ഘോര സംഭവം', 102: 'പെരുപ്പം കാണിക്കൽ', 103: 'കാലം', 104: 'ഏഷണിക്കാരൻ', 105: 'ആന',
+    106: 'ഖുറൈശ്', 107: 'സാധാരണ സഹായവസ്തുക്കൾ', 108: 'സമൃദ്ധി', 109: 'അവിശ്വാസികൾ', 110: 'സഹായം',
+    111: 'ഈത്തപ്പന നാരുകൾ', 112: 'നിഷ്കളങ്കത', 113: 'പ്രഭാതം', 114: 'മനുഷ്യർ'
+  };
+
+  // Ayah count + revelation place (Makki/Madani) for all 114 surahs, used to
+  // show "[ Makki 7 Ayahs ]" on the right of every row in both dropdown lists.
+  var SURAH_INFO = {
+    1: [7, 'Makki'], 2: [286, 'Madani'], 3: [200, 'Madani'], 4: [176, 'Madani'], 5: [120, 'Madani'],
+    6: [165, 'Makki'], 7: [206, 'Makki'], 8: [75, 'Madani'], 9: [129, 'Madani'], 10: [109, 'Makki'],
+    11: [123, 'Makki'], 12: [111, 'Makki'], 13: [43, 'Madani'], 14: [52, 'Makki'], 15: [99, 'Makki'],
+    16: [128, 'Makki'], 17: [111, 'Makki'], 18: [110, 'Makki'], 19: [98, 'Makki'], 20: [135, 'Makki'],
+    21: [112, 'Makki'], 22: [78, 'Madani'], 23: [118, 'Makki'], 24: [64, 'Madani'], 25: [77, 'Makki'],
+    26: [227, 'Makki'], 27: [93, 'Makki'], 28: [88, 'Makki'], 29: [69, 'Makki'], 30: [60, 'Makki'],
+    31: [34, 'Makki'], 32: [30, 'Makki'], 33: [73, 'Madani'], 34: [54, 'Makki'], 35: [45, 'Makki'],
+    36: [83, 'Makki'], 37: [182, 'Makki'], 38: [88, 'Makki'], 39: [75, 'Makki'], 40: [85, 'Makki'],
+    41: [54, 'Makki'], 42: [53, 'Makki'], 43: [89, 'Makki'], 44: [59, 'Makki'], 45: [37, 'Makki'],
+    46: [35, 'Makki'], 47: [38, 'Madani'], 48: [29, 'Madani'], 49: [18, 'Madani'], 50: [45, 'Makki'],
+    51: [60, 'Makki'], 52: [49, 'Makki'], 53: [62, 'Makki'], 54: [55, 'Makki'], 55: [78, 'Madani'],
+    56: [96, 'Makki'], 57: [29, 'Madani'], 58: [22, 'Madani'], 59: [24, 'Madani'], 60: [13, 'Madani'],
+    61: [14, 'Madani'], 62: [11, 'Madani'], 63: [11, 'Madani'], 64: [18, 'Madani'], 65: [12, 'Madani'],
+    66: [12, 'Madani'], 67: [30, 'Makki'], 68: [52, 'Makki'], 69: [52, 'Makki'], 70: [44, 'Makki'],
+    71: [28, 'Makki'], 72: [28, 'Makki'], 73: [20, 'Makki'], 74: [56, 'Makki'], 75: [40, 'Makki'],
+    76: [31, 'Madani'], 77: [50, 'Makki'], 78: [40, 'Makki'], 79: [46, 'Makki'], 80: [42, 'Makki'],
+    81: [29, 'Makki'], 82: [19, 'Makki'], 83: [36, 'Makki'], 84: [25, 'Makki'], 85: [22, 'Makki'],
+    86: [17, 'Makki'], 87: [19, 'Makki'], 88: [26, 'Makki'], 89: [30, 'Makki'], 90: [20, 'Makki'],
+    91: [15, 'Makki'], 92: [21, 'Makki'], 93: [11, 'Makki'], 94: [8, 'Makki'], 95: [8, 'Makki'],
+    96: [19, 'Makki'], 97: [5, 'Makki'], 98: [8, 'Madani'], 99: [8, 'Madani'], 100: [11, 'Makki'],
+    101: [11, 'Makki'], 102: [8, 'Makki'], 103: [3, 'Makki'], 104: [9, 'Makki'], 105: [5, 'Makki'],
+    106: [4, 'Makki'], 107: [7, 'Makki'], 108: [3, 'Makki'], 109: [6, 'Makki'], 110: [3, 'Madani'],
+    111: [5, 'Makki'], 112: [4, 'Makki'], 113: [5, 'Makki'], 114: [6, 'Makki']
+  };
+  function surahInfoHtml(chapterNum) {
+    var info = SURAH_INFO[chapterNum];
+    if (!info) return '';
+    var placeClass = info[1] === 'Makki' ? 'chapter-sheet-info-makki' : 'chapter-sheet-info-madani';
+    return '<span class="chapter-sheet-info">[ <span class="' + placeClass + '">' + info[1] + '</span> ' + info[0] + ' Ayahs ]</span>';
+  }
+
+  // Add the "[ Makki 7 Ayahs ]" info to every chapter row already in the
+  // page (both the Mushaf-order and the static top-14 Revelation-order
+  // rows). Dynamically generated revelation-order rows (15-114) get it
+  // inline via surahInfoHtml() above.
+  document.querySelectorAll('.chapter-sheet-row[data-value]').forEach(function (row) {
+    if (row.querySelector('.chapter-sheet-info')) return;
+    var chapterNum = parseInt(row.getAttribute('data-value'), 10);
+    var html = surahInfoHtml(chapterNum);
+    if (html) row.insertAdjacentHTML('beforeend', html);
+  });
+
+  // Fetch all 114 chapters' metadata (Arabic name, English name/meaning) live
+  // from api.alquran.cloud, then append rows for revelation orders 15-114.
+  // Word-level meanings aren't hand-authored for these — only the ones
+  // already in the list (orders 1-14) have that; these rows show
+  // Arabic + Malayalam + English name-meanings only.
+  // (The normal 1-114 order list is fully static in the HTML, so it doesn't
+  // need this fetch to display.)
+  fetch('https://api.alquran.cloud/v1/surah')
+    .then(function (r) { return r.json(); })
+    .then(function (json) {
+      var chapters = (json.data || []);
+      var byNumber = {};
+      chapters.forEach(function (c) { byNumber[c.number] = c; });
+
+      var rowsHtml = '';
+      REVELATION_ORDER_REST.forEach(function (chapterNum, idx) {
+        var order = idx + 15;
+        var meta = byNumber[chapterNum];
+        if (!meta) return;
+        var meaning = (SURAH_MEANING_ML[chapterNum] ? SURAH_MEANING_ML[chapterNum] + ' / ' : '') + (meta.englishNameTranslation || '');
+        rowsHtml += '<button type="button" class="chapter-sheet-row" data-value="' + chapterNum + '">'
+          + '<span class="chapter-sheet-num">' + order + '</span>'
+          + '<span class="chapter-sheet-text">'
+          + '<span class="chapter-sheet-name">' + meta.name + ' <span class="chapter-sheet-translit">(' + meta.englishName + ')-' + chapterNum + '</span></span>'
+          + '<span class="chapter-sheet-meaning">' + meaning + '</span>'
+          + '</span>'
+          + surahInfoHtml(chapterNum)
+          + '</button>';
+      });
+
+      chapterSheetList.insertAdjacentHTML('beforeend', rowsHtml);
+      chapterSheetList.querySelectorAll('.chapter-sheet-row[data-value]:not([data-wired])').forEach(function (row) {
+        row.setAttribute('data-wired', '1');
+        attachChapterRowHandler(row);
+      });
+    })
+    .catch(function () {
+      // Offline — the first 14 chapters (already in the page) still work fine;
+      // the normal-order (1-114) box is fully static, so it works offline too.
+    });
+
+  // Tap-to-highlight a word block
+  function attachWordBlockHandler(block) {
+    block.addEventListener('click', function(){
+      document.querySelectorAll('.word-block.active').forEach(function(b){
+        if (b !== block) b.classList.remove('active');
+      });
+      block.classList.toggle('active');
+    });
+  }
+  document.querySelectorAll('.word-block').forEach(attachWordBlockHandler);
+
+  // ---- Live translations via Al Quran Cloud API ----
+  // Nothing here is hard-coded: the Arabic cross-check and all three
+  // translations below are fetched live from api.alquran.cloud.
+  var SURAH_NUMBER = 96;
+  var API_BASE = 'https://api.alquran.cloud/v1';
+  var EN_EDITION = 'en.sahih'; // Saheeh International
+
+
+  function fetchSurahAyahs(edition, surahNum) {
+    surahNum = surahNum || SURAH_NUMBER;
+    if (!edition) return Promise.resolve(null);
+    return fetch(API_BASE + '/surah/' + surahNum + '/' + edition)
+      .then(function (r) { return r.json(); })
+      .then(function (json) { return (json.data && json.data.ayahs) ? json.data.ayahs : null; })
+      .catch(function () { return null; });
+  }
+
+  // QuranEnc.com (Encyclopedia of the Noble Quran) — an officially supervised
+  // translation platform. It hosts this exact Malayalam translation under
+  // the key "malayalam_kunhi", so we fetch it directly by name instead of
+  // guessing at an edition identifier.
+  function fetchQuranEncSura(translationKey, surahNum) {
+    surahNum = surahNum || SURAH_NUMBER;
+    return fetch('https://quranenc.com/api/v1/translation/sura/' + translationKey + '/' + surahNum)
+      .then(function (r) { return r.json(); })
+      .then(function (json) {
+        var rows = json.result || [];
+        if (!rows.length) return null;
+        // QuranEnc embeds footnote reference numbers like "(1)", "(2)" inline
+        // in the translation text (sequential per-surah footnote markers, not
+        // ayah numbers) — we don't fetch the footnote content, so strip these
+        // reference markers to avoid a confusing stray number.
+        return rows.map(function (row) {
+          // Match footnote markers using ASCII, Devanagari, or Arabic-Indic digits —
+          // Hindi sources sometimes use Devanagari numerals (१, २...) for the marker.
+          // Footnote markers can sit anywhere in the text (e.g. "...മാർഗത്തിൽ(2) ." or "...ല്ല.(3) ..."), not only at the end, so strip them globally and tidy the spacing left behind.
+          var text = (row.translation || '')
+            .replace(/\s*\([0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]+\)/g, '')
+            .replace(/\s+([.,;:!?\u0964])/g, '$1')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+          return { text: text };
+        });
+      })
+      .catch(function () { return null; });
+  }
+
+  function upsertTranslationBlock(box, lang, text, name) {
+    if (!text) return; // no live data for this language — leave existing fallback text alone
+    var html = '<div class="translation-block"><p class="translation-line ' + lang + '">' + text + '</p><p class="translation-attr ' + lang + '">— ' + name + '</p></div>';
+    var existingLine = box.querySelector('.translation-line.' + lang);
+    var existingBlock = existingLine ? existingLine.closest('.translation-block') : null;
+    if (existingBlock) {
+      existingBlock.outerHTML = html;
+    } else if (existingLine) {
+      existingLine.outerHTML = html;
+    } else {
+      box.insertAdjacentHTML('beforeend', html);
+    }
+  }
+
+
+  // ---- Generic dynamic chapter loader (for any surah other than the
+  // statically-built Al-'Alaq) — fetches Arabic, word-by-word (Arabic +
+  // English), and full EN/ML/HI translations live, and renders them in the
+  // same visual style as Al-'Alaq. Word-level Malayalam/Hindi gloss isn't
+  // available from a verified live source, so those word-blocks show
+  // Arabic + English only — the full-ayah Malayalam/Hindi translation
+  // below still covers those languages accurately.
+  var loadedChapters = {};
+  var dynamicContainer = document.getElementById('dynamicChapterContent');
+  var staticContainer = document.getElementById('ayahList');
+
+  function toArabicDigitsGeneric(n) {
+    var map = { '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤', '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩' };
+    return String(n).split('').map(function (d) { return map[d] || d; }).join('');
+  }
+
+  function normalizeArabic(s) {
+    return (s || '')
+      .replace(/[\u064B-\u065F\u0610-\u061A\u06D6-\u06ED\u0670\u0640]/g, '')
+      .replace(/[إأآٱ]/g, 'ا');
+  }
+  var BISMILLAH_FIRST_WORD_NORM = normalizeArabic('بِسْمِ');
+
+
+  var shareIconSvgGeneric = '<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><line x1="8" y1="10.8" x2="16" y2="7.2"/><line x1="8" y1="13.2" x2="16" y2="16.8"/></svg>';
+
+  var bismillahLine = document.getElementById('bismillahLine');
+
+  // ---- Word search (highlights matching word-blocks in the visible chapter) ----
+  var wordSearchInput = document.getElementById('wordSearchInput');
+  var wordSearchClear = document.getElementById('wordSearchClear');
+  var wordSearchCount = document.getElementById('wordSearchCount');
+  var wordSearchNav = document.getElementById('wordSearchFab');
+  var wordSearchPrevBtn = document.getElementById('wordSearchFabPrev');
+  var wordSearchNextBtn = document.getElementById('wordSearchFabNext');
+  var wordSearchMatches = [];
+  var wordSearchIndex = -1;
+
+  function getVisibleContainer() {
+    return (staticContainer.style.display !== 'none') ? staticContainer : dynamicContainer;
+  }
+
+  // ---- Arabic-aware matching (ignores harakat, unifies alef/ya/ta-marbuta forms) ----
+  var AR_MARKS = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED\u0640]/;
+
+  function arNormChar(c) {
+    if (c === '\u0623' || c === '\u0625' || c === '\u0622' || c === '\u0671') return '\u0627';
+    if (c === '\u0649' || c === '\u06CC') return '\u064A';
+    if (c === '\u0629') return '\u0647';
+    return c;
+  }
+
+  // Returns { s: normalized text, map: normalized index -> original index }.
+  // daggerAsAlef: treat the small superscript alef (ٰ) as a full alef, so both
+  // "الرحمن" and "الرحمان" style spellings can be found.
+  function arNormalize(text, daggerAsAlef) {
+    var s = '', map = [];
+    for (var k = 0; k < text.length; k++) {
+      var c = text.charAt(k);
+      if (c === '\u0670') {
+        if (daggerAsAlef) { s += '\u0627'; map.push(k); }
+        continue;
+      }
+      if (AR_MARKS.test(c)) continue;
+      s += arNormChar(c);
+      map.push(k);
+    }
+    return { s: s, map: map };
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function findArabicRanges(text, nq) {
+    var ranges = [];
+    [false, true].forEach(function (mode) {
+      var n = arNormalize(text, mode);
+      var from = 0, idx;
+      while ((idx = n.s.indexOf(nq, from)) !== -1) {
+        var start = n.map[idx];
+        var end = n.map[idx + nq.length - 1] + 1;
+        while (end < text.length && AR_MARKS.test(text.charAt(end))) end++;
+        ranges.push([start, end]);
+        from = idx + nq.length;
+      }
+    });
+    ranges.sort(function (a, b) { return a[0] - b[0]; });
+    var merged = [];
+    ranges.forEach(function (r) {
+      var last = merged[merged.length - 1];
+      if (last && r[0] <= last[1]) last[1] = Math.max(last[1], r[1]);
+      else merged.push([r[0], r[1]]);
+    });
+    return merged;
+  }
+
+  function clearVerseHighlights() {
+    document.querySelectorAll('.arabic-live').forEach(function (el) {
+      if (el.querySelector('mark.ar-hit')) el.textContent = el.textContent;
+    });
+  }
+
+  function highlightVerses(container, nq) {
+    container.querySelectorAll('.arabic-live').forEach(function (el) {
+      var text = el.textContent;
+      var ranges = findArabicRanges(text, nq);
+      if (!ranges.length) return;
+      var out = '', pos = 0;
+      ranges.forEach(function (r) {
+        out += escHtml(text.slice(pos, r[0]))
+          + '<mark class="ar-hit">' + escHtml(text.slice(r[0], r[1])) + '</mark>';
+        pos = r[1];
+      });
+      out += escHtml(text.slice(pos));
+      el.innerHTML = out;
+    });
+  }
+
+
+  function clearWordSearch() {
+    document.querySelectorAll('.word-block.search-match, .word-block.search-dim, .word-block.search-current').forEach(function (b) {
+      b.classList.remove('search-match', 'search-dim', 'search-current');
+    });
+    clearVerseHighlights();
+    if (wordSearchCount) wordSearchCount.textContent = '';
+    var fabCountEl = document.getElementById('wordSearchFabCount');
+    if (fabCountEl) fabCountEl.textContent = '';
+    if (wordSearchNav) wordSearchNav.hidden = true;
+    wordSearchMatches = [];
+    wordSearchIndex = -1;
+  }
+
+  function updateMatchFocus() {
+    wordSearchMatches.forEach(function (b) { b.classList.remove('search-current'); });
+    if (wordSearchIndex >= 0 && wordSearchMatches[wordSearchIndex]) {
+      var current = wordSearchMatches[wordSearchIndex];
+      current.classList.add('search-current');
+      if (document.body.classList.contains('settings-open')) {
+        // settings modal covers the top of the screen: show the match in the lower part
+        var cr = current.getBoundingClientRect();
+        window.scrollBy({ top: cr.top + cr.height / 2 - window.innerHeight * 0.72, behavior: 'smooth' });
+      } else {
+        current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    if (wordSearchCount) {
+      wordSearchCount.textContent = wordSearchMatches.length
+        ? ((wordSearchIndex + 1) + ' / ' + wordSearchMatches.length)
+        : 'No';
+    }
+    var fabCount = document.getElementById('wordSearchFabCount');
+    if (fabCount) {
+      fabCount.textContent = wordSearchMatches.length
+        ? ((wordSearchIndex + 1) + '/' + wordSearchMatches.length)
+        : '';
+    }
+  }
+
+  function goToMatch(delta) {
+    if (!wordSearchMatches.length) return;
+    wordSearchIndex = (wordSearchIndex + delta + wordSearchMatches.length) % wordSearchMatches.length;
+    updateMatchFocus();
+  }
+
+  function performWordSearch(rawQuery) {
+    var q = (rawQuery || '').trim().toLowerCase();
+    if (wordSearchClear) wordSearchClear.hidden = !q;
+    var nq = q ? arNormalize(q, false).s : '';
+    if (!nq) { clearWordSearch(); return; }
+
+    clearVerseHighlights();
+
+    var container = getVisibleContainer();
+    var blocks = container.querySelectorAll('.word-block');
+    var blockMatches = [];
+    blocks.forEach(function (b) {
+      var s = b.getAttribute('data-search') || '';
+      var hit = s.indexOf(q) !== -1;
+      if (!hit) {
+        if (b._ns1 === undefined) {
+          var low = s.toLowerCase();
+          b._ns1 = arNormalize(low, false).s;
+          b._ns2 = arNormalize(low, true).s;
+        }
+        hit = b._ns1.indexOf(nq) !== -1 || b._ns2.indexOf(nq) !== -1;
+      }
+      if (hit) {
+        b.classList.add('search-match');
+        b.classList.remove('search-dim');
+        blockMatches.push(b);
+      } else {
+        b.classList.remove('search-match', 'search-current');
+        b.classList.add('search-dim');
+      }
+    });
+
+    // Also highlight the same Arabic text inside the full verses.
+    highlightVerses(container, nq);
+    var verseMarks = Array.prototype.slice.call(container.querySelectorAll('mark.ar-hit'));
+
+    // Navigate the word blocks when they are shown; otherwise (word-by-word
+    // switched off) navigate the highlighted spots inside the verses.
+    var visibleBlocks = blockMatches.filter(function (b) { return b.offsetParent !== null; });
+    var matches;
+    if (visibleBlocks.length) matches = visibleBlocks;
+    else if (verseMarks.length) matches = verseMarks;
+    else matches = blockMatches;
+
+    wordSearchMatches = matches;
+    wordSearchIndex = matches.length ? 0 : -1;
+    if (wordSearchNav) wordSearchNav.hidden = matches.length === 0;
+    updateMatchFocus();
+  }
+
+  if (wordSearchPrevBtn) wordSearchPrevBtn.addEventListener('click', function () { goToMatch(-1); });
+  if (wordSearchNextBtn) wordSearchNextBtn.addEventListener('click', function () { goToMatch(1); });
+
+  if (wordSearchInput) {
+    var wordSearchDebounce = null;
+    wordSearchInput.addEventListener('input', function () {
+      var value = this.value;
+      clearTimeout(wordSearchDebounce);
+      wordSearchDebounce = setTimeout(function () { performWordSearch(value); }, 120);
+      updateSearchFocusMode();
+    });
+  }
+  if (wordSearchClear) {
+    wordSearchClear.addEventListener('click', function () {
+      wordSearchInput.value = '';
+      clearWordSearch();
+      wordSearchClear.hidden = true;
+      wordSearchInput.focus();
+      updateSearchFocusMode();
+    });
+  }
+
+  // While the word-search box is focused or has text in it, collapse the
+  // rest of the Settings panel (order pickers, language toggles, font size)
+  // so only the search box and its Go/count controls stay visible.
+  var settingsControlsEl = document.querySelector('.settings-controls');
+  function updateSearchFocusMode() {
+    if (!settingsControlsEl || !wordSearchInput) return;
+    var active = document.activeElement === wordSearchInput || wordSearchInput.value.trim() !== '';
+    settingsControlsEl.classList.toggle('search-focused', active);
+  }
+  if (wordSearchInput) {
+    wordSearchInput.addEventListener('focus', function () {
+      // Deferred a tick: collapsing the panel synchronously here can shrink
+      // it out from under this same tap before the browser's click event for
+      // it has finished, landing that click on the backdrop and closing
+      // Settings entirely. Waiting a beat lets the tap resolve first.
+      setTimeout(updateSearchFocusMode, 0);
+    });
+    wordSearchInput.addEventListener('blur', function () { setTimeout(updateSearchFocusMode, 150); });
+  }
+
+
+  var QF_WORKER = 'https://quran-api.ramsheedabdul1404-bab.workers.dev';
+  var activeChapter = null;
+
+  function qfGet(path) {
+    return fetch(QF_WORKER + path).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + path.slice(16, 60));
+      return r.json();
+    }, function (e) {
+      throw new Error('network/CORS: ' + (e && e.message ? e.message : e) + ' for ' + path.slice(16, 60));
+    });
+  }
+
+  // The API gives at most 50 ayahs per call, so long surahs are fetched page by page.
+  function qfChapterVerses(surahNum, wordLang, extra) {
+    var base = '/content/api/v4/verses/by_chapter/' + surahNum
+      + '?words=true&word_fields=text_uthmani,text_qpc_hafs&fields=text_uthmani&per_page=50&language=' + wordLang + (extra || '');
+    return qfGet(base + '&page=1').then(function (first) {
+      var verses = first.verses || [];
+      var pages = (first.pagination && first.pagination.total_pages) || 1;
+      var rest = [];
+      for (var p = 2; p <= pages; p++) rest.push(qfGet(base + '&page=' + p));
+      return Promise.all(rest).then(function (more) {
+        more.forEach(function (m) { verses = verses.concat(m.verses || []); });
+        verses.sort(function (a, b) { return a.verse_number - b.verse_number; });
+        return verses;
+      });
+    });
+  }
+
+  function qfRealWords(verse) {
+    return (verse && verse.words ? verse.words : []).filter(function (w) { return w.char_type_name !== 'end'; });
+  }
+
+  function qfAttr(s) { return String(s || '').replace(/"/g, "'"); }
+
+  // Finds the Hindi translation (Maulana Azizul Haque al-Umari) in the API's translation list, once.
+  var qfHindiPromise = null;
+  function qfResolveHindi() {
+    if (!qfHindiPromise) {
+      qfHindiPromise = qfGet('/content/api/v4/resources/translations').then(function (d) {
+        var list = (d && d.translations) || [];
+        for (var i = 0; i < list.length; i++) {
+          var t = list[i];
+          if (String(t.language_name).toLowerCase() === 'hindi' && /azizul/i.test((t.name || '') + ' ' + (t.author_name || ''))) {
+            return { id: t.id, name: 'Maulana Azizul Haque al-Umari' };
+          }
+        }
+        return null;
+      }).catch(function () { return null; });
+    }
+    return qfHindiPromise;
+  }
+
+  function qfCleanText(t) {
+    return String(t || '').replace(/<sup[^>]*>.*?<\/sup>/g, '').replace(/<[^>]+>/g, '').trim();
+  }
+
+  function switchToChapter(value) {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    bismillahLine.style.display = (value === '1') ? 'none' : '';
+    if (wordSearchInput) wordSearchInput.value = '';
+    if (wordSearchClear) wordSearchClear.hidden = true;
+    clearWordSearch();
+
+    activeChapter = String(value);
+    staticContainer.style.display = 'none';
+    dynamicContainer.style.display = '';
+
+    if (loadedChapters[value]) {
+      dynamicContainer.innerHTML = loadedChapters[value];
+      dynamicContainer.querySelectorAll('.share-btn').forEach(attachShareHandler);
+      dynamicContainer.querySelectorAll('.word-block').forEach(attachWordBlockHandler);
+      applyTranslationVisibility();
+      applyWordByWordVisibility();
+      return;
+    }
+
+    dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">ലോഡ് ചെയ്യുന്നു… (internet വേണം)</p>';
+    loadDynamicChapter(value);
+  }
+
+  function loadDynamicChapter(surahNum) {
+    Promise.all([
+      qfChapterVerses(surahNum, 'ml'),
+      qfChapterVerses(surahNum, 'en').catch(function () { return []; }),
+      fetchQuranEncSura('malayalam_kunhi', surahNum).catch(function () { return null; }).then(function (a) {
+        return { ayahs: a, name: 'Abdulhamid Haidar Al-Madany & Kunhi Muhammad' };
+      }),
+      fetchSurahAyahs(EN_EDITION, surahNum).catch(function () { return null; }).then(function (a) {
+        return { ayahs: a, name: 'Saheeh International' };
+      }),
+      qfResolveHindi().then(function (tr) {
+        return qfChapterVerses(surahNum, 'hi', tr ? '&translations=' + tr.id : '')
+          .catch(function () { return []; })
+          .then(function (v) { return { verses: v, tr: tr }; });
+      })
+    ]).then(function (results) {
+      var verses = results[0];
+      var enVerses = results[1];
+      var mlData = results[2];
+      var enData = results[3];
+      var hiData = results[4];
+
+      if (!verses.length) {
+        if (String(activeChapter) === String(surahNum)) {
+          dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">ഈ സൂറ ലോഡ് ചെയ്യാൻ പറ്റിയില്ല — ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കൂ.</p>';
+        }
+        return;
+      }
+
+      var enByVerse = {};
+      enVerses.forEach(function (v) { enByVerse[v.verse_number] = qfRealWords(v); });
+      var hiByVerse = {}, hiTextByVerse = {};
+      hiData.verses.forEach(function (v) {
+        hiByVerse[v.verse_number] = qfRealWords(v);
+        if (v.translations && v.translations[0] && v.translations[0].text) {
+          hiTextByVerse[v.verse_number] = qfCleanText(v.translations[0].text);
+        }
+      });
+
+      var html = '';
+      verses.forEach(function (verse) {
+        var n = verse.verse_number;
+        var realWords = qfRealWords(verse);
+        var enWords = enByVerse[n] || [];
+        var hiWords = hiByVerse[n] || [];
+        var allHafs = realWords.length > 0 && realWords.every(function (w) { return w.text_qpc_hafs; });
+        var arabicText = allHafs
+          ? realWords.map(function (w) { return w.text_qpc_hafs; }).join(' ')
+          : (verse.text_uthmani || realWords.map(function (w) { return w.text_uthmani || w.text || ''; }).join(' '));
+
+        var enText = enData.ayahs && enData.ayahs[n - 1] ? enData.ayahs[n - 1].text : '';
+        var mlText = mlData.ayahs && mlData.ayahs[n - 1] ? mlData.ayahs[n - 1].text : '';
+        var translationsHtml = '';
+        if (mlText) translationsHtml += '<div class="translation-block"><p class="translation-line ml">' + mlText + '</p><p class="translation-attr ml">— ' + mlData.name + '</p></div>';
+        if (enText) translationsHtml += '<div class="translation-block"><p class="translation-line en">' + enText + '</p><p class="translation-attr en">— ' + enData.name + '</p></div>';
+        var hiText = hiTextByVerse[n] || '';
+        if (hiText && hiData.tr) translationsHtml += '<div class="translation-block"><p class="translation-line hi">' + hiText + '</p><p class="translation-attr hi">— ' + hiData.tr.name + '</p></div>';
+        if (!translationsHtml) translationsHtml = '<p class="translation-loading">translation ലഭ്യമായില്ല</p>';
+
+        // Use the fully-marked words of the whole-ayah text when the counts line up.
+        var markedWords = arabicText.split(/\s+/).filter(Boolean);
+        var useMarked = markedWords.length === realWords.length;
+
+        // Collect the words; when the API gives one Malayalam meaning for several
+        // words (the following words have an empty Malayalam), show them as ONE block.
+        var groups = [];
+        realWords.forEach(function (w, i) {
+          var ar = useMarked ? markedWords[i] : (w.text_uthmani || w.text || '');
+          var ml = (w.translation && w.translation.text) ? String(w.translation.text).trim() : '';
+          // When a word has no Malayalam meaning the API sends its English text instead
+          // (language_name "english"). That is not Malayalam, so treat it as empty.
+          if (ml && w.translation.language_name && String(w.translation.language_name).toLowerCase() !== 'malayalam') ml = '';
+          var enW = null;
+          for (var k = 0; k < enWords.length; k++) {
+            if (enWords[k].position === w.position) { enW = enWords[k]; break; }
+          }
+          var en = (enW && enW.translation && enW.translation.text) ? String(enW.translation.text).trim() : '';
+          if (ml && en && ml.toLowerCase() === en.toLowerCase()) ml = '';
+          // Hindi meaning of this word (the API sends English text when there is none)
+          var hiW = null;
+          for (var q = 0; q < hiWords.length; q++) {
+            if (hiWords[q].position === w.position) { hiW = hiWords[q]; break; }
+          }
+          var hi = '';
+          if (hiW && hiW.translation && hiW.translation.text && String(hiW.translation.language_name).toLowerCase() === 'hindi') {
+            hi = String(hiW.translation.text).trim();
+          }
+          var tr = (w.transliteration && w.transliteration.text) ? w.transliteration.text : '';
+          var last = groups.length ? groups[groups.length - 1] : null;
+          if (!ml && last && last.ml) {
+            last.ar += ' ' + ar;
+            if (en) last.en += (last.en ? ' ' : '') + en;
+            if (hi) last.hi += (last.hi ? ' ' : '') + hi;
+            if (tr) last.tr += (last.tr ? ' ' : '') + tr;
+          } else {
+            groups.push({ ar: ar, ml: ml, en: en, hi: hi, tr: tr });
+          }
+        });
+
+        var wordsHtml = groups.map(function (g) {
+          var searchTag = qfAttr((g.ar + ' ' + g.tr + ' ' + g.en + ' ' + g.ml + ' ' + g.hi).toLowerCase());
+          return '<div class="word-block" data-search="' + searchTag + '">'
+            + '<div class="word-arabic">' + g.ar + '</div>'
+            + (g.ml ? '<div class="word-gloss ml">' + g.ml + '</div>' : '')
+            + (g.en ? '<div class="word-gloss en">' + g.en + '</div>' : '')
+            + (g.hi ? '<div class="word-gloss hi">' + g.hi + '</div>' : '')
+            + '</div>';
+        }).join('');
+
+        if (!wordsHtml) wordsHtml = '<p class="translation-loading">word-by-word ലഭ്യമായില്ല</p>';
+
+        html += '<section class="ayah" data-ayah="' + n + '">'
+          + '<div class="ayah-head"><span class="ayah-number">' + surahNum + ':' + n + '</span>'
+          + '<button type="button" class="share-btn" aria-label="Share this ayah">' + shareIconSvgGeneric + '</button></div>'
+          + '<p class="ayah-full-arabic"><span class="arabic-live" data-ayah="' + n + '">' + arabicText + '</span> <span class="ayah-end-num">(' + toArabicDigitsGeneric(n) + ')</span></p>'
+          + '<div class="word-row">' + wordsHtml + '</div>'
+          + '<div class="ayah-translations">' + translationsHtml + '</div>'
+          + '</section>';
+      });
+
+      loadedChapters[surahNum] = html;
+      if (String(activeChapter) !== String(surahNum)) return; // user already moved to another surah
+
+      dynamicContainer.innerHTML = html;
+      dynamicContainer.querySelectorAll('.share-btn').forEach(attachShareHandler);
+      dynamicContainer.querySelectorAll('.word-block').forEach(attachWordBlockHandler);
+      applyTranslationVisibility();
+      applyWordByWordVisibility();
+      applyFontSize(currentFontStep);
+    }).catch(function () {
+      if (String(activeChapter) === String(surahNum)) {
+        dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">ഈ സൂറ ലോഡ് ചെയ്യാൻ പറ്റിയില്ല.</p>';
+      }
+    });
+  }
+
+  // ---- Floating settings modal (hamburger button, top-left) ----
+  (function () {
+    var fab = document.getElementById('settingsFab');
+    var overlay = document.getElementById('settingsOverlay');
+    var closeBtn = document.getElementById('settingsClose');
+    if (!fab || !overlay) return;
+
+    function openSettings() {
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('settings-open');
+      // Always start with the full panel visible, even if a previous word
+      // search left text behind — the search-collapsed view only comes back
+      // once the person actually taps into the search box again.
+      var sc = document.querySelector('.settings-controls');
+      if (sc) sc.classList.remove('search-focused');
+    }
+    function closeSettings() { overlay.hidden = true; document.body.style.overflow = ''; document.body.classList.remove('settings-open'); }
+
+    // Go button inside the modal: closes settings so the highlighted match
+    // (and the floating up/down nav) are visible on the page.
+    var goBtn = document.getElementById('wordSearchGoBtn');
+    function syncGoBtn() { if (goBtn) goBtn.hidden = wordSearchNav.hidden; }
+    new MutationObserver(syncGoBtn).observe(wordSearchNav, { attributes: true, attributeFilter: ['hidden'] });
+    syncGoBtn();
+    if (goBtn) goBtn.addEventListener('click', closeSettings);
+
+    fab.addEventListener('click', openSettings);
+    if (closeBtn) closeBtn.addEventListener('click', closeSettings);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeSettings(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !overlay.hidden) closeSettings();
+    });
+
+    // After a surah is picked from either chapter list, close settings so the surah is visible.
+    document.addEventListener('click', function (e) {
+      if (!overlay.hidden && e.target.closest && e.target.closest('.chapter-sheet-row')) closeSettings();
+    });
+
+    // Tapping anywhere on the page (except the up/down arrows) clears the word
+    // search and its highlights, so there is no need to reopen settings to close it.
+    document.addEventListener('click', function (e) {
+      var searchActive = (wordSearchInput && wordSearchInput.value.trim()) || wordSearchMatches.length;
+      if (!searchActive) return;
+      var el = e.target;
+      if (!el || !el.closest) return;
+      if (el.closest('.word-search-fab') || el.closest('#settingsFab') ||
+          el.closest('#settingsOverlay') || el.closest('.chapter-sheet-overlay') ||
+          el.closest('#verseSheetOverlay')) return;
+      wordSearchInput.value = '';
+      if (wordSearchClear) wordSearchClear.hidden = true;
+      clearWordSearch();
+    });
+
+    // Pressing Enter/Search on the keyboard closes settings so matches can be seen.
+    var si = document.getElementById('wordSearchInput');
+    if (si) si.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); si.blur(); closeSettings(); }
+    });
+  })();
+
+  // ---- Current surah title + remembered settings (this device only) ----
+  (function () {
+    var STORE_KEY = 'wbw_settings_v1';
+
+    function loadPrefs() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY) || 'null') || {}; }
+      catch (e) { return {}; }
+    }
+    function savePrefs(patch) {
+      try {
+        var p = loadPrefs();
+        Object.keys(patch).forEach(function (k) { p[k] = patch[k]; });
+        localStorage.setItem(STORE_KEY, JSON.stringify(p));
+      } catch (e) { /* storage unavailable - just don't remember */ }
+    }
+
+    // ---------- surah title pill ----------
+    var pill = document.getElementById('surahTitle');
+    var stpNum = document.getElementById('stpNum');
+    var stpEn = document.getElementById('stpEn');
+    var stpAr = document.getElementById('stpAr');
+
+    function updateSurahTitle(value, forceRev) {
+      var row = chapterSheetListNormal.querySelector('.chapter-sheet-row[data-value="' + value + '"]');
+      if (!row) return;
+      var nameEl = row.querySelector('.chapter-sheet-name');
+      var translitEl = nameEl.querySelector('.chapter-sheet-translit');
+      var ar = nameEl.childNodes[0] ? nameEl.childNodes[0].textContent.trim() : '';
+      var m = translitEl ? translitEl.textContent.match(/^\((.*)\)-(\d+)$/) : null;
+
+      // Which order is in use? Revelation when its dropdown was last used (or at the very start,
+      // where Al-'Alaq is shown as revelation no. 1); otherwise Mushaf.
+      var useRev = forceRev || chapterSheetBtn.classList.contains('box-selected');
+      var num = value, tag = 'Mushaf';
+      if (useRev) {
+        var revRow = chapterSheetList.querySelector('.chapter-sheet-row[data-value="' + value + '"]');
+        var revNum = revRow && revRow.querySelector('.chapter-sheet-num');
+        if (revNum) { num = revNum.textContent.replace(/\D/g, '') || value; tag = 'Revelation'; }
+      }
+      stpNum.textContent = num;
+      stpEn.textContent = m ? m[1] : '';
+      stpAr.textContent = ar;
+      var tagEl = document.getElementById('surahOrderTag');
+      if (tagEl) tagEl.textContent = tag;
+    }
+    if (pill) pill.addEventListener('click', function () {
+      var fab = document.getElementById('settingsFab');
+      if (fab) fab.click();
+    });
+
+    // Wrap switchToChapter so every surah change updates the title and is remembered.
+    var originalSwitch = window.switchToChapter;
+    window.switchToChapter = function (value) {
+      var result = originalSwitch.apply(this, arguments);
+      updateSurahTitle(value);
+      savePrefs({ chapter: String(value), chapterList: chapterSheetBtnNormal.classList.contains('box-selected') ? 'normal' : 'rev' });
+      return result;
+    };
+    updateSurahTitle('96', true);   // at the start Al-'Alaq is shown as revelation no. 1
+    originalSwitch.call(window, '96');   // load Al-'Alaq from the API at start
+
+    // ---------- remember toggles + font size ----------
+    function saveToggles() {
+      var wbw = {}, trans = {};
+      document.querySelectorAll('.lang-switch').forEach(function (b) { wbw[b.dataset.lang] = b.checked; });
+      document.querySelectorAll('.trans-switch').forEach(function (b) { trans[b.dataset.lang] = b.checked; });
+      savePrefs({ wbw: wbw, trans: trans });
+    }
+    document.querySelectorAll('.lang-switch, .trans-switch').forEach(function (b) {
+      b.addEventListener('change', saveToggles);
+    });
+    function saveFont() { savePrefs({ font: currentFontStep }); }
+    document.getElementById('fontSizeMinus').addEventListener('click', saveFont);
+    document.getElementById('fontSizePlus').addEventListener('click', saveFont);
+
+    // ---------- "Translator" toggle: show/hide the "— translator name" line ----------
+    var translatorToggle = document.getElementById('translatorToggle');
+    translatorToggle.addEventListener('change', function () {
+      document.body.classList.toggle('show-translator', translatorToggle.checked);
+      savePrefs({ showTranslator: translatorToggle.checked });
+    });
+
+    // ---------- "Ayah" toggle: show/hide the full Arabic ayah line ----------
+    var ayahToggle = document.getElementById('ayahToggle');
+    ayahToggle.addEventListener('change', function () {
+      document.body.classList.toggle('hide-ayah', !ayahToggle.checked);
+      savePrefs({ showAyah: ayahToggle.checked });
+    });
+
+    // ---------- restore saved settings on load ----------
+    var prefs = loadPrefs();
+
+    if (typeof prefs.font === 'number') applyFontSize(prefs.font);
+
+    if (typeof prefs.showTranslator === 'boolean') {
+      translatorToggle.checked = prefs.showTranslator;
+      document.body.classList.toggle('show-translator', prefs.showTranslator);
+    }
+
+    if (typeof prefs.showAyah === 'boolean') {
+      ayahToggle.checked = prefs.showAyah;
+      document.body.classList.toggle('hide-ayah', !prefs.showAyah);
+    }
+
+    if (prefs.wbw) document.querySelectorAll('.lang-switch').forEach(function (b) {
+      if (typeof prefs.wbw[b.dataset.lang] === 'boolean') b.checked = prefs.wbw[b.dataset.lang];
+    });
+    if (prefs.trans) document.querySelectorAll('.trans-switch').forEach(function (b) {
+      if (typeof prefs.trans[b.dataset.lang] === 'boolean') b.checked = prefs.trans[b.dataset.lang];
+    });
+    if (prefs.wbw || prefs.trans) { applyWordByWordVisibility(); applyTranslationVisibility(); }
+
+    // Note: the surah is NOT reopened automatically - the site always starts with the defaults
+    // (Mushaf = Al-Fatiha, Revelation = Al-'Alaq). Only font size and toggles are remembered.
+  })();
+
+  // ---- Double tap anywhere -> "Go to Ayah" popup: search box + grid of ayah numbers (like Quran.com) ----
+  (function () {
+    var overlay = document.getElementById('verseSheetOverlay');
+    var grid = document.getElementById('verseGrid');
+    var input = document.getElementById('verseInput');
+    var surahEl = document.getElementById('vpSurah');
+    var curEl = document.getElementById('vpCur');
+    var emptyEl = document.getElementById('vpEmpty');
+    if (!overlay || !grid) return;
+
+    var sections = [];
+    var cells = [];
+    var openedAt = 0;
+
+    // Keep the popup inside the visible area (also when the keyboard is open).
+    function fitToViewport() {
+      var vv = window.visualViewport;
+      var h = vv ? vv.height : window.innerHeight;
+      overlay.style.height = h + 'px';
+      overlay.style.top = (vv ? vv.offsetTop : 0) + 'px';
+      grid.style.maxHeight = Math.max(70, Math.min(186, h - 170)) + 'px';
+    }
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', function () { if (!overlay.hidden) fitToViewport(); });
+      window.visualViewport.addEventListener('scroll', function () { if (!overlay.hidden) fitToViewport(); });
+    }
+
+    function closePicker() {
+      overlay.hidden = true;
+      document.body.style.overflow = '';
+      input.blur();
+    }
+
+    function jumpTo(idx) {
+      var sec = sections[idx];
+      if (!sec) return;
+      closePicker();
+      var top = sec.getBoundingClientRect().top + window.pageYOffset - 68;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+
+    // Typing filters the numbers that start with what was typed (4 -> 4, 40, 41 ...).
+    function applyFilter() {
+      var q = input.value.replace(/\D/g, '');
+      if (input.value !== q) input.value = q;
+      var shown = 0;
+      cells.forEach(function (c) {
+        var ok = !q || c.textContent.indexOf(q) === 0;
+        c.style.display = ok ? '' : 'none';
+        if (ok) shown++;
+      });
+      emptyEl.hidden = shown > 0;
+      grid.scrollTop = 0;
+    }
+    input.addEventListener('input', applyFilter);
+    input.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      goToTyped();
+    });
+
+    function goToTyped() {
+      var q = input.value;
+      var exact = null, first = null;
+      cells.forEach(function (c) {
+        if (c.style.display === 'none') return;
+        if (!first) first = c;
+        if (c.textContent === q) exact = c;
+      });
+      var pick = exact || first;
+      if (pick) jumpTo(parseInt(pick.getAttribute('data-idx'), 10));
+    }
+    var goBtn = document.getElementById('verseGoBtn');
+    if (goBtn) goBtn.addEventListener('click', goToTyped);
+
+    // Tap a number -> jump to that ayah.
+    grid.addEventListener('click', function (e) {
+      if (Date.now() - openedAt < 500) return;      // ghost click from the double tap itself
+      var c = e.target.closest ? e.target.closest('.vp-cell') : null;
+      if (c) jumpTo(parseInt(c.getAttribute('data-idx'), 10));
+    });
+
+    function openPicker() {
+      if (!overlay.hidden) return;
+      openedAt = Date.now();
+      sections = Array.prototype.slice.call(getVisibleContainer().querySelectorAll('.ayah[data-ayah]'));
+
+      // which ayah is on screen right now?
+      var currentIdx = 0;
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].getBoundingClientRect().bottom > 90) { currentIdx = i; break; }
+      }
+
+      grid.innerHTML = '';
+      var frag = document.createDocumentFragment();
+      cells = sections.map(function (sec, idx) {
+        var d = document.createElement('div');
+        d.className = 'vp-cell' + (idx === currentIdx ? ' cur' : '');
+        d.textContent = sec.getAttribute('data-ayah');
+        d.setAttribute('data-idx', String(idx));
+        frag.appendChild(d);
+        return d;
+      });
+      grid.appendChild(frag);
+
+      var stpEn = document.getElementById('stpEn');
+      surahEl.textContent = stpEn ? stpEn.textContent : '';
+      curEl.textContent = sections[currentIdx] ? sections[currentIdx].getAttribute('data-ayah') : '';
+      input.value = '';
+      emptyEl.hidden = true;
+
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+      fitToViewport();
+      var cur = cells[currentIdx];
+      grid.scrollTop = cur ? Math.max(0, cur.offsetTop - grid.clientHeight / 2 + cur.offsetHeight / 2) : 0;
+    }
+
+    // Tapping outside the card closes it (ignore the click that follows the double tap).
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay && Date.now() - openedAt > 500) closePicker();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!overlay.hidden && e.key === 'Escape') closePicker();
+    });
+
+    // Ignore taps on buttons, menus, inputs and open panels.
+    var IGNORE = 'button, a, input, select, textarea, label, .settings-overlay, .verse-sheet-overlay, ' +
+                 '.chapter-sheet-overlay, .word-search-fab, .share-btn';
+    function isIgnored(el) { return !el || !el.closest || el.closest(IGNORE); }
+
+    // Double tap on touch screens (own detection: iOS does not reliably send dblclick).
+    var start = null, last = { t: 0, x: 0, y: 0 };
+    document.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) { start = null; last.t = 0; return; }
+      start = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }, { passive: true });
+    document.addEventListener('touchend', function (e) {
+      if (!start || e.changedTouches.length !== 1 || e.touches.length) return;
+      var c = e.changedTouches[0];
+      var moved = Math.abs(c.clientX - start.x) > 10 || Math.abs(c.clientY - start.y) > 10;
+      start = null;
+      if (moved || isIgnored(e.target)) { last.t = 0; return; }   // a scroll/swipe or a tap on a control
+      var now = Date.now();
+      if (now - last.t < 320 && Math.abs(c.clientX - last.x) < 30 && Math.abs(c.clientY - last.y) < 30) {
+        last.t = 0;
+        openPicker();
+      } else {
+        last = { t: now, x: c.clientX, y: c.clientY };
+      }
+    }, { passive: true });
+
+    // Double click with a mouse (desktop).
+    document.addEventListener('dblclick', function (e) {
+      if (!isIgnored(e.target)) openPicker();
+    });
+  })();
+
+  // ---- Keep the Settings panel pinned to the real visible area ----
+  // On iOS Safari, opening the keyboard shifts the *visual* viewport while a
+  // plain `position: fixed` element stays anchored to the old (layout)
+  // viewport — so right after the keyboard opens the panel can appear to
+  // have scrolled off, until something nudges the browser to re-settle.
+  // Actively syncing to visualViewport keeps it in the right place from the
+  // very first tap.
+  (function () {
+    var settingsOverlayEl = document.getElementById('settingsOverlay');
+    var vv = window.visualViewport;
+    if (!settingsOverlayEl || !vv) return;
+    function syncToViewport() {
+      if (settingsOverlayEl.hidden) return;
+      settingsOverlayEl.style.top = vv.offsetTop + 'px';
+      settingsOverlayEl.style.left = vv.offsetLeft + 'px';
+      settingsOverlayEl.style.width = vv.width + 'px';
+      settingsOverlayEl.style.height = vv.height + 'px';
+    }
+    vv.addEventListener('resize', syncToViewport);
+    vv.addEventListener('scroll', syncToViewport);
+    var settingsFabEl = document.getElementById('settingsFab');
+    if (settingsFabEl) settingsFabEl.addEventListener('click', function () {
+      setTimeout(syncToViewport, 0);
+    });
+    var wsi = document.getElementById('wordSearchInput');
+    if (wsi) wsi.addEventListener('focus', function () { setTimeout(syncToViewport, 0); });
+  })();
+
+</script>
+
+</body>
+</html>

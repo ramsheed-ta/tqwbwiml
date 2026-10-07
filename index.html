@@ -170,6 +170,7 @@
   .chapter-sheet-row.hidden-by-search { display: none; }
 
   .chapter-sheet-list {
+    position: relative;
     overflow-y: auto;
     padding: 0 16px;
     flex: 1 1 auto;
@@ -1610,8 +1611,8 @@
       r.classList.toggle('active', on);
       if (on) target = r;
     });
-    list.scrollTop = 0;
-    if (target) list.scrollTop += target.getBoundingClientRect().top - list.getBoundingClientRect().top;
+    // offsetTop ignores the sheet's opening zoom animation, unlike getBoundingClientRect
+    list.scrollTop = target ? target.offsetTop : 0;
   }
   function openChapterSheet() { closeSettingsForChapterSearch(); chapterSheetOverlay.hidden = false; showCurrentChapterInList(chapterSheetList); }
   function closeChapterSheet() { chapterSheetOverlay.hidden = true; }

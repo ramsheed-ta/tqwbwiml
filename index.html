@@ -174,7 +174,7 @@
     padding: 0 16px;
     flex: 1 1 auto;
     min-height: 0;
-    max-height: min(158px, calc(var(--vvh, 100vh) - 110px));
+    max-height: min(210px, calc(var(--vvh, 100vh) - 110px));
   }
 
   .chapter-sheet-row {
@@ -1601,7 +1601,19 @@
       document.body.classList.remove('settings-open');
     }
   }
-  function openChapterSheet() { closeSettingsForChapterSearch(); chapterSheetOverlay.hidden = false; chapterSheetList.scrollTop = 0; }
+  // When a surah picker opens, mark and show the surah that is open right now
+  function showCurrentChapterInList(list) {
+    var current = (typeof activeChapter !== 'undefined' && activeChapter) ? String(activeChapter) : '';
+    var target = null;
+    list.querySelectorAll('.chapter-sheet-row').forEach(function (r) {
+      var on = current !== '' && r.dataset.value === current;
+      r.classList.toggle('active', on);
+      if (on) target = r;
+    });
+    list.scrollTop = 0;
+    if (target) list.scrollTop += target.getBoundingClientRect().top - list.getBoundingClientRect().top;
+  }
+  function openChapterSheet() { closeSettingsForChapterSearch(); chapterSheetOverlay.hidden = false; showCurrentChapterInList(chapterSheetList); }
   function closeChapterSheet() { chapterSheetOverlay.hidden = true; }
   function resetChapterSheetSearch() {
     chapterSheetSearch.value = '';
@@ -1648,7 +1660,7 @@
   var chapterSheetListNormal = document.getElementById('chapterSheetListNormal');
   var chapterSheetSearchNormal = document.getElementById('chapterSheetSearchNormal');
 
-  function openChapterSheetNormal() { closeSettingsForChapterSearch(); chapterSheetOverlayNormal.hidden = false; chapterSheetListNormal.scrollTop = 0; }
+  function openChapterSheetNormal() { closeSettingsForChapterSearch(); chapterSheetOverlayNormal.hidden = false; showCurrentChapterInList(chapterSheetListNormal); }
   function closeChapterSheetNormal() { chapterSheetOverlayNormal.hidden = true; }
   function resetChapterSheetSearchNormal() {
     chapterSheetSearchNormal.value = '';
@@ -2728,4 +2740,3 @@
 
 </body>
 </html>
-

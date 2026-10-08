@@ -1282,7 +1282,7 @@
   <div class="controls settings-controls">
     <div class="chapter-row">
       <span class="chapter-select-label">Mushaf Order:</span>
-      <button type="button" id="chapterSheetBtnNormal" class="chapter-sheet-btn">
+      <button type="button" id="chapterSheetBtnNormal" class="chapter-sheet-btn box-selected">
         <span id="chapterSheetLabelNormal">1. الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)</span></span>
         <span class="chapter-sheet-chevron">⌄</span>
       </button>
@@ -1290,7 +1290,7 @@
     </div>
     <div class="chapter-row" style="margin-top:-4px;">
       <span class="chapter-select-label">Revelation Order:</span>
-      <button type="button" id="chapterSheetBtn" class="chapter-sheet-btn box-selected">
+      <button type="button" id="chapterSheetBtn" class="chapter-sheet-btn">
         <span id="chapterSheetLabel">1. العلق <span class="chapter-sheet-translit">(Al-'Alaq)-96</span></span>
         <span class="chapter-sheet-chevron">⌄</span>
       </button>
@@ -2465,8 +2465,8 @@
       var ar = nameEl.childNodes[0] ? nameEl.childNodes[0].textContent.trim() : '';
       var m = translitEl ? translitEl.textContent.match(/^\((.*)\)-(\d+)$/) : null;
 
-      // Which order is in use? Revelation when its dropdown was last used (or at the very start,
-      // where Al-'Alaq is shown as revelation no. 1); otherwise Mushaf.
+      // Which order is in use? Revelation when its dropdown was last used; otherwise Mushaf
+      // (the default at the very start, Al-Fatiha).
       var useRev = forceRev || chapterSheetBtn.classList.contains('box-selected');
       var num = value, tag = 'Mushaf';
       if (useRev) {
@@ -2506,9 +2506,9 @@
       savePrefs({ chapter: String(value), chapterList: chapterSheetBtnNormal.classList.contains('box-selected') ? 'normal' : 'rev' });
       return result;
     };
-    updateSurahTitle('96', true);   // at the start Al-'Alaq is shown as revelation no. 1
-    syncChapterLabels('96');
-    originalSwitch.call(window, '96');   // load Al-'Alaq from the API at start
+    updateSurahTitle('1', false);   // at the start Al-Fatiha is shown in Mushaf order
+    syncChapterLabels('1');
+    originalSwitch.call(window, '1');   // load Al-Fatiha from the API at start
 
     // ---------- remember toggles + font size ----------
     function saveToggles() {
@@ -2562,7 +2562,7 @@
     if (prefs.wbw || prefs.trans) { applyWordByWordVisibility(); applyTranslationVisibility(); }
 
     // Note: the surah is NOT reopened automatically - the site always starts with the defaults
-    // (Mushaf = Al-Fatiha, Revelation = Al-'Alaq). Only font size and toggles are remembered.
+    // (Mushaf order, Al-Fatiha). Only font size and toggles are remembered.
   })();
 
   // ---- Double tap anywhere -> "Go to Ayah" popup: search box + grid of ayah numbers (like Quran.com) ----

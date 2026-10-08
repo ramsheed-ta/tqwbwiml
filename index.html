@@ -2480,6 +2480,18 @@
       var tagEl = document.getElementById('surahOrderTag');
       if (tagEl) tagEl.textContent = tag;
     }
+    // Keep BOTH Settings buttons showing the surah that is open now
+    // (before this, the Mushaf Order button always stayed on "1. Al-Fatiha")
+    function syncChapterLabels(value) {
+      var nRow = chapterSheetListNormal.querySelector('.chapter-sheet-row[data-value="' + value + '"]');
+      if (nRow) {
+        chapterSheetLabelNormal.innerHTML = nRow.querySelector('.chapter-sheet-num').textContent + '. ' + nRow.querySelector('.chapter-sheet-name').innerHTML;
+      }
+      var rRow = chapterSheetList.querySelector('.chapter-sheet-row[data-value="' + value + '"]');
+      if (rRow) {
+        chapterSheetLabel.innerHTML = rRow.querySelector('.chapter-sheet-num').textContent + '. ' + rRow.querySelector('.chapter-sheet-name').innerHTML;
+      }
+    }
     if (pill) pill.addEventListener('click', function () {
       var fab = document.getElementById('settingsFab');
       if (fab) fab.click();
@@ -2490,10 +2502,12 @@
     window.switchToChapter = function (value) {
       var result = originalSwitch.apply(this, arguments);
       updateSurahTitle(value);
+      syncChapterLabels(value);
       savePrefs({ chapter: String(value), chapterList: chapterSheetBtnNormal.classList.contains('box-selected') ? 'normal' : 'rev' });
       return result;
     };
     updateSurahTitle('96', true);   // at the start Al-'Alaq is shown as revelation no. 1
+    syncChapterLabels('96');
     originalSwitch.call(window, '96');   // load Al-'Alaq from the API at start
 
     // ---------- remember toggles + font size ----------

@@ -1373,7 +1373,7 @@
     <button type="button" id="wordSearchFabNext" class="word-search-fabbtn" aria-label="Next match"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
 
-  <p class="bismillah-line" id="bismillahLine">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+  <p class="bismillah-line" id="bismillahLine">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِيمِ</p>
 
   <main id="ayahList" style="display:none;"></main>
 
@@ -2237,11 +2237,33 @@
       return;
     }
 
-    dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">ലോഡ് ചെയ്യുന്നു… (internet വേണം)</p>';
+    dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">Chapter loading…</p>';
     loadDynamicChapter(value);
   }
 
-  function loadDynamicChapter(surahNum) {
+  // A failed load shows "Chapter loading…" and retries by itself (up to 3 more times);
+  // only then it shows the error message with a Retry button.
+  function handleLoadFail(surahNum, attempt) {
+    if (String(activeChapter) !== String(surahNum)) return;
+    if (attempt < 3) {
+      dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">Chapter loading…</p>';
+      setTimeout(function () {
+        if (String(activeChapter) === String(surahNum)) loadDynamicChapter(surahNum, attempt + 1);
+      }, 1500);
+      return;
+    }
+    dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">Could not load this chapter. Please check your internet connection. '
+      + '<a href="#" id="chapterRetryLink" style="color:inherit;text-decoration:underline;">Retry</a></p>';
+    var rl = document.getElementById('chapterRetryLink');
+    if (rl) rl.addEventListener('click', function (e) {
+      e.preventDefault();
+      dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">Chapter loading…</p>';
+      loadDynamicChapter(surahNum, 0);
+    });
+  }
+
+  function loadDynamicChapter(surahNum, attempt) {
+    attempt = attempt || 0;
     Promise.all([
       qfChapterVerses(surahNum, 'ml'),
       qfChapterVerses(surahNum, 'en').catch(function () { return []; }),
@@ -2264,9 +2286,7 @@
       var hiData = results[4];
 
       if (!verses.length) {
-        if (String(activeChapter) === String(surahNum)) {
-          dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">ഈ സൂറ ലോഡ് ചെയ്യാൻ പറ്റിയില്ല — ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിക്കൂ.</p>';
-        }
+        handleLoadFail(surahNum, attempt);
         return;
       }
 
@@ -2298,7 +2318,7 @@
         if (enText) translationsHtml += '<div class="translation-block"><p class="translation-line en">' + enText + '</p><p class="translation-attr en">— ' + enData.name + '</p></div>';
         var hiText = hiTextByVerse[n] || '';
         if (hiText && hiData.tr) translationsHtml += '<div class="translation-block"><p class="translation-line hi">' + hiText + '</p><p class="translation-attr hi">— ' + hiData.tr.name + '</p></div>';
-        if (!translationsHtml) translationsHtml = '<p class="translation-loading">translation ലഭ്യമായില്ല</p>';
+        if (!translationsHtml) translationsHtml = '<p class="translation-loading">Translation not available</p>';
 
         // Use the fully-marked words of the whole-ayah text when the counts line up.
         var markedWords = arabicText.split(/\s+/).filter(Boolean);
@@ -2350,7 +2370,7 @@
             + '</div>';
         }).join('');
 
-        if (!wordsHtml) wordsHtml = '<p class="translation-loading">word-by-word ലഭ്യമായില്ല</p>';
+        if (!wordsHtml) wordsHtml = '<p class="translation-loading">Word-by-word not available</p>';
 
         html += '<section class="ayah" data-ayah="' + n + '">'
           + '<div class="ayah-head"><span class="ayah-number">' + surahNum + ':' + n + '</span>'
@@ -2371,9 +2391,7 @@
       applyWordByWordVisibility();
       applyFontSize(currentFontStep);
     }).catch(function () {
-      if (String(activeChapter) === String(surahNum)) {
-        dynamicContainer.innerHTML = '<p class="translation-loading" style="padding:20px 0;">ഈ സൂറ ലോഡ് ചെയ്യാൻ പറ്റിയില്ല.</p>';
-      }
+      handleLoadFail(surahNum, attempt);
     });
   }
 

@@ -1605,7 +1605,9 @@
   // When a surah picker opens, mark and show the surah that is open right now
   function showCurrentChapterInList(list) {
     var current = (typeof activeChapter !== 'undefined' && activeChapter) ? String(activeChapter) : '';
-    if (!window.__chapterPicked) current = (list.id === 'chapterSheetListNormal') ? '1' : '96';
+    // each list remembers its own last pick (defaults: Mushaf = Al-Fatiha, Revelation = Al-'Alaq)
+    var lp = window.__lastPick || { normal: '1', rev: '96' };
+    current = (list.id === 'chapterSheetListNormal') ? lp.normal : lp.rev;
     var target = null;
     list.querySelectorAll('.chapter-sheet-row').forEach(function (r) {
       var on = current !== '' && r.dataset.value === current;
@@ -2502,9 +2504,11 @@
     var originalSwitch = window.switchToChapter;
     window.switchToChapter = function (value) {
       var result = originalSwitch.apply(this, arguments);
-      window.__chapterPicked = true;
+      window.__lastPick = window.__lastPick || { normal: '1', rev: '96' };
+      if (chapterSheetBtnNormal.classList.contains('box-selected')) window.__lastPick.normal = String(value);
+      else window.__lastPick.rev = String(value);
       updateSurahTitle(value);
-      syncChapterLabels(value);
+      // (the other order's button is NOT changed - each button only changes when its own list is used)
       savePrefs({ chapter: String(value), chapterList: chapterSheetBtnNormal.classList.contains('box-selected') ? 'normal' : 'rev' });
       return result;
     };

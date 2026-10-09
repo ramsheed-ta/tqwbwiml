@@ -179,7 +179,7 @@
     padding: 0 16px;
     flex: 1 1 auto;
     min-height: 0;
-    max-height: min(285px, calc(var(--vvh, 100vh) - 110px));
+    max-height: min(310px, calc(var(--vvh, 100vh) - 110px));
   }
 
   .chapter-sheet-row {
@@ -205,7 +205,7 @@
   }
 
   .chapter-sheet-num {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink-soft);
     min-width: 16px;
   }
@@ -219,7 +219,7 @@
   .chapter-sheet-name {
     font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif;
     direction: ltr;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.35;
     color: var(--ink);
     font-weight: 400;
@@ -228,14 +228,14 @@
   .chapter-sheet-translit {
     font-family: 'Lora', serif;
     direction: ltr;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 400;
     white-space: nowrap;
     color: var(--ink-soft);
   }
 
   .chapter-sheet-meaning {
-    font-size: 13.5px;
+    font-size: 14.5px;
     line-height: 1.35;
     color: var(--ink-soft);
   }
@@ -243,7 +243,7 @@
   .chapter-sheet-info {
     margin-inline-start: auto;
     flex: 0 0 auto;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--ink-soft);
     white-space: nowrap;
     text-align: right;
@@ -1005,6 +1005,11 @@
   .vp-cell.cur { background: #e3f2da; color: #2e5a1c; font-weight: 600; }
   .vp-empty { padding: 10px 0 4px; text-align: center; color: #888; font-size: 14px; }
   .vp-empty[hidden] { display: none; }
+
+  /* In both dropdown lists: surah name + its bracket are bold; everything else stays normal */
+  .chapter-sheet-row .chapter-sheet-name,
+  .chapter-sheet-row .chapter-sheet-translit { font-weight: 700; }
+  .chapter-sheet-row .chapter-sheet-order { font-weight: 400; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1022,98 +1027,98 @@
       <button type="button" class="chapter-sheet-row active" data-value="96">
         <span class="chapter-sheet-num">1</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">العلق <span class="chapter-sheet-translit">(Al-'Alaq)-96</span></span>
+          <span class="chapter-sheet-name">العلق <span class="chapter-sheet-translit">(Al-'Alaq)<span class="chapter-sheet-order">-96</span></span></span>
           <span class="chapter-sheet-meaning">ഭ്രൂണം / The Clot</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="68">
         <span class="chapter-sheet-num">2</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">القلم <span class="chapter-sheet-translit">(Al-Qalam)-68</span></span>
+          <span class="chapter-sheet-name">القلم <span class="chapter-sheet-translit">(Al-Qalam)<span class="chapter-sheet-order">-68</span></span></span>
           <span class="chapter-sheet-meaning">പേന / The Pen</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="73">
         <span class="chapter-sheet-num">3</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">المزمل <span class="chapter-sheet-translit">(Al-Muzzammil)-73</span></span>
+          <span class="chapter-sheet-name">المزمل <span class="chapter-sheet-translit">(Al-Muzzammil)<span class="chapter-sheet-order">-73</span></span></span>
           <span class="chapter-sheet-meaning">വസ്ത്രത്താൽ മൂടിയവൻ / The Enshrouded One</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="74">
         <span class="chapter-sheet-num">4</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">المدثر <span class="chapter-sheet-translit">(Al-Muddathir)-74</span></span>
+          <span class="chapter-sheet-name">المدثر <span class="chapter-sheet-translit">(Al-Muddathir)<span class="chapter-sheet-order">-74</span></span></span>
           <span class="chapter-sheet-meaning">പുതച്ച് മൂടിയവൻ / The Cloaked One</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="1">
         <span class="chapter-sheet-num">5</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)-1</span></span>
+          <span class="chapter-sheet-name">الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)<span class="chapter-sheet-order">-1</span></span></span>
           <span class="chapter-sheet-meaning">പ്രാരംഭം / The Opening</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="111">
         <span class="chapter-sheet-num">6</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">المسد <span class="chapter-sheet-translit">(Al-Masad)-111</span></span>
+          <span class="chapter-sheet-name">المسد <span class="chapter-sheet-translit">(Al-Masad)<span class="chapter-sheet-order">-111</span></span></span>
           <span class="chapter-sheet-meaning">ഈന്തപ്പനനാര് / The Palm Fibre</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="81">
         <span class="chapter-sheet-num">7</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">التكوير <span class="chapter-sheet-translit">(At-Takwir)-81</span></span>
+          <span class="chapter-sheet-name">التكوير <span class="chapter-sheet-translit">(At-Takwir)<span class="chapter-sheet-order">-81</span></span></span>
           <span class="chapter-sheet-meaning">ചുറ്റിപ്പൊതിയൽ / The Overthrowing</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="87">
         <span class="chapter-sheet-num">8</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">الأعلى <span class="chapter-sheet-translit">(Al-A'la)-87</span></span>
+          <span class="chapter-sheet-name">الأعلى <span class="chapter-sheet-translit">(Al-A'la)<span class="chapter-sheet-order">-87</span></span></span>
           <span class="chapter-sheet-meaning">അത്യുന്നതൻ / The Most High</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="92">
         <span class="chapter-sheet-num">9</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">الليل <span class="chapter-sheet-translit">(Al-Lail)-92</span></span>
+          <span class="chapter-sheet-name">الليل <span class="chapter-sheet-translit">(Al-Lail)<span class="chapter-sheet-order">-92</span></span></span>
           <span class="chapter-sheet-meaning">രാത്രി / The Night</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="89">
         <span class="chapter-sheet-num">10</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">الفجر <span class="chapter-sheet-translit">(Al-Fajr)-89</span></span>
+          <span class="chapter-sheet-name">الفجر <span class="chapter-sheet-translit">(Al-Fajr)<span class="chapter-sheet-order">-89</span></span></span>
           <span class="chapter-sheet-meaning">പ്രഭാതം / The Dawn</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="93">
         <span class="chapter-sheet-num">11</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">الضحى <span class="chapter-sheet-translit">(Ad-Duha)-93</span></span>
+          <span class="chapter-sheet-name">الضحى <span class="chapter-sheet-translit">(Ad-Duha)<span class="chapter-sheet-order">-93</span></span></span>
           <span class="chapter-sheet-meaning">പൂർവ്വാഹ്നം / The Morning Hours</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="94">
         <span class="chapter-sheet-num">12</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">الشرح <span class="chapter-sheet-translit">(Ash-Sharh)-94</span></span>
+          <span class="chapter-sheet-name">الشرح <span class="chapter-sheet-translit">(Ash-Sharh)<span class="chapter-sheet-order">-94</span></span></span>
           <span class="chapter-sheet-meaning">വിശാലമാക്കൽ / The Relief</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="103">
         <span class="chapter-sheet-num">13</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">العصر <span class="chapter-sheet-translit">(Al-Asr)-103</span></span>
+          <span class="chapter-sheet-name">العصر <span class="chapter-sheet-translit">(Al-Asr)<span class="chapter-sheet-order">-103</span></span></span>
           <span class="chapter-sheet-meaning">കാലം / The Declining Day</span>
         </span>
       </button>
       <button type="button" class="chapter-sheet-row" data-value="100">
         <span class="chapter-sheet-num">14</span>
         <span class="chapter-sheet-text">
-          <span class="chapter-sheet-name">العاديات <span class="chapter-sheet-translit">(Al-Adiyat)-100</span></span>
+          <span class="chapter-sheet-name">العاديات <span class="chapter-sheet-translit">(Al-Adiyat)<span class="chapter-sheet-order">-100</span></span></span>
           <span class="chapter-sheet-meaning">ഓടുന്നവ / The Chargers</span>
         </span>
       </button>
@@ -1835,7 +1840,7 @@
         rowsHtml += '<button type="button" class="chapter-sheet-row" data-value="' + chapterNum + '">'
           + '<span class="chapter-sheet-num">' + order + '</span>'
           + '<span class="chapter-sheet-text">'
-          + '<span class="chapter-sheet-name">' + meta.name + ' <span class="chapter-sheet-translit">(' + meta.englishName + ')-' + chapterNum + '</span></span>'
+          + '<span class="chapter-sheet-name">' + meta.name + ' <span class="chapter-sheet-translit">(' + meta.englishName + ')<span class="chapter-sheet-order">-' + chapterNum + '</span></span></span>'
           + '<span class="chapter-sheet-meaning">' + meaning + '</span>'
           + '</span>'
           + surahInfoHtml(chapterNum)

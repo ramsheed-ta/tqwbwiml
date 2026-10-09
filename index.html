@@ -1035,6 +1035,21 @@
     cursor: pointer;
   }
   .feedback-send { background: #f1f9ec; }
+
+  /* Bottom bar of the Sources & credits box: Feedback in the centre, close at the right corner */
+  .sources-bottom {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    background: #fff;
+    margin: 8px -16px -14px;
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--line);
+  }
+  .sources-bottom .sources-link { grid-column: 2; font-size: 14px; }
+  .sources-bottom .settings-close { grid-column: 3; justify-self: end; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1418,6 +1433,10 @@
         <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer">fonts.google.com</a>
       </div>
       <p class="sources-note">All sources belong to their respective owners. Please check their own terms before reusing any content.</p>
+      <div class="sources-bottom">
+        <button type="button" id="sourcesFeedbackBtn" class="sources-link">Feedback</button>
+        <button type="button" id="sourcesCloseBottom" class="settings-close" aria-label="Close sources">✕</button>
+      </div>
     </div>
   </div>
 
@@ -1535,6 +1554,14 @@
     var footerBtn = document.getElementById('sourcesFooterBtn');
     if (footerBtn) footerBtn.addEventListener('click', openSources);
     if (closeBtn) closeBtn.addEventListener('click', closeSources);
+    var closeBottom = document.getElementById('sourcesCloseBottom');
+    if (closeBottom) closeBottom.addEventListener('click', closeSources);
+    var fbBtn = document.getElementById('sourcesFeedbackBtn');
+    if (fbBtn) fbBtn.addEventListener('click', function () {
+      closeSources();
+      var open = document.getElementById('feedbackFooterBtn');
+      if (open) open.click();
+    });
     box.addEventListener('click', function (e) { if (e.target === box) closeSources(); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !box.hidden) closeSources();

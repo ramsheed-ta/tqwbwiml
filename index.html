@@ -1010,6 +1010,31 @@
   .chapter-sheet-row .chapter-sheet-name,
   .chapter-sheet-row .chapter-sheet-translit { font-weight: 700; }
   .chapter-sheet-row .chapter-sheet-order { font-weight: 400; }
+
+  /* Feedback panel (uses the same box as Sources & credits) */
+  .feedback-email {
+    font-size: 15px;
+    word-break: break-all;
+    margin: 10px 0 2px;
+    user-select: all;
+    -webkit-user-select: all;
+  }
+  .feedback-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .feedback-send, .feedback-copy {
+    flex: 1;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 10px 8px;
+    border-radius: 12px;
+    border: 1.5px solid #b9e0a5;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .feedback-send { background: #f1f9ec; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1315,7 +1340,7 @@
     <div>
       <div class="toggle-label">Translation:</div>
       <div class="lang-toggles">
-        <label><input type="checkbox" class="trans-switch" data-lang="ml"> മലയാളം</label>
+        <label><input type="checkbox" class="trans-switch" data-lang="ml" checked> മലയാളം</label>
         <label><input type="checkbox" class="trans-switch" data-lang="en"> English</label>
         <label><input type="checkbox" class="trans-switch" data-lang="hi"> हिन्दी</label>
       </div>
@@ -1340,6 +1365,26 @@
 
     </div><!-- /settings-modal -->
   </div><!-- /settings-overlay -->
+
+  <div id="feedbackOverlay" class="sources-overlay" hidden>
+    <div class="sources-box" role="dialog" aria-modal="true" aria-label="Feedback">
+      <div class="sources-head">
+        <span class="sources-title">Feedback</span>
+        <button type="button" id="feedbackClose" class="settings-close" aria-label="Close feedback">✕</button>
+      </div>
+      <div class="sources-item">
+        Found a mistake, missing text, a broken link or a technical problem? Or have a suggestion? Please send us an email.
+      </div>
+      <div class="sources-item">
+        <span class="sources-what">Please mention the surah and ayah number (for example 96:1) so it is easy to find.</span>
+      </div>
+      <div class="feedback-email" id="feedbackEmailText">tqwbwiml.feedback@gmail.com</div>
+      <div class="feedback-actions">
+        <a id="feedbackSend" class="feedback-send" href="mailto:tqwbwiml.feedback@gmail.com">Send email</a>
+        <button type="button" id="feedbackCopy" class="feedback-copy">Copy address</button>
+      </div>
+    </div>
+  </div>
 
   <div id="sourcesOverlay" class="sources-overlay" hidden>
     <div class="sources-box" role="dialog" aria-modal="true" aria-label="Sources and credits">
@@ -1390,7 +1435,7 @@
 
   <footer>
     Arabic text of the Qur'an is not subject to copyright. Translations here are simplified word-by-word glosses for study, not an authoritative rendering — for formal reference, cross-check with a scholarly translation.<br>
-    <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>
+    <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>
   </footer>
 
 </div>
@@ -1449,7 +1494,7 @@
   });
   applyWordByWordVisibility();
 
-  // Translation show/hide (default: none selected)
+  // Translation show/hide (default: Malayalam only)
   function applyTranslationVisibility() {
     document.querySelectorAll('.trans-switch').forEach(function (box) {
       var lang = box.dataset.lang;
@@ -1493,6 +1538,43 @@
     box.addEventListener('click', function (e) { if (e.target === box) closeSources(); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !box.hidden) closeSources();
+    });
+  })();
+
+  // Feedback box (opened from the footer link): email only
+  (function () {
+    var box = document.getElementById('feedbackOverlay');
+    var closeBtn = document.getElementById('feedbackClose');
+    var openBtn = document.getElementById('feedbackFooterBtn');
+    var sendLink = document.getElementById('feedbackSend');
+    var copyBtn = document.getElementById('feedbackCopy');
+    var settings = document.getElementById('settingsOverlay');
+    if (!box || !openBtn) return;
+    var EMAIL = 'tqwbwiml.feedback@gmail.com';
+    function openFeedback() {
+      var surah = (typeof activeChapter !== 'undefined' && activeChapter) ? String(activeChapter) : '';
+      var body = 'Assalamu Alaikum,\n\nSurah:Ayah (for example 96:1): \nWhat is wrong, or your suggestion:\n\n\n---\nPage: https://tqwbwiml.vercel.app' +
+                 (surah ? ' (surah ' + surah + ' was open)' : '');
+      sendLink.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent('Feedback - Tadabbur Quran') + '&body=' + encodeURIComponent(body);
+      if (copyBtn) copyBtn.textContent = 'Copy address';
+      box.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeFeedback() {
+      box.hidden = true;
+      if (!settings || settings.hidden) document.body.style.overflow = '';
+    }
+    openBtn.addEventListener('click', openFeedback);
+    if (closeBtn) closeBtn.addEventListener('click', closeFeedback);
+    box.addEventListener('click', function (e) { if (e.target === box) closeFeedback(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !box.hidden) closeFeedback();
+    });
+    if (copyBtn) copyBtn.addEventListener('click', function () {
+      function done() { copyBtn.textContent = 'Copied'; }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(EMAIL).then(done, function () {});
+      }
     });
   })();
 
@@ -2725,7 +2807,7 @@
 
     // Ignore taps on buttons, menus, inputs and open panels.
     var IGNORE = 'button, a, input, select, textarea, label, .settings-overlay, .verse-sheet-overlay, ' +
-                 '.chapter-sheet-overlay, .word-search-fab, .share-btn';
+                 '.chapter-sheet-overlay, .word-search-fab, .share-btn, .sources-overlay';
     function isIgnored(el) { return !el || !el.closest || el.closest(IGNORE); }
 
     // Double tap on touch screens (own detection: iOS does not reliably send dblclick).

@@ -1005,6 +1005,64 @@
   .vp-cell.cur { background: #e3f2da; color: #2e5a1c; font-weight: 600; }
   .vp-empty { padding: 10px 0 4px; text-align: center; color: #888; font-size: 14px; }
   .vp-empty[hidden] { display: none; }
+
+  /* Feedback (WhatsApp / Email) button on each ayah */
+  .feedback-btn {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 2px 3px;
+    margin-left: auto;
+    cursor: pointer;
+  }
+  .feedback-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: #a8a8a8;
+    fill: none;
+    stroke-width: 1.6;
+    opacity: 0.8;
+    transition: stroke 0.15s ease;
+  }
+  .feedback-btn:active svg { stroke: #555; }
+  .feedback-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 3000;
+  }
+  .feedback-card {
+    background: var(--card, #fff);
+    color: var(--ink, #000);
+    width: 100%;
+    max-width: 520px;
+    box-sizing: border-box;
+    border-radius: 16px 16px 0 0;
+    padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  .feedback-card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+  .feedback-card p { margin: 0 0 6px; font-size: 13px; opacity: 0.7; }
+  .feedback-card .fb-opt {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--line, rgba(0,0,0,0.08));
+    background: var(--card, #fff);
+    color: inherit;
+    font-size: 15px;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1344,7 +1402,7 @@
       </div>
       <div class="sources-item">
         <b>Quran Foundation API (Quran.com)</b><br>
-        <span class="sources-what">Arabic text, word-by-word meanings (Malayalam, English, Hindi) and the Hindi translation by Maulana Azizul Haque al-Umari. Where one meaning covers several words, they are shown together.</span><br>
+        <span class="sources-what">Arabic text, word-by-word meanings (Malayalam, English, Hindi) and the Hindi translation by Maulana Azizul Haque al-Umari. Where one meaning covers several words, they are shown together. Surah information (place of revelation and verse counts) also comes from this API.</span><br>
         <a href="https://api-docs.quran.foundation" target="_blank" rel="noopener noreferrer">api-docs.quran.foundation</a>
       </div>
       <div class="sources-item">
@@ -1788,6 +1846,29 @@
     var html = surahInfoHtml(chapterNum);
     if (html) row.insertAdjacentHTML('beforeend', html);
   });
+
+  // Live surah info (place of revelation + verse count) from the Quran Foundation API
+  // (via the Cloudflare Worker). The SURAH_INFO table above is only the fallback, used
+  // if this request fails (offline, API down). Works whether it finishes before or after
+  // the revelation-order rows 15-114 are added below.
+  function applyLiveSurahInfo(chapters) {
+    chapters.forEach(function (c) {
+      var place = String(c.revelation_place || '').toLowerCase();
+      if (!c.id || !c.verses_count || (place !== 'makkah' && place !== 'madinah')) return;
+      SURAH_INFO[c.id] = [c.verses_count, place === 'madinah' ? 'Madani' : 'Makki'];
+    });
+    document.querySelectorAll('.chapter-sheet-row[data-value]').forEach(function (row) {
+      var n = parseInt(row.getAttribute('data-value'), 10);
+      var html = surahInfoHtml(n);
+      if (!html) return;
+      var old = row.querySelector('.chapter-sheet-info');
+      if (old) old.outerHTML = html; else row.insertAdjacentHTML('beforeend', html);
+    });
+  }
+  fetch('https://quran-api.ramsheedabdul1404-bab.workers.dev/content/api/v4/chapters')
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (d) { applyLiveSurahInfo((d && d.chapters) || []); })
+    .catch(function () { /* keep the built-in table */ });
 
   // Fetch all 114 chapters' metadata (Arabic name, English name/meaning) live
   // from api.alquran.cloud, then append rows for revelation orders 15-114.
@@ -2718,7 +2799,7 @@
 
     // Ignore taps on buttons, menus, inputs and open panels.
     var IGNORE = 'button, a, input, select, textarea, label, .settings-overlay, .verse-sheet-overlay, ' +
-                 '.chapter-sheet-overlay, .word-search-fab, .share-btn';
+                 '.chapter-sheet-overlay, .word-search-fab, .share-btn, .feedback-overlay';
     function isIgnored(el) { return !el || !el.closest || el.closest(IGNORE); }
 
     // Double tap on touch screens (own detection: iOS does not reliably send dblclick).
@@ -2778,6 +2859,77 @@
 
 </script>
 
-<script defer src="/_vercel/insights/script.js"></script>
+
+<script>
+(function () {
+  // ===== Feedback button settings =====================================
+  // WhatsApp number: country code + number, digits only (no + or spaces), e.g. '97312345678'
+  var FEEDBACK_WHATSAPP = '';
+  // Email address for feedback, e.g. 'name@example.com'
+  var FEEDBACK_EMAIL = '';
+  // TEST MODE: the button shows only on these surahs. Set to null to show it on every surah.
+  var FEEDBACK_TEST_CHAPTERS = [96];
+  // =====================================================================
+
+  var SITE_URL = 'https://tqwbwiml.vercel.app';
+  var ICON = '<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
+
+  function allowed(ref) {
+    if (!FEEDBACK_TEST_CHAPTERS) return true;
+    return FEEDBACK_TEST_CHAPTERS.indexOf(parseInt(ref.split(':')[0], 10)) !== -1;
+  }
+
+  function addButtons() {
+    document.querySelectorAll('.ayah-head').forEach(function (head) {
+      if (head.querySelector('.feedback-btn')) return;
+      var numEl = head.querySelector('.ayah-number');
+      var ref = numEl ? numEl.textContent.trim() : '';
+      if (!/^\d+:\d+$/.test(ref) || !allowed(ref)) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'feedback-btn';
+      btn.setAttribute('aria-label', 'Send feedback about this ayah');
+      btn.setAttribute('data-ref', ref);
+      btn.innerHTML = ICON;
+      var share = head.querySelector('.share-btn');
+      if (share) head.insertBefore(btn, share); else head.appendChild(btn);
+    });
+  }
+
+  function closeSheet() {
+    var o = document.querySelector('.feedback-overlay');
+    if (o) o.remove();
+  }
+
+  function openSheet(ref) {
+    closeSheet();
+    var text = 'Assalamu Alaikum,\n\nFeedback on Ayah ' + ref + ' (Tadabbur Quran, ' + SITE_URL + '):\n\n';
+    var overlay = document.createElement('div');
+    overlay.className = 'feedback-overlay';
+    var card = document.createElement('div');
+    card.className = 'feedback-card';
+    var html = '<h3>Send feedback</h3><p>Ayah ' + ref + ' will be added to your message.</p>';
+    var wa = FEEDBACK_WHATSAPP.replace(/\D/g, '');
+    if (wa) html += '<a class="fb-opt" target="_blank" rel="noopener noreferrer" href="https://wa.me/' + wa + '?text=' + encodeURIComponent(text) + '">WhatsApp</a>';
+    if (FEEDBACK_EMAIL) html += '<a class="fb-opt" href="mailto:' + FEEDBACK_EMAIL + '?subject=' + encodeURIComponent('Feedback: Ayah ' + ref) + '&body=' + encodeURIComponent(text) + '">Email</a>';
+    if (!wa && !FEEDBACK_EMAIL) html += '<p style="margin-top:10px;">Feedback contact is not set up yet.</p>';
+    html += '<button type="button" class="fb-opt fb-cancel">Cancel</button>';
+    card.innerHTML = html;
+    overlay.appendChild(card);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeSheet(); });
+    card.querySelector('.fb-cancel').addEventListener('click', closeSheet);
+    document.body.appendChild(overlay);
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.feedback-btn');
+    if (b) openSheet(b.getAttribute('data-ref'));
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+
+  addButtons();
+  new MutationObserver(addButtons).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>

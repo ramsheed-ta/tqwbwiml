@@ -1315,7 +1315,7 @@
     <div>
       <div class="toggle-label">Translation:</div>
       <div class="lang-toggles">
-        <label><input type="checkbox" class="trans-switch" data-lang="ml" checked> മലയാളം</label>
+        <label><input type="checkbox" class="trans-switch" data-lang="ml"> മലയാളം</label>
         <label><input type="checkbox" class="trans-switch" data-lang="en"> English</label>
         <label><input type="checkbox" class="trans-switch" data-lang="hi"> हिन्दी</label>
       </div>
@@ -1449,7 +1449,7 @@
   });
   applyWordByWordVisibility();
 
-  // Translation show/hide (default: Malayalam only)
+  // Translation show/hide (default: none selected)
   function applyTranslationVisibility() {
     document.querySelectorAll('.trans-switch').forEach(function (box) {
       var lang = box.dataset.lang;

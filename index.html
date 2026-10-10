@@ -1051,10 +1051,10 @@
   .sources-bottom .sources-link { grid-column: 2; font-size: 14px; }
   .sources-bottom .settings-close { grid-column: 3; justify-self: end; }
 
-  /* Tap a verse: small rectangular box (inside that verse, on the left) to pick word-by-word languages for it */
+  /* Tap a verse: small box (inside that verse, on the left) to pick word-by-word languages for it */
   .vw-card {
     position: absolute;
-    left: 82px;
+    left: 65px;
     top: 30px;
     z-index: 5;
     display: flex;
@@ -1063,7 +1063,7 @@
     box-sizing: border-box;
     background: #fff;
     border: 1.5px solid #b9e0a5;
-    border-radius: 0;
+    border-radius: 12px;
     padding: 6px 8px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.18);
   }
@@ -1079,22 +1079,8 @@
     user-select: none;
     -webkit-user-select: none;
   }
-  /* square (rectangular) tick boxes */
-  .vw-card input {
-    -webkit-appearance: none;
-    appearance: none;
-    flex: none;
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    border: 1.5px solid #777;
-    border-radius: 0;
-    background: #fff;
-  }
-  .vw-card input:checked {
-    background: #3a7d44 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat;
-    border-color: #3a7d44;
-  }
+  /* same tick boxes as in Settings (native rounded squares) */
+  .vw-card input { width: 16px; height: 16px; margin: 0; flex: none; accent-color: var(--teal); }
   .ayah.vw-selected { position: relative; z-index: 3; background: #f6fbf2; }
 </style>
 <script>

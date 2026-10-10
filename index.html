@@ -1051,7 +1051,7 @@
   .sources-bottom .sources-link { grid-column: 2; font-size: 14px; }
   .sources-bottom .settings-close { grid-column: 3; justify-self: end; }
 
-  /* Tap a verse: small box (inside that verse, on the left) to pick word-by-word languages for it */
+  /* Tap a verse: small rectangular box (inside that verse, on the left) to pick word-by-word languages for it */
   .vw-card {
     position: absolute;
     left: 12px;
@@ -1059,26 +1059,42 @@
     z-index: 5;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     box-sizing: border-box;
     background: #fff;
     border: 1.5px solid #b9e0a5;
-    border-radius: 12px;
-    padding: 12px 14px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    border-radius: 0;
+    padding: 8px 10px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
   }
   .vw-card label {
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 16px;
+    line-height: 1.2;
     color: var(--ink);
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
   }
-  .vw-card input { width: 20px; height: 20px; accent-color: var(--teal); }
+  /* square (rectangular) tick boxes */
+  .vw-card input {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    border: 1.5px solid #777;
+    border-radius: 0;
+    background: #fff;
+  }
+  .vw-card input:checked {
+    background: #3a7d44 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat;
+    border-color: #3a7d44;
+  }
   .ayah.vw-selected { position: relative; z-index: 3; background: #f6fbf2; }
 </style>
 <script>

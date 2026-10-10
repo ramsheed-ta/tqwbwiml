@@ -2559,7 +2559,7 @@
   // dotted circle. So: remove spaces before marks, and join mark-only entries to the word before.
   var QF_TEXT_FIELDS = ['text_qpc_hafs', 'text_uthmani', 'text'];
   function qfFixMarks(t) {
-    return t.replace(/[\s\u200B-\u200D]+(?=[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED])/g, '');
+    return t.replace(/[\s\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF\u061C]+(?=[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED])/g, '');
   }
   function qfRealWords(verse) {
     var out = [];
@@ -2696,7 +2696,7 @@
         var allHafs = realWords.length > 0 && realWords.every(function (w) { return w.text_qpc_hafs; });
         var arabicText = allHafs
           ? realWords.map(function (w) { return w.text_qpc_hafs; }).join(' ')
-          : (verse.text_uthmani || realWords.map(function (w) { return w.text_uthmani || w.text || ''; }).join(' '));
+          : qfFixMarks(verse.text_uthmani || realWords.map(function (w) { return w.text_uthmani || w.text || ''; }).join(' '));
 
         var enText = enData.ayahs && enData.ayahs[n - 1] ? enData.ayahs[n - 1].text : '';
         var mlText = mlData.ayahs && mlData.ayahs[n - 1] ? mlData.ayahs[n - 1].text : '';

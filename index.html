@@ -1082,6 +1082,17 @@
   /* same tick boxes as in Settings (native rounded squares) */
   .vw-card input { width: 16px; height: 16px; margin: 0; flex: none; accent-color: var(--teal); }
   .ayah.vw-selected { position: relative; z-index: 3; background: #f6fbf2; }
+
+  /* Last updated panel: plain, same look as Sources & credits */
+  .sources-box.lu-box { max-width: 500px; }
+  .lu-list { margin: 4px 0 0; padding-left: 20px; }
+  .lu-table-wrap { margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .lu-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .lu-table th { text-align: left; padding: 8px; font-weight: 700; border-bottom: 1px solid var(--line); }
+  .lu-table td { padding: 8px; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.45; }
+  .lu-table tbody tr:first-child td { border-top: none; }
+  .lu-table td:first-child { white-space: nowrap; }
+  .lu-table td ul { margin: 0; padding-left: 14px; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1413,6 +1424,84 @@
     </div><!-- /settings-modal -->
   </div><!-- /settings-overlay -->
 
+  <div id="lastUpdatedOverlay" class="sources-overlay" hidden>
+    <div class="sources-box lu-box" role="dialog" aria-modal="true" aria-label="Last updated">
+      <div class="sources-head">
+        <span class="sources-title">Last updated</span>
+        <button type="button" id="luClose" class="settings-close" aria-label="Close updates">✕</button>
+      </div>
+
+      <div class="sources-item">
+        <b>Last updated: 10 October 2026</b><br>
+        <span class="sources-what">We regularly make improvements to provide you with a better experience. Check below for the latest changes.</span>
+      </div>
+
+      <div class="sources-item">
+        <b>Recent changes</b>
+        <ul class="lu-list">
+          <li>Tap a verse to show word-by-word (Malayalam, English or Hindi) for that verse only.</li>
+          <li>Surah lists: larger text, bold surah names and five surahs visible at a time.</li>
+          <li>Malayalam surah-name meanings now come from the surah headings of quranmalayalam.com.</li>
+          <li>Added Feedback (email) and Last updated pages.</li>
+          <li>Arabic verses and words are slightly larger.</li>
+        </ul>
+      </div>
+
+      <div class="sources-item">
+        <b>Update history</b><br>
+        <span class="sources-what">A record of changes made to the website.</span>
+        <div class="lu-table-wrap">
+          <table class="lu-table">
+            <thead><tr><th>Date</th><th>Section</th><th>Changes made</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Oct 2026</td><td>Word by Word</td>
+                <td><ul>
+                  <li>Tap a verse to choose Malayalam / English / Hindi word-by-word for that verse only.</li>
+                  <li>Arabic verses and words slightly larger.</li>
+                </ul></td>
+              </tr>
+              <tr>
+                <td>Oct 2026</td><td>Surah lists</td>
+                <td><ul>
+                  <li>Mushaf and Revelation order lists: larger text, bold surah names, about five surahs visible. Each list remembers its own last selection.</li>
+                  <li>Malayalam surah-name meanings from quranmalayalam.com.</li>
+                  <li>Makki / Madani and ayah counts from the Quran Foundation API.</li>
+                </ul></td>
+              </tr>
+              <tr>
+                <td>Oct 2026</td><td>Pages</td>
+                <td><ul>
+                  <li>Added Feedback (email) and Last updated pages in the footer.</li>
+                  <li>Sources &amp; credits updated.</li>
+                </ul></td>
+              </tr>
+              <tr>
+                <td>Oct 2026</td><td>Design</td>
+                <td><ul>
+                  <li>Page title "Tadabbur Quran".</li>
+                  <li>Bismillah written as on Quran.com.</li>
+                  <li>Default settings for first-time visitors.</li>
+                </ul></td>
+              </tr>
+              <tr>
+                <td>Oct 2026</td><td>Messages</td>
+                <td><ul>
+                  <li>Loading and error messages are in English.</li>
+                  <li>A chapter that fails to load is retried automatically.</li>
+                </ul></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sources-bottom">
+        <button type="button" id="luCloseBottom" class="settings-close" aria-label="Close updates">✕</button>
+      </div>
+    </div>
+  </div>
+
   <div id="feedbackOverlay" class="sources-overlay" hidden>
     <div class="sources-box" role="dialog" aria-modal="true" aria-label="Feedback">
       <div class="sources-head">
@@ -1486,7 +1575,7 @@
 
   <footer>
     Arabic text of the Qur'an is not subject to copyright. Translations here are simplified word-by-word glosses for study, not an authoritative rendering — for formal reference, cross-check with a scholarly translation.<br>
-    <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>
+    <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>, <button type="button" id="lastUpdatedFooterBtn" class="sources-link">Last updated</button>
   </footer>
 
 </div>
@@ -1736,6 +1825,31 @@
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(EMAIL).then(done, function () {});
       }
+    });
+  })();
+
+  // Last updated panel (opened from the footer link)
+  (function () {
+    var box = document.getElementById('lastUpdatedOverlay');
+    var openBtn = document.getElementById('lastUpdatedFooterBtn');
+    var closeTop = document.getElementById('luClose');
+    var closeBottom = document.getElementById('luCloseBottom');
+    var settings = document.getElementById('settingsOverlay');
+    if (!box || !openBtn) return;
+    function openBox() {
+      box.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeBox() {
+      box.hidden = true;
+      if (!settings || settings.hidden) document.body.style.overflow = '';
+    }
+    openBtn.addEventListener('click', openBox);
+    if (closeTop) closeTop.addEventListener('click', closeBox);
+    if (closeBottom) closeBottom.addEventListener('click', closeBox);
+    box.addEventListener('click', function (e) { if (e.target === box) closeBox(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !box.hidden) closeBox();
     });
   })();
 
@@ -2440,8 +2554,30 @@
     });
   }
 
+  // A Quranic mark (small circle, pause sign, ...) must stay attached to its letter. If the API
+  // puts a space before a mark, or sends a mark as a separate "word", the phone draws it on a
+  // dotted circle. So: remove spaces before marks, and join mark-only entries to the word before.
+  var QF_TEXT_FIELDS = ['text_qpc_hafs', 'text_uthmani', 'text'];
+  function qfFixMarks(t) {
+    return t.replace(/[\s\u200B-\u200D]+(?=[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED])/g, '');
+  }
   function qfRealWords(verse) {
-    return (verse && verse.words ? verse.words : []).filter(function (w) { return w.char_type_name !== 'end'; });
+    var out = [];
+    (verse && verse.words ? verse.words : []).forEach(function (w) {
+      if (w.char_type_name === 'end') return;
+      QF_TEXT_FIELDS.forEach(function (f) { if (typeof w[f] === 'string') w[f] = qfFixMarks(w[f]); });
+      var t = w.text_qpc_hafs || w.text_uthmani || w.text || '';
+      var markOnly = t.trim() !== '' && !/[\u0621-\u064A\u0671-\u06D3]/.test(t);   // no real letter in it
+      if (markOnly && out.length) {
+        var prev = out[out.length - 1];
+        QF_TEXT_FIELDS.forEach(function (f) {
+          if (typeof w[f] === 'string' && typeof prev[f] === 'string') prev[f] += w[f].trim();
+        });
+        return;
+      }
+      out.push(w);
+    });
+    return out;
   }
 
   function qfAttr(s) { return String(s || '').replace(/"/g, "'"); }

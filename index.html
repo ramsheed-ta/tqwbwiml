@@ -1051,29 +1051,35 @@
   .sources-bottom .sources-link { grid-column: 2; font-size: 14px; }
   .sources-bottom .settings-close { grid-column: 3; justify-self: end; }
 
-  /* Tap a verse: small popup to pick word-by-word languages for that verse only */
+  /* Tap a verse: small box (inside that verse, on the left) to pick word-by-word languages for it */
   .vw-card {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 0;
-    width: 100%;
-    max-width: 520px;
+    position: absolute;
+    left: 12px;
+    top: 30px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     box-sizing: border-box;
-    z-index: 80;
     background: #fff;
     border: 1.5px solid #b9e0a5;
-    border-bottom: none;
-    border-radius: 16px 16px 0 0;
-    padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -6px 18px rgba(0,0,0,0.12);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
   }
-  .vw-card[hidden] { display: none; }
-  .vw-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
-  .vw-card .lang-toggles { gap: 20px; }
-  .vw-card .lang-toggles label { font-size: 16px; color: var(--ink); }
-  .vw-card .lang-toggles input { width: 20px; height: 20px; }
-  .ayah.vw-selected { background: #f6fbf2; }
+  .vw-card label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: var(--ink);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .vw-card input { width: 20px; height: 20px; accent-color: var(--teal); }
+  .ayah.vw-selected { position: relative; z-index: 3; background: #f6fbf2; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1405,19 +1411,6 @@
     </div><!-- /settings-modal -->
   </div><!-- /settings-overlay -->
 
-  <!-- Tap a verse: choose word-by-word languages for that verse only -->
-  <div id="verseWbwCard" class="vw-card" hidden>
-    <div class="vw-head">
-      <span>Word-by-word &middot; Ayah <b id="vwRef"></b></span>
-      <button type="button" id="vwClose" class="settings-close" aria-label="Close">✕</button>
-    </div>
-    <div class="lang-toggles">
-      <label><input type="checkbox" class="vw-switch" data-lang="ml"> മലയാളം</label>
-      <label><input type="checkbox" class="vw-switch" data-lang="en"> English</label>
-      <label><input type="checkbox" class="vw-switch" data-lang="hi"> हिन्दी</label>
-    </div>
-  </div>
-
   <div id="feedbackOverlay" class="sources-overlay" hidden>
     <div class="sources-box" role="dialog" aria-modal="true" aria-label="Feedback">
       <div class="sources-head">
@@ -1566,12 +1559,15 @@
   });
   applyWordByWordVisibility();
 
-  // Tap a verse -> popup with Malayalam / English / Hindi; the choice applies to that verse only.
+  // Tap a verse -> a small box with Malayalam / English / Hindi appears inside that verse.
+  // The choice applies to that verse only. Tap anywhere outside the box to close it.
   (function () {
-    var card = document.getElementById('verseWbwCard');
-    if (!card) return;
-    var refEl = document.getElementById('vwRef');
-    var closeBtn = document.getElementById('vwClose');
+    var card = document.createElement('div');
+    card.className = 'vw-card';
+    card.innerHTML =
+      '<label><input type="checkbox" class="vw-switch" data-lang="ml"> മലയാളം</label>' +
+      '<label><input type="checkbox" class="vw-switch" data-lang="en"> English</label>' +
+      '<label><input type="checkbox" class="vw-switch" data-lang="hi"> हिन्दी</label>';
     var boxes = Array.prototype.slice.call(card.querySelectorAll('.vw-switch'));
     var currentSec = null, currentKey = '', timer = null, lastClick = 0;
 
@@ -1589,7 +1585,7 @@
       boxes.forEach(function (b) { b.checked = langs.indexOf(b.dataset.lang) !== -1; });
     }
     function closeCard() {
-      card.hidden = true;
+      if (card.parentNode) card.parentNode.removeChild(card);
       if (currentSec) currentSec.classList.remove('vw-selected');
       currentSec = null;
       currentKey = '';
@@ -1597,52 +1593,53 @@
     function openFor(sec) {
       var numEl = sec.querySelector('.ayah-number');
       if (!numEl) return;
-      if (currentSec) currentSec.classList.remove('vw-selected');
+      closeCard();
       currentSec = sec;
       currentKey = numEl.textContent.trim();
       sec.classList.add('vw-selected');
-      refEl.textContent = currentKey;
+      sec.appendChild(card);
       refreshTicks();
-      card.hidden = false;
-      // keep the tapped verse visible above the popup
-      var r = sec.getBoundingClientRect();
-      var delta = Math.min(r.bottom - (window.innerHeight - card.offsetHeight - 12), r.top - 80);
-      if (delta > 0) window.scrollBy({ top: delta, behavior: 'smooth' });
+      // make sure the whole box is visible on screen
+      var r = card.getBoundingClientRect();
+      var delta = 0;
+      if (r.bottom > window.innerHeight - 16) delta = r.bottom - window.innerHeight + 90;
+      else if (r.top < 90) delta = r.top - 90;
+      if (delta) window.scrollBy({ top: delta, behavior: 'smooth' });
     }
 
     boxes.forEach(function (b) {
       b.addEventListener('change', function () {
         if (!currentKey) return;
-        if (currentSec && !document.body.contains(currentSec)) { closeCard(); return; }
         var langs = boxes.filter(function (x) { return x.checked; }).map(function (x) { return x.dataset.lang; });
         if (sameSet(langs, globalLangs())) delete verseLangs[currentKey]; else verseLangs[currentKey] = langs;
         withScrollAnchor(applyWordByWordVisibility);
       });
     });
     document.querySelectorAll('.lang-switch').forEach(function (b) {
-      b.addEventListener('change', function () { if (!card.hidden) refreshTicks(); });
+      b.addEventListener('change', function () { if (currentSec) refreshTicks(); });
     });
-    if (closeBtn) closeBtn.addEventListener('click', closeCard);
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !card.hidden) closeCard(); });
-    // switching surah: the tapped verse is gone, so close the popup
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCard(); });
+    // switching surah: the tapped verse is gone, so close the box
     document.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest('.chapter-sheet-row')) closeCard();
     }, true);
 
-    // One tap on a verse opens the popup. A second tap within 330 ms is the existing
-    // double tap ("Go to Ayah"), so the popup waits briefly and cancels in that case.
     document.addEventListener('click', function (e) {
       var t = e.target;
       if (!t || !t.closest) return;
+      if (card.contains(t)) return;                    // ticking a language inside the box
+      clearTimeout(timer);
+      if (currentSec) { closeCard(); lastClick = 0; return; }   // tap outside: just close the box
       var sec = t.closest('.ayah');
-      if (!sec || card.contains(t)) return;
+      if (!sec) return;
       if (t.closest('button, a, input, select, textarea, label, .word-block, .settings-overlay, .chapter-sheet-overlay, .verse-sheet-overlay, .sources-overlay')) return;
       var sel = window.getSelection && window.getSelection();
       if (sel && String(sel).length) return;           // the user is selecting text
+      // One tap opens the box. A second tap within 330 ms is the existing double tap
+      // ("Go to Ayah"), so the box waits briefly and cancels in that case.
       var now = Date.now();
       var isDouble = now - lastClick < 330;
       lastClick = now;
-      clearTimeout(timer);
       if (isDouble) return;
       timer = setTimeout(function () { openFor(sec); }, 330);
     });

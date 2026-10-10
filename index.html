@@ -1050,6 +1050,30 @@
   }
   .sources-bottom .sources-link { grid-column: 2; font-size: 14px; }
   .sources-bottom .settings-close { grid-column: 3; justify-self: end; }
+
+  /* Tap a verse: small popup to pick word-by-word languages for that verse only */
+  .vw-card {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 100%;
+    max-width: 520px;
+    box-sizing: border-box;
+    z-index: 80;
+    background: #fff;
+    border: 1.5px solid #b9e0a5;
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+    padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -6px 18px rgba(0,0,0,0.12);
+  }
+  .vw-card[hidden] { display: none; }
+  .vw-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+  .vw-card .lang-toggles { gap: 20px; }
+  .vw-card .lang-toggles label { font-size: 16px; color: var(--ink); }
+  .vw-card .lang-toggles input { width: 20px; height: 20px; }
+  .ayah.vw-selected { background: #f6fbf2; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1381,6 +1405,19 @@
     </div><!-- /settings-modal -->
   </div><!-- /settings-overlay -->
 
+  <!-- Tap a verse: choose word-by-word languages for that verse only -->
+  <div id="verseWbwCard" class="vw-card" hidden>
+    <div class="vw-head">
+      <span>Word-by-word &middot; Ayah <b id="vwRef"></b></span>
+      <button type="button" id="vwClose" class="settings-close" aria-label="Close">✕</button>
+    </div>
+    <div class="lang-toggles">
+      <label><input type="checkbox" class="vw-switch" data-lang="ml"> മലയാളം</label>
+      <label><input type="checkbox" class="vw-switch" data-lang="en"> English</label>
+      <label><input type="checkbox" class="vw-switch" data-lang="hi"> हिन्दी</label>
+    </div>
+  </div>
+
   <div id="feedbackOverlay" class="sources-overlay" hidden>
     <div class="sources-box" role="dialog" aria-modal="true" aria-label="Feedback">
       <div class="sources-head">
@@ -1488,6 +1525,9 @@
     }
   }
 
+  // Word-by-word languages chosen for single verses (tap a verse -> popup). Key: "96:11" -> ['ml','en'].
+  var verseLangs = {};
+
   // Language show/hide
   function applyWordByWordVisibility() {
     document.querySelectorAll('.lang-switch').forEach(function (box) {
@@ -1504,6 +1544,19 @@
     document.querySelectorAll('.word-row').forEach(function (el) {
       el.classList.toggle('word-row-hidden', !anyChecked);
     });
+    // Verses with their own choice (from the tap-a-verse popup) override the global settings.
+    document.querySelectorAll('.ayah').forEach(function (sec) {
+      var numEl = sec.querySelector('.ayah-number');
+      var langs = numEl ? verseLangs[numEl.textContent.trim()] : null;
+      if (!langs) return;
+      ['ml', 'en', 'hi'].forEach(function (l) {
+        sec.querySelectorAll('.word-gloss.' + l).forEach(function (el) {
+          el.classList.toggle('lang-hidden', langs.indexOf(l) === -1);
+        });
+      });
+      var row = sec.querySelector('.word-row');
+      if (row) row.classList.toggle('word-row-hidden', langs.length === 0);
+    });
   }
 
   document.querySelectorAll('.lang-switch').forEach(function(box){
@@ -1512,6 +1565,88 @@
     });
   });
   applyWordByWordVisibility();
+
+  // Tap a verse -> popup with Malayalam / English / Hindi; the choice applies to that verse only.
+  (function () {
+    var card = document.getElementById('verseWbwCard');
+    if (!card) return;
+    var refEl = document.getElementById('vwRef');
+    var closeBtn = document.getElementById('vwClose');
+    var boxes = Array.prototype.slice.call(card.querySelectorAll('.vw-switch'));
+    var currentSec = null, currentKey = '', timer = null, lastClick = 0;
+
+    function globalLangs() {
+      return ['ml', 'en', 'hi'].filter(function (l) {
+        var b = document.querySelector('.lang-switch[data-lang="' + l + '"]');
+        return b && b.checked;
+      });
+    }
+    function sameSet(a, b) {
+      return a.length === b.length && a.every(function (x) { return b.indexOf(x) !== -1; });
+    }
+    function refreshTicks() {
+      var langs = verseLangs[currentKey] || globalLangs();
+      boxes.forEach(function (b) { b.checked = langs.indexOf(b.dataset.lang) !== -1; });
+    }
+    function closeCard() {
+      card.hidden = true;
+      if (currentSec) currentSec.classList.remove('vw-selected');
+      currentSec = null;
+      currentKey = '';
+    }
+    function openFor(sec) {
+      var numEl = sec.querySelector('.ayah-number');
+      if (!numEl) return;
+      if (currentSec) currentSec.classList.remove('vw-selected');
+      currentSec = sec;
+      currentKey = numEl.textContent.trim();
+      sec.classList.add('vw-selected');
+      refEl.textContent = currentKey;
+      refreshTicks();
+      card.hidden = false;
+      // keep the tapped verse visible above the popup
+      var r = sec.getBoundingClientRect();
+      var delta = Math.min(r.bottom - (window.innerHeight - card.offsetHeight - 12), r.top - 80);
+      if (delta > 0) window.scrollBy({ top: delta, behavior: 'smooth' });
+    }
+
+    boxes.forEach(function (b) {
+      b.addEventListener('change', function () {
+        if (!currentKey) return;
+        if (currentSec && !document.body.contains(currentSec)) { closeCard(); return; }
+        var langs = boxes.filter(function (x) { return x.checked; }).map(function (x) { return x.dataset.lang; });
+        if (sameSet(langs, globalLangs())) delete verseLangs[currentKey]; else verseLangs[currentKey] = langs;
+        withScrollAnchor(applyWordByWordVisibility);
+      });
+    });
+    document.querySelectorAll('.lang-switch').forEach(function (b) {
+      b.addEventListener('change', function () { if (!card.hidden) refreshTicks(); });
+    });
+    if (closeBtn) closeBtn.addEventListener('click', closeCard);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !card.hidden) closeCard(); });
+    // switching surah: the tapped verse is gone, so close the popup
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('.chapter-sheet-row')) closeCard();
+    }, true);
+
+    // One tap on a verse opens the popup. A second tap within 330 ms is the existing
+    // double tap ("Go to Ayah"), so the popup waits briefly and cancels in that case.
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      var sec = t.closest('.ayah');
+      if (!sec || card.contains(t)) return;
+      if (t.closest('button, a, input, select, textarea, label, .word-block, .settings-overlay, .chapter-sheet-overlay, .verse-sheet-overlay, .sources-overlay')) return;
+      var sel = window.getSelection && window.getSelection();
+      if (sel && String(sel).length) return;           // the user is selecting text
+      var now = Date.now();
+      var isDouble = now - lastClick < 330;
+      lastClick = now;
+      clearTimeout(timer);
+      if (isDouble) return;
+      timer = setTimeout(function () { openFor(sec); }, 330);
+    });
+  })();
 
   // Translation show/hide (default: Malayalam only)
   function applyTranslationVisibility() {
@@ -2834,7 +2969,7 @@
 
     // Ignore taps on buttons, menus, inputs and open panels.
     var IGNORE = 'button, a, input, select, textarea, label, .settings-overlay, .verse-sheet-overlay, ' +
-                 '.chapter-sheet-overlay, .word-search-fab, .share-btn, .sources-overlay';
+                 '.chapter-sheet-overlay, .word-search-fab, .share-btn, .sources-overlay, .vw-card';
     function isIgnored(el) { return !el || !el.closest || el.closest(IGNORE); }
 
     // Double tap on touch screens (own detection: iOS does not reliably send dblclick).

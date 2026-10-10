@@ -2715,7 +2715,10 @@
         // words (the following words have an empty Malayalam), show them as ONE block.
         var groups = [];
         realWords.forEach(function (w, i) {
-          var ar = useMarked ? markedWords[i] : (w.text_uthmani || w.text || '');
+          // Use each word's own QPC text whenever the verse has it. (Matching words by splitting the
+          // verse text broke when a word itself holds a space, e.g. "۞ وَلَوْ" at the start of a
+          // rub el hizb; the blocks then fell back to text_uthmani, which this font draws wrongly.)
+          var ar = allHafs ? w.text_qpc_hafs : (useMarked ? markedWords[i] : (w.text_uthmani || w.text || ''));
           var ml = (w.translation && w.translation.text) ? String(w.translation.text).trim() : '';
           // When a word has no Malayalam meaning the API sends its English text instead
           // (language_name "english"). That is not Malayalam, so treat it as empty.

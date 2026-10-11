@@ -1121,15 +1121,16 @@
   .verse-nav-btn svg {
     width: 28px;
     height: 28px;
-    stroke: #a8a8a8;
+    stroke: #bdbdbd;
     fill: none;
-    stroke-width: 1.6;
+    stroke-width: 1.3;
     stroke-linejoin: round;
-    opacity: 0.85;
-    transition: stroke 0.15s ease;
+    opacity: 0.55;
+    transition: stroke 0.15s ease, opacity 0.15s ease;
   }
-  .verse-nav-btn svg .halo { stroke: #fff; stroke-width: 4.6; opacity: 0.9; }
-  .verse-nav-btn:active svg path:not(.halo) { stroke: #555; }
+  .verse-nav-btn svg .halo { stroke: #fff; stroke-width: 3.6; opacity: 0.8; }
+  .verse-nav-btn:active svg { opacity: 1; }
+  .verse-nav-btn:active svg path:not(.halo) { stroke: #888; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };

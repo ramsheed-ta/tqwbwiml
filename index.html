@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
 <title>Tadabbur Quran</title>
 <meta name="description" content="Word by Word In Multiple Languages">
 <meta property="og:title" content="Tadabbur Quran">
@@ -1105,6 +1106,7 @@
     flex-direction: column;
     gap: 6px;
   }
+  .verse-nav-right { left: auto; right: 12px; }
   .verse-nav-btn {
     width: 48px;
     height: 48px;
@@ -1503,6 +1505,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Browser auto-translate is switched off for the page, so Quran translations are shown exactly as they are.</li>
           <li>Added Last read: a small chapter:verse button at the top right to continue where you stopped.</li>
           <li>Added floating up / down arrows to jump to the start or end of a verse.</li>
           <li>Fixed a wrongly drawn mark in some word-by-word Arabic words (for example in 23:75).</li>
@@ -1554,6 +1557,7 @@
               <tr>
                 <td>Oct 2026</td><td>Design</td>
                 <td><ul>
+                  <li>Browser auto-translate (for example Google Translate in Chrome) is switched off for the page, so Quran translations are never re-translated.</li>
                   <li>Page title "Tadabbur Quran".</li>
                   <li>Bismillah written as on Quran.com.</li>
                   <li>Default settings for first-time visitors.</li>
@@ -1582,10 +1586,19 @@
 
   <!-- Floating arrows: jump to the start / end of the verse you are reading -->
   <div id="verseNav" class="verse-nav">
-    <button type="button" id="verseUp" class="verse-nav-btn" aria-label="Go to the start of this ayah (or the previous ayah)">
+    <button type="button" id="verseUp" class="verse-nav-btn verse-up" aria-label="Go to the start of this ayah (or the previous ayah)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 5L4.5 18h15z"/><path d="M12 5L4.5 18h15z"/></svg>
     </button>
-    <button type="button" id="verseDown" class="verse-nav-btn" aria-label="Go to the end of this ayah (or the next ayah)">
+    <button type="button" id="verseDown" class="verse-nav-btn verse-down" aria-label="Go to the end of this ayah (or the next ayah)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 19L4.5 6h15z"/><path d="M12 19L4.5 6h15z"/></svg>
+    </button>
+  </div>
+
+  <div id="verseNavRight" class="verse-nav verse-nav-right">
+    <button type="button" id="verseUpRight" class="verse-nav-btn verse-up" aria-label="Go to the start of this ayah (or the previous ayah)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 5L4.5 18h15z"/><path d="M12 5L4.5 18h15z"/></svg>
+    </button>
+    <button type="button" id="verseDownRight" class="verse-nav-btn verse-down" aria-label="Go to the end of this ayah (or the next ayah)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 19L4.5 6h15z"/><path d="M12 19L4.5 6h15z"/></svg>
     </button>
   </div>
@@ -1944,9 +1957,9 @@
   // Floating arrows. Up: start of the verse you are reading (if you are already there: the previous verse).
   // Down: end of the verse (if its end is already on screen: the start of the next verse).
   (function () {
-    var upBtn = document.getElementById('verseUp');
-    var downBtn = document.getElementById('verseDown');
-    if (!upBtn || !downBtn) return;
+    var upBtns = document.querySelectorAll('.verse-up');
+    var downBtns = document.querySelectorAll('.verse-down');
+    if (!upBtns.length || !downBtns.length) return;
     var TOP_OFFSET = 68;     // same offset as "Go to Ayah": the verse head sits just under the round buttons
     var BOTTOM_GAP = 100;    // keeps the end of a verse above the phone's bottom bar
 
@@ -1966,14 +1979,14 @@
     function topOf(el) { return el.getBoundingClientRect().top + window.pageYOffset - TOP_OFFSET; }
     function goTo(y) { window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
 
-    upBtn.addEventListener('click', function () {
+    function goUp() {
       var list = visibleVerses();
       if (!list.length) return;
       var i = currentIndex(list);
       if (list[i].getBoundingClientRect().top < TOP_OFFSET - 14) { goTo(topOf(list[i])); return; }
       goTo(i > 0 ? topOf(list[i - 1]) : 0);
-    });
-    downBtn.addEventListener('click', function () {
+    }
+    function goDown() {
       var list = visibleVerses();
       if (!list.length) return;
       var i = currentIndex(list);
@@ -1981,7 +1994,9 @@
       if (delta > 14) { window.scrollBy({ top: delta, behavior: 'smooth' }); return; }
       if (i < list.length - 1) goTo(topOf(list[i + 1]));
       else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-    });
+    }
+    upBtns.forEach(function (b) { b.addEventListener('click', goUp); });
+    downBtns.forEach(function (b) { b.addEventListener('click', goDown); });
   })();
 
   // Last read: remembers the chapter:verse you were reading. The pill at the top right shows where you were

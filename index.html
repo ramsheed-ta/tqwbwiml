@@ -1131,6 +1131,32 @@
   .verse-nav-btn svg .halo { stroke: #fff; stroke-width: 3.6; opacity: 0.8; }
   .verse-nav-btn:active svg { opacity: 1; }
   .verse-nav-btn:active svg path:not(.halo) { stroke: #888; }
+
+  /* Last read pill (top right, same row as the surah buttons) */
+  .last-read-pill {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 19px);
+    right: 14px;
+    z-index: 60;
+    height: 30px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid #b9e0a5;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .last-read-pill[hidden] { display: none; }
+  .last-read-pill:active { background: #f0f0f0; }
+  body.has-last-read .surah-title-wrap { max-width: calc(100vw - 160px); }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1542,6 +1568,9 @@
     </div>
   </div>
 
+  <!-- Last read: small pill at the top right (chapter:verse), tap to continue from there -->
+  <button type="button" id="lastReadPill" class="last-read-pill" hidden></button>
+
   <!-- Floating arrows: jump to the start / end of the verse you are reading -->
   <div id="verseNav" class="verse-nav">
     <button type="button" id="verseUp" class="verse-nav-btn" aria-label="Go to the start of this ayah (or the previous ayah)">
@@ -1944,6 +1973,89 @@
       if (i < list.length - 1) goTo(topOf(list[i + 1]));
       else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     });
+  })();
+
+  // Last read: remembers the chapter:verse you were reading. The pill at the top right shows where you were
+  // before (last visit, or before you switched surah) and jumps back there when tapped.
+  (function () {
+    var pill = document.getElementById('lastReadPill');
+    if (!pill) return;
+    var KEY = 'wbw_lastread_v1';
+    var TOP_OFFSET = 68;
+    var shown = '';          // what the pill shows: "11:5"
+    var cur = '';            // where you are reading now
+    var userScrolled = false;
+    var timer = null;
+
+    try { var st = JSON.parse(localStorage.getItem(KEY) || 'null'); if (st && /^\d+:\d+$/.test(st.cur)) shown = st.cur; } catch (e) {}
+
+    function render() {
+      if (shown) { pill.textContent = shown; pill.hidden = false; pill.setAttribute('aria-label', 'Last read ' + shown + ' - tap to continue'); }
+      else pill.hidden = true;
+      document.body.classList.toggle('has-last-read', !!shown);
+    }
+    function verses() {
+      return Array.prototype.filter.call(document.querySelectorAll('.ayah'), function (el) { return el.offsetParent !== null; });
+    }
+    function keyOf(sec) {
+      var n = sec.querySelector('.ayah-number');
+      return n ? n.textContent.trim() : '';
+    }
+    function currentKey() {
+      var list = verses();
+      if (!list.length) return '';
+      var line = TOP_OFFSET + 40, idx = 0;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].getBoundingClientRect().top <= line) idx = i; else break;
+      }
+      return keyOf(list[idx]);
+    }
+    function save() {
+      var k = currentKey();
+      if (!/^\d+:\d+$/.test(k)) return;
+      cur = k;
+      try { localStorage.setItem(KEY, JSON.stringify({ cur: k })); } catch (e) {}
+    }
+    function remember() {   // the place you are leaving becomes the new "last read"
+      if (userScrolled && /^\d+:\d+$/.test(cur)) { shown = cur; render(); }
+    }
+
+    window.addEventListener('scroll', function () {
+      userScrolled = true;
+      clearTimeout(timer);
+      timer = setTimeout(save, 500);
+    }, { passive: true });
+    document.addEventListener('visibilitychange', function () { if (document.hidden && userScrolled) save(); });
+    window.addEventListener('pagehide', function () { if (userScrolled) save(); });
+    // switching surah from a list: remember the verse you were reading
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('.chapter-sheet-row')) { save(); remember(); }
+    }, true);
+
+    function findVerse(key) {
+      var list = verses();
+      for (var i = 0; i < list.length; i++) if (keyOf(list[i]) === key) return list[i];
+      return null;
+    }
+    function scrollToVerse(sec) {
+      window.scrollTo({ top: Math.max(0, sec.getBoundingClientRect().top + window.pageYOffset - TOP_OFFSET), behavior: 'smooth' });
+    }
+    pill.addEventListener('click', function () {
+      var target = shown;
+      if (!target) return;
+      save(); remember();     // the pill now shows where you were before the jump
+      var sec = findVerse(target);
+      if (sec) { scrollToVerse(sec); return; }
+      if (typeof window.switchToChapter === 'function') window.switchToChapter(target.split(':')[0]);
+      var tries = 0;
+      var iv = setInterval(function () {
+        var s2 = findVerse(target);
+        if (s2) { clearInterval(iv); setTimeout(function () { scrollToVerse(s2); }, 150); }
+        else if (++tries > 60) clearInterval(iv);
+      }, 150);
+    });
+
+    render();
   })();
 
   // Keep the surah-search sheets inside the visible area (above the keyboard)

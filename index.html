@@ -1093,6 +1093,42 @@
   .lu-table tbody tr:first-child td { border-top: none; }
   .lu-table td:first-child { white-space: nowrap; }
   .lu-table td ul { margin: 0; padding-left: 14px; }
+
+  /* Floating up / down arrows (same light grey as the share icon) */
+  .verse-nav {
+    position: fixed;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 55;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .verse-nav-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.75);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .verse-nav-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke: #a8a8a8;
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    opacity: 0.85;
+    transition: stroke 0.15s ease;
+  }
+  .verse-nav-btn:active svg { stroke: #555; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1432,13 +1468,14 @@
       </div>
 
       <div class="sources-item">
-        <b>Last updated: 10 October 2026</b><br>
+        <b>Last updated: 11 October 2026</b><br>
         <span class="sources-what">We regularly make improvements to provide you with a better experience. Check below for the latest changes.</span>
       </div>
 
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Fixed a wrongly drawn mark in some word-by-word Arabic words (for example in 23:75).</li>
           <li>Tap a verse to show word-by-word (Malayalam, English or Hindi) for that verse only.</li>
           <li>Surah lists: larger text, bold surah names and five surahs visible at a time.</li>
           <li>Malayalam surah-name meanings now come from the surah headings of quranmalayalam.com.</li>
@@ -1457,6 +1494,7 @@
               <tr>
                 <td>Oct 2026</td><td>Word by Word</td>
                 <td><ul>
+                  <li>Fixed a wrongly drawn mark in some word-by-word Arabic words (for example in 23:75).</li>
                   <li>Tap a verse to choose Malayalam / English / Hindi word-by-word for that verse only.</li>
                   <li>Arabic verses and words slightly larger.</li>
                 </ul></td>
@@ -1500,6 +1538,16 @@
         <button type="button" id="luCloseBottom" class="settings-close" aria-label="Close updates">✕</button>
       </div>
     </div>
+  </div>
+
+  <!-- Floating arrows: jump to the start / end of the verse you are reading -->
+  <div id="verseNav" class="verse-nav">
+    <button type="button" id="verseUp" class="verse-nav-btn" aria-label="Go to the start of this ayah (or the previous ayah)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5L4.5 18h15z"/></svg>
+    </button>
+    <button type="button" id="verseDown" class="verse-nav-btn" aria-label="Go to the end of this ayah (or the next ayah)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19L4.5 6h15z"/></svg>
+    </button>
   </div>
 
   <div id="feedbackOverlay" class="sources-overlay" hidden>
@@ -1850,6 +1898,49 @@
     box.addEventListener('click', function (e) { if (e.target === box) closeBox(); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !box.hidden) closeBox();
+    });
+  })();
+
+  // Floating arrows. Up: start of the verse you are reading (if you are already there: the previous verse).
+  // Down: end of the verse (if its end is already on screen: the start of the next verse).
+  (function () {
+    var upBtn = document.getElementById('verseUp');
+    var downBtn = document.getElementById('verseDown');
+    if (!upBtn || !downBtn) return;
+    var TOP_OFFSET = 68;     // same offset as "Go to Ayah": the verse head sits just under the round buttons
+    var BOTTOM_GAP = 100;    // keeps the end of a verse above the phone's bottom bar
+
+    function visibleVerses() {
+      return Array.prototype.filter.call(document.querySelectorAll('.ayah'), function (el) {
+        return el.offsetParent !== null;
+      });
+    }
+    function currentIndex(list) {
+      var line = TOP_OFFSET + 40;    // a line just below the floating buttons
+      var idx = 0;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].getBoundingClientRect().top <= line) idx = i; else break;
+      }
+      return idx;
+    }
+    function topOf(el) { return el.getBoundingClientRect().top + window.pageYOffset - TOP_OFFSET; }
+    function goTo(y) { window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
+
+    upBtn.addEventListener('click', function () {
+      var list = visibleVerses();
+      if (!list.length) return;
+      var i = currentIndex(list);
+      if (list[i].getBoundingClientRect().top < TOP_OFFSET - 14) { goTo(topOf(list[i])); return; }
+      goTo(i > 0 ? topOf(list[i - 1]) : 0);
+    });
+    downBtn.addEventListener('click', function () {
+      var list = visibleVerses();
+      if (!list.length) return;
+      var i = currentIndex(list);
+      var delta = list[i].getBoundingClientRect().bottom - (window.innerHeight - BOTTOM_GAP);
+      if (delta > 14) { window.scrollBy({ top: delta, behavior: 'smooth' }); return; }
+      if (i < list.length - 1) goTo(topOf(list[i + 1]));
+      else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     });
   })();
 

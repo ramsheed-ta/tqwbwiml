@@ -1112,7 +1112,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.75);
+    background: transparent;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -1128,7 +1128,8 @@
     opacity: 0.85;
     transition: stroke 0.15s ease;
   }
-  .verse-nav-btn:active svg { stroke: #555; }
+  .verse-nav-btn svg .halo { stroke: #fff; stroke-width: 4.6; opacity: 0.9; }
+  .verse-nav-btn:active svg path:not(.halo) { stroke: #555; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1543,10 +1544,10 @@
   <!-- Floating arrows: jump to the start / end of the verse you are reading -->
   <div id="verseNav" class="verse-nav">
     <button type="button" id="verseUp" class="verse-nav-btn" aria-label="Go to the start of this ayah (or the previous ayah)">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5L4.5 18h15z"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 5L4.5 18h15z"/><path d="M12 5L4.5 18h15z"/></svg>
     </button>
     <button type="button" id="verseDown" class="verse-nav-btn" aria-label="Go to the end of this ayah (or the next ayah)">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19L4.5 6h15z"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 19L4.5 6h15z"/><path d="M12 19L4.5 6h15z"/></svg>
     </button>
   </div>
 

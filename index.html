@@ -1159,6 +1159,15 @@
   .last-read-pill[hidden] { display: none; }
   .last-read-pill:active { background: #f0f0f0; }
   body.has-last-read .surah-title-wrap { max-width: calc(100vw - 160px); }
+
+  /* Verse shown at the top of the footer */
+  .footer-ayah { margin-bottom: 16px; color: var(--ink); }
+  .fa-ar { font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; font-size: calc(1.3rem + 0.5px); line-height: 2.1; margin-bottom: 4px; }
+  .fa-ref { font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; font-size: 1.05rem; line-height: 2; margin-top: 2px; }
+  .fa-ml, .fa-en, .fa-hi { font-size: 0.95rem; line-height: 1.6; margin: 0 0 3px; }
+  .fa-ml { font-family: 'Noto Serif Malayalam', serif; }
+  .fa-en { font-family: 'Inter', sans-serif; }
+  .fa-hi { font-family: 'Noto Serif Devanagari', serif; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1675,7 +1684,14 @@
   <main id="dynamicChapterContent" style="display:none;"></main>
 
   <footer>
-    Arabic text of the Qur'an is not subject to copyright. Translations here are simplified word-by-word glosses for study, not an authoritative rendering — for formal reference, cross-check with a scholarly translation.<br>
+  <div class="footer-ayah">
+    <div class="fa-ar" lang="ar" dir="rtl">أَفَلَا يَتَدَبَّرُونَ ٱلۡقُرۡءَانَ</div>
+    <div class="fa-ml" lang="ml">അപ്പോൾ അവർ ഖുർആൻ ചിന്തിച്ചുമനസ്സിലാക്കുന്നില്ലേ</div>
+    <div class="fa-en" lang="en">Then do they not reflect upon the Qur'an</div>
+    <div class="fa-hi" lang="hi">तो क्या वे क़ुरआन में सोच-विचार नहीं करते</div>
+    <div class="fa-ref" lang="ar" dir="rtl">(محمد 47:24)</div>
+  </div>
+    Word-by-word meanings are simple glosses for study, not an authoritative translation. For formal reference, please check a scholarly translation.<br>
     <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>, <button type="button" id="lastUpdatedFooterBtn" class="sources-link">Last updated</button>
   </footer>
 
@@ -1782,7 +1798,7 @@
       currentSec = null;
       currentKey = '';
     }
-    function openFor(sec) {
+    function openFor(sec, relY) {
       var numEl = sec.querySelector('.ayah-number');
       if (!numEl) return;
       closeCard();
@@ -1791,6 +1807,10 @@
       sec.classList.add('vw-selected');
       sec.appendChild(card);
       refreshTicks();
+      // open the box at the height where the verse was tapped (not always at the top of the verse)
+      var maxTop = sec.offsetHeight - card.offsetHeight - 6;
+      var top = Math.max(30, Math.min((relY || 0) - 24, maxTop));
+      card.style.top = top + 'px';
       // make sure the whole box is visible on screen
       var r = card.getBoundingClientRect();
       var delta = 0;
@@ -1833,7 +1853,8 @@
       var isDouble = now - lastClick < 330;
       lastClick = now;
       if (isDouble) return;
-      timer = setTimeout(function () { openFor(sec); }, 330);
+      var relY = e.clientY - sec.getBoundingClientRect().top;     // where inside the verse it was tapped
+      timer = setTimeout(function () { openFor(sec, relY); }, 330);
     });
   })();
 

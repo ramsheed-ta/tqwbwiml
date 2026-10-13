@@ -1575,6 +1575,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Sources &amp; credits: QuranEnc.com translation text is shown exactly as published; only the footnote reference numbers are hidden.</li>
           <li>Faster loading: the Arabic and Malayalam word-by-word appear first, and the translations are added as soon as they arrive.</li>
           <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Gmail website or Outlook) with the message filled in.</li>
           <li>Sources &amp; credits: added the QuranEnc.com Malayalam translation version (V1.0.3) and a note that footnote numbers are hidden.</li>
@@ -1735,7 +1736,7 @@
       </div>
       <div class="sources-item">
         <b>QuranEnc.com</b><br>
-        <span class="sources-what">Malayalam translation: Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad (Version V1.0.3, 30/05/2021). Loaded directly from QuranEnc.com, so it always follows their latest version. Footnote reference numbers are hidden.</span><br>
+        <span class="sources-what">Malayalam translation: Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad (Version V1.0.3, 30/05/2021). Loaded directly from QuranEnc.com, so it always follows their latest version. Footnote reference numbers are hidden because the footnote text is not shown; the translation text is otherwise not changed.</span><br>
         <a href="https://quranenc.com" target="_blank" rel="noopener noreferrer">quranenc.com</a>
       </div>
       <div class="sources-item">
@@ -2642,11 +2643,14 @@
           // Match footnote markers using ASCII, Devanagari, or Arabic-Indic digits —
           // Hindi sources sometimes use Devanagari numerals (१, २...) for the marker.
           // Footnote markers can sit anywhere in the text (e.g. "...മാർഗത്തിൽ(2) ." or "...ല്ല.(3) ..."), not only at the end, so strip them globally and tidy the spacing left behind.
+          // QuranEnc allows this only if nothing else in the text is changed, so ONLY the marker
+          // (and the space it leaves behind) is removed; every other character stays as published.
           var text = (row.translation || '')
-            .replace(/\s*\([0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]+\)/g, '')
-            .replace(/\s+([.,;:!?\u0964])/g, '$1')
-            .replace(/\s{2,}/g, ' ')
-            .trim();
+            .replace(/(\s*)\([0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]+\)(\s*)/g, function (m, before, after, offset, whole) {
+              var next = whole.charAt(offset + m.length);
+              if (!next || /[.,;:!?\u0964]/.test(next)) return '';
+              return (before || after) ? ' ' : '';
+            });
           return { text: text };
         });
       }), 12000)

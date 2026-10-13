@@ -298,6 +298,7 @@
     color: var(--ink);
     white-space: nowrap;
   }
+  .translator-toggle-label input { accent-color: #4caf50; } /* green tick for Translator and Ayah */
 
   .font-size-label {
     font-size: 14px;
@@ -729,6 +730,15 @@
     margin-bottom: 4px;
   }
   .sources-title { font-size: 15px; }
+  /* Top part of a panel stays in view while the rest scrolls */
+  .sticky-top {
+    position: sticky;
+    top: -12px; /* same as the box's top padding, so nothing shows above it */
+    z-index: 3;
+    background: #fff;
+    margin: -12px 0 4px;
+    padding: 12px 0 0;
+  }
   .sources-item {
     padding: 8px 0;
     border-bottom: 1px solid var(--line);
@@ -1541,7 +1551,7 @@
     <div class="font-size-row">
       <span class="font-size-label">Font size</span>
       <button type="button" id="fontSizeMinus" class="font-size-btn" aria-label="Decrease font size">−</button>
-      <span id="fontSizeValue">4</span>
+      <span id="fontSizeValue">5</span>
       <button type="button" id="fontSizePlus" class="font-size-btn" aria-label="Increase font size">+</button>
       <label class="translator-toggle-label"><input type="checkbox" id="translatorToggle"> Translator</label>
       <label class="translator-toggle-label"><input type="checkbox" id="ayahToggle" checked> Ayah</label>
@@ -1561,20 +1571,23 @@
 
   <div id="lastUpdatedOverlay" class="sources-overlay" hidden>
     <div class="sources-box lu-box" role="dialog" aria-modal="true" aria-label="Last updated">
-      <div class="sources-head">
-        <span class="sources-title">Last updated</span>
-        <button type="button" id="luClose" class="settings-close" aria-label="Close updates">✕</button>
-      </div>
+      <div class="sticky-top">
+        <div class="sources-head">
+          <span class="sources-title">Last updated</span>
+          <button type="button" id="luClose" class="settings-close" aria-label="Close updates">✕</button>
+        </div>
 
-      <div class="sources-item">
-        <b>Last updated: 13 October 2026</b><br>
-        Website created on 03 September 2026<br>
-        <span class="sources-what" style="font-size:14px;">The site regularly makes improvements to provide you with a better experience. Check below for the latest changes.</span>
+        <div class="sources-item">
+          <b>Last updated: 13 October 2026</b><br>
+          Website created on 03 September 2026<br>
+          <span class="sources-what" style="font-size:14px;">The site regularly makes improvements to provide you with a better experience. Check below for the latest changes.</span>
+        </div>
       </div>
 
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>The title bars of "Last updated" and "Sources &amp; credits" now stay fixed at the top while you scroll. The default text size is now 5.</li>
           <li>Sources &amp; credits: QuranEnc.com translation text is shown exactly as published; only the footnote reference numbers are hidden.</li>
           <li>Faster loading: the Arabic and Malayalam word-by-word appear first, and the translations are added as soon as they arrive.</li>
           <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Gmail website or Outlook) with the message filled in.</li>
@@ -1725,7 +1738,7 @@
 
   <div id="sourcesOverlay" class="sources-overlay" hidden>
     <div class="sources-box" role="dialog" aria-modal="true" aria-label="Sources and credits">
-      <div class="sources-head">
+      <div class="sources-head sticky-top">
         <span class="sources-title">Sources &amp; credits</span>
         <button type="button" id="sourcesClose" class="settings-close" aria-label="Close sources">✕</button>
       </div>
@@ -2258,7 +2271,7 @@
   var fontSizeValue = document.getElementById('fontSizeValue');
   var fontSizeMinus = document.getElementById('fontSizeMinus');
   var fontSizePlus = document.getElementById('fontSizePlus');
-  var currentFontStep = 4;
+  var currentFontStep = 5;
   function applyFontSize(v) {
     v = Math.max(1, Math.min(10, v));
     currentFontStep = v;

@@ -1087,20 +1087,14 @@
   }
   .feedback-send { background: #f1f9ec; }
 
-  /* Bottom bar of the Sources & credits box: Feedback in the centre, close at the right corner */
+  /* Bottom close button of the Sources & credits / Last updated boxes: same plain button as the top one, at the end of the content (not a sticky bar) */
   .sources-bottom {
-    position: sticky;
-    bottom: 0;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
-    background: #fff;
-    margin: 8px -16px -14px;
-    padding: 10px 16px 12px;
-    border-top: 1px solid var(--line);
+    margin: 4px 0 0;
+    padding: 0;
   }
-  .sources-bottom .sources-link { grid-column: 2; font-size: 14px; }
-  .sources-bottom .settings-close { grid-column: 3; justify-self: end; }
 
   /* Tap a verse: small box (inside that verse, on the left) to pick word-by-word languages for it */
   .vw-card {
@@ -1225,11 +1219,13 @@
     line-height: inherit;
     margin: 0;
   }
-  /* Welcome box shown when the page opens */
-  .welcome-box { text-align: center; }
-  .welcome-box .sources-head { justify-content: flex-end; margin-bottom: 0; }
-  .welcome-ayah { padding: 2px 8px 14px; color: var(--ink); }
-  .welcome-ayah .fa-ml, .welcome-ayah .fa-en, .welcome-ayah .fa-hi { margin: 6px 0; line-height: 1.7; }
+  /* Welcome box shown when the page opens (compact: little empty space) */
+  .welcome-box { text-align: center; padding: 8px 14px 6px; }
+  .welcome-box .sources-head { justify-content: flex-end; margin-bottom: -12px; position: relative; z-index: 1; }
+  .welcome-ayah { padding: 0 8px 2px; color: var(--ink); }
+  .welcome-ayah .fa-ar { line-height: 1.8; margin-bottom: 0; }
+  .welcome-ayah .fa-ml, .welcome-ayah .fa-en, .welcome-ayah .fa-hi { margin: 3px 0; line-height: 1.55; }
+  .welcome-ayah .fa-ref { line-height: 1.6; margin-top: 0; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };

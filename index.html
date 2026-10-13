@@ -1168,6 +1168,18 @@
   .fa-ml { font-family: 'Noto Serif Malayalam', serif; }
   .fa-en { font-family: 'Inter', sans-serif; }
   .fa-hi { font-family: 'Noto Serif Devanagari', serif; }
+
+  /* Footer verse: same size as the footer text */
+  .footer-ayah .fa-ar, .footer-ayah .fa-ml, .footer-ayah .fa-en, .footer-ayah .fa-hi, .footer-ayah .fa-ref {
+    font-size: inherit;
+    line-height: inherit;
+    margin: 0;
+  }
+  /* Welcome box shown when the page opens */
+  .welcome-box { text-align: center; }
+  .welcome-box .sources-head { justify-content: flex-end; margin-bottom: 0; }
+  .welcome-ayah { padding: 2px 8px 14px; color: var(--ink); }
+  .welcome-ayah .fa-ml, .welcome-ayah .fa-en, .welcome-ayah .fa-hi { margin: 6px 0; line-height: 1.7; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1507,13 +1519,15 @@
       </div>
 
       <div class="sources-item">
-        <b>Last updated: 11 October 2026</b><br>
+        <b>Last updated: 13 October 2026</b><br>
+        Website created on 03 September 2026<br>
         <span class="sources-what">We regularly make improvements to provide you with a better experience. Check below for the latest changes.</span>
       </div>
 
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Sources &amp; credits: added the QuranEnc.com Malayalam translation version (V1.0.3) and a note that footnote numbers are hidden.</li>
           <li>Browser auto-translate is switched off for the page, so Quran translations are shown exactly as they are.</li>
           <li>Added Last read: a small chapter:verse button at the top right to continue where you stopped.</li>
           <li>Added floating up / down arrows to jump to the start or end of a verse.</li>
@@ -1561,6 +1575,7 @@
                 <td><ul>
                   <li>Added Feedback (email) and Last updated pages in the footer.</li>
                   <li>Sources &amp; credits updated.</li>
+                  <li>QuranEnc.com Malayalam translation version (V1.0.3, 30/05/2021) added to Sources &amp; credits, with a note that footnote reference numbers are hidden.</li>
                 </ul></td>
               </tr>
               <tr>
@@ -1577,6 +1592,12 @@
                 <td><ul>
                   <li>Loading and error messages are in English.</li>
                   <li>A chapter that fails to load is retried automatically.</li>
+                </ul></td>
+              </tr>
+              <tr>
+                <td>03 Sep 2026</td><td>Initial setup</td>
+                <td><ul>
+                  <li>Website created.</li>
                 </ul></td>
               </tr>
             </tbody>
@@ -1612,6 +1633,16 @@
     </button>
   </div>
 
+  <div id="welcomeOverlay" class="sources-overlay" hidden>
+    <div class="sources-box welcome-box" role="dialog" aria-modal="true" aria-label="Tadabbur">
+      <div class="sources-head">
+        <span></span>
+        <button type="button" id="welcomeClose" class="settings-close" aria-label="Close">✕</button>
+      </div>
+      <div id="welcomeAyah" class="welcome-ayah"></div>
+    </div>
+  </div>
+
   <div id="feedbackOverlay" class="sources-overlay" hidden>
     <div class="sources-box" role="dialog" aria-modal="true" aria-label="Feedback">
       <div class="sources-head">
@@ -1645,7 +1676,7 @@
       </div>
       <div class="sources-item">
         <b>QuranEnc.com</b><br>
-        <span class="sources-what">Malayalam translation: Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad. Shown without changes.</span><br>
+        <span class="sources-what">Malayalam translation: Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad (Version V1.0.3, 30/05/2021). Loaded directly from QuranEnc.com, so it always follows their latest version. Footnote reference numbers are hidden.</span><br>
         <a href="https://quranenc.com" target="_blank" rel="noopener noreferrer">quranenc.com</a>
       </div>
       <div class="sources-item">
@@ -2101,6 +2132,26 @@
     });
 
     render();
+  })();
+
+  // Welcome box: when the page is opened, show the verse (same text as in the footer).
+  // Tap anywhere outside the box (or the cross) to close it. Shown every time the page opens or is refreshed.
+  (function () {
+    var box = document.getElementById('welcomeOverlay');
+    var body = document.getElementById('welcomeAyah');
+    var src = document.querySelector('.footer-ayah');
+    var closeBtn = document.getElementById('welcomeClose');
+    if (!box || !body || !src) return;
+    body.innerHTML = src.innerHTML;
+    function closeBox() {
+      box.hidden = true;
+      document.body.style.overflow = '';
+    }
+    if (closeBtn) closeBtn.addEventListener('click', closeBox);
+    box.addEventListener('click', function (e) { if (e.target === box) closeBox(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) closeBox(); });
+    box.hidden = false;
+    document.body.style.overflow = 'hidden';
   })();
 
   // Keep the surah-search sheets inside the visible area (above the keyboard)

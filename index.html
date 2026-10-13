@@ -2613,9 +2613,9 @@
   function fetchSurahAyahs(edition, surahNum) {
     surahNum = surahNum || SURAH_NUMBER;
     if (!edition) return Promise.resolve(null);
-    return fetch(API_BASE + '/surah/' + surahNum + '/' + edition)
+    return withTimeout(fetch(API_BASE + '/surah/' + surahNum + '/' + edition)
       .then(function (r) { return r.json(); })
-      .then(function (json) { return (json.data && json.data.ayahs) ? json.data.ayahs : null; })
+      .then(function (json) { return (json.data && json.data.ayahs) ? json.data.ayahs : null; }), 12000)
       .catch(function () { return null; });
   }
 
@@ -2625,7 +2625,7 @@
   // guessing at an edition identifier.
   function fetchQuranEncSura(translationKey, surahNum) {
     surahNum = surahNum || SURAH_NUMBER;
-    return fetch('https://quranenc.com/api/v1/translation/sura/' + translationKey + '/' + surahNum)
+    return withTimeout(fetch('https://quranenc.com/api/v1/translation/sura/' + translationKey + '/' + surahNum)
       .then(function (r) { return r.json(); })
       .then(function (json) {
         var rows = json.result || [];
@@ -2645,7 +2645,7 @@
             .trim();
           return { text: text };
         });
-      })
+      }), 12000)
       .catch(function () { return null; });
   }
 
@@ -2904,13 +2904,23 @@
   var QF_WORKER = 'https://quran-api.ramsheedabdul1404-bab.workers.dev';
   var activeChapter = null;
 
+  // A request that never answers (weak mobile network) must not leave "Chapter loading…" on screen
+  // forever: after `ms` it counts as failed, so the normal retry / error + Retry flow takes over.
+  function withTimeout(promise, ms) {
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { reject(new Error('timeout')); }, ms);
+      promise.then(function (v) { clearTimeout(timer); resolve(v); },
+                   function (e) { clearTimeout(timer); reject(e); });
+    });
+  }
+
   function qfGet(path) {
-    return fetch(QF_WORKER + path).then(function (r) {
+    return withTimeout(fetch(QF_WORKER + path).then(function (r) {
       if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + path.slice(16, 60));
       return r.json();
     }, function (e) {
       throw new Error('network/CORS: ' + (e && e.message ? e.message : e) + ' for ' + path.slice(16, 60));
-    });
+    }), 20000);
   }
 
   // The API gives at most 50 ayahs per call, so long surahs are fetched page by page.

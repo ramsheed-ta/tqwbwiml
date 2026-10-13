@@ -1016,19 +1016,49 @@
   .feedback-email {
     font-size: 15px;
     word-break: break-all;
-    margin: 10px 0 2px;
+    margin: 6px 0 0;
     user-select: all;
     -webkit-user-select: all;
   }
   /* keep the feedback box inside the visible area when the keyboard is open */
-  #feedbackOverlay { bottom: auto; top: var(--vvtop, 0px); height: var(--vvh, 100%); }
-  #feedbackOverlay .sources-box { max-height: calc(var(--vvh, 100vh) - 32px); }
+  #feedbackOverlay {
+    bottom: auto;
+    top: var(--vvtop, 0px);
+    height: var(--vvh, 100%);
+    align-items: flex-start;
+    padding-top: max(16px, calc(var(--vvh, 100vh) * 0.12));
+  }
+  #feedbackOverlay .sources-box {
+    max-height: calc(var(--vvh, 100vh) * 0.88 - 16px);
+    padding: 10px 16px 12px;
+  }
+  #feedbackOverlay .sources-head { margin-bottom: 0; }
+  #feedbackOverlay .sources-item { padding: 5px 0; }
+  .feedback-choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .feedback-choices[hidden] { display: none; }
+  .feedback-choice {
+    box-sizing: border-box;
+    text-align: center;
+    padding: 9px 6px;
+    border-radius: 12px;
+    border: 1.5px solid #b9e0a5;
+    background: #fff;
+    color: var(--ink);
+    font-size: 14px;
+    text-decoration: none;
+  }
   .feedback-text {
     display: block;
     width: 100%;
     box-sizing: border-box;
-    min-height: 110px;
-    margin: 10px 0 0;
+    min-height: 64px;
+    max-height: 160px;
+    margin: 6px 0 0;
     padding: 10px 12px;
     border: 1.5px solid #b9e0a5;
     border-radius: 12px;
@@ -1040,7 +1070,7 @@
     resize: vertical;
   }
   .feedback-text:focus { outline: none; border-color: #8fcb73; }
-  .feedback-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .feedback-actions { display: flex; gap: 8px; margin-top: 8px; }
   .feedback-send, .feedback-copy {
     flex: 1;
     box-sizing: border-box;
@@ -1541,13 +1571,13 @@
       <div class="sources-item">
         <b>Last updated: 13 October 2026</b><br>
         Website created on 03 September 2026<br>
-        <span class="sources-what">We regularly make improvements to provide you with a better experience. Check below for the latest changes.</span>
+        <span class="sources-what" style="font-size:14px;">The site regularly makes improvements to provide you with a better experience. Check below for the latest changes.</span>
       </div>
 
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
-          <li>Feedback: added a box to type your message; "Send email" opens your mail app with the message filled in.</li>
+          <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Gmail website or Outlook) with the message filled in.</li>
           <li>Sources &amp; credits: added the QuranEnc.com Malayalam translation version (V1.0.3) and a note that footnote numbers are hidden.</li>
           <li>Browser auto-translate is switched off for the page, so Quran translations are shown exactly as they are.</li>
           <li>Added Last read: a small chapter:verse button at the top right to continue where you stopped.</li>
@@ -1596,7 +1626,7 @@
                 <td><ul>
                   <li>Added Feedback (email) and Last updated pages in the footer.</li>
                   <li>Sources &amp; credits updated.</li>
-                  <li>Feedback page: added a message box. What you type is placed in the email when you tap "Send email".</li>
+                  <li>Feedback page: added a message box, moved the box higher and tightened the spacing. "Send email" now offers a choice of Mail, Gmail app, Gmail website or Outlook, with your message filled in.</li>
                   <li>QuranEnc.com Malayalam translation version (V1.0.3, 30/05/2021) added to Sources &amp; credits, with a note that footnote reference numbers are hidden.</li>
                 </ul></td>
               </tr>
@@ -1677,11 +1707,17 @@
       <div class="sources-item">
         <span class="sources-what">Please mention the surah and ayah number (for example 96:1) so it is easy to find.</span>
       </div>
-      <textarea id="feedbackText" class="feedback-text" rows="4" placeholder="Type your message here (surah and ayah, for example 96:1)"></textarea>
+      <textarea id="feedbackText" class="feedback-text" rows="2" placeholder="Type your message here (surah and ayah, for example 96:1)"></textarea>
       <div class="feedback-email" id="feedbackEmailText">tqwbwiml.feedback@gmail.com</div>
       <div class="feedback-actions">
-        <a id="feedbackSend" class="feedback-send" href="mailto:tqwbwiml.feedback@gmail.com">Send email</a>
+        <button type="button" id="feedbackSend" class="feedback-send">Send email</button>
         <button type="button" id="feedbackCopy" class="feedback-copy">Copy address</button>
+      </div>
+      <div id="feedbackChoices" class="feedback-choices" hidden>
+        <a id="fbMail" class="feedback-choice" href="#">Mail (Apple / iCloud)</a>
+        <a id="fbGmailApp" class="feedback-choice" href="#">Gmail app</a>
+        <a id="fbGmailWeb" class="feedback-choice" href="#" target="_blank" rel="noopener noreferrer">Gmail website</a>
+        <a id="fbOutlook" class="feedback-choice" href="#">Outlook app</a>
       </div>
     </div>
   </div>
@@ -1719,7 +1755,6 @@
       </div>
       <p class="sources-note">All sources belong to their respective owners. Please check their own terms before reusing any content.</p>
       <div class="sources-bottom">
-        <button type="button" id="sourcesFeedbackBtn" class="sources-link">Feedback</button>
         <button type="button" id="sourcesCloseBottom" class="settings-close" aria-label="Close sources">✕</button>
       </div>
     </div>
@@ -1955,12 +1990,6 @@
     if (closeBtn) closeBtn.addEventListener('click', closeSources);
     var closeBottom = document.getElementById('sourcesCloseBottom');
     if (closeBottom) closeBottom.addEventListener('click', closeSources);
-    var fbBtn = document.getElementById('sourcesFeedbackBtn');
-    if (fbBtn) fbBtn.addEventListener('click', function () {
-      closeSources();
-      var open = document.getElementById('feedbackFooterBtn');
-      if (open) open.click();
-    });
     box.addEventListener('click', function (e) { if (e.target === box) closeSources(); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !box.hidden) closeSources();
@@ -1985,11 +2014,30 @@
       var body = typed
         ? 'Assalamu Alaikum,\n\n' + typed + footer
         : 'Assalamu Alaikum,\n\nSurah:Ayah (for example 96:1): \nWhat is wrong, or your suggestion:\n\n' + footer;
-      sendLink.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent('Feedback - Tadabbur Quran') + '&body=' + encodeURIComponent(body);
+      var subj = encodeURIComponent('Feedback - Tadabbur Quran');
+      var bod = encodeURIComponent(body);
+      var to = encodeURIComponent(EMAIL);
+      var set = function (id, href) { var a = document.getElementById(id); if (a) a.href = href; };
+      set('fbMail', 'mailto:' + EMAIL + '?subject=' + subj + '&body=' + bod);
+      set('fbGmailApp', 'googlegmail:///co?to=' + to + '&subject=' + subj + '&body=' + bod);
+      set('fbGmailWeb', 'https://mail.google.com/mail/?view=cm&fs=1&to=' + to + '&su=' + subj + '&body=' + bod);
+      set('fbOutlook', 'ms-outlook://compose?to=' + to + '&subject=' + subj + '&body=' + bod);
     }
-    if (textBox) textBox.addEventListener('input', buildHref);
+    var choices = document.getElementById('feedbackChoices');
+    if (sendLink && choices) sendLink.addEventListener('click', function () {
+      buildHref();
+      choices.hidden = !choices.hidden;
+      if (!choices.hidden) choices.scrollIntoView({ block: 'nearest' });
+    });
+    function growTextBox() {
+      if (!textBox) return;
+      textBox.style.height = 'auto';
+      textBox.style.height = Math.min(textBox.scrollHeight + 2, 160) + 'px';
+    }
+    if (textBox) textBox.addEventListener('input', function () { buildHref(); growTextBox(); });
     function openFeedback() {
       buildHref();
+      if (choices) choices.hidden = true;
       if (copyBtn) copyBtn.textContent = 'Copy address';
       box.hidden = false;
       document.body.style.overflow = 'hidden';

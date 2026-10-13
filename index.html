@@ -738,7 +738,9 @@
     background: #fff;
     margin: -12px 0 4px;
     padding: 12px 0 0;
+    border-bottom: 1px solid var(--line); /* line under the frozen part */
   }
+  .sources-head.sticky-top { padding-bottom: 8px; }
   .sources-item {
     padding: 8px 0;
     border-bottom: 1px solid var(--line);
@@ -748,6 +750,7 @@
   .sources-item:last-of-type { border-bottom: none; }
   .sources-what { color: var(--ink-soft); font-size: 12px; }
   .sources-item a { color: var(--ink); text-decoration: underline; }
+  .pt-heading { font-size: 15px; font-weight: 700; padding: 10px 0 2px; }
   .sources-note { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin-top: 6px; }
 
   footer {
@@ -1587,6 +1590,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Added a "Privacy &amp; Terms" page (link at the bottom of the page).</li>
           <li>The title bars of "Last updated" and "Sources &amp; credits" now stay fixed at the top while you scroll. The default text size is now 5.</li>
           <li>Sources &amp; credits: QuranEnc.com translation text is shown exactly as published; only the footnote reference numbers are hidden.</li>
           <li>Faster loading: the Arabic and Malayalam word-by-word appear first, and the translations are added as soon as they arrive.</li>
@@ -1656,6 +1660,7 @@
                 <td>Oct 2026</td><td>Messages</td>
                 <td><ul>
                   <li>Loading and error messages are in English.</li>
+                  <li>Privacy &amp; Terms page added.</li>
                   <li>Faster chapter loading: the Arabic and Malayalam word-by-word are shown first; translations and other languages are added as they arrive. A slow source can no longer keep the chapter loading forever.</li>
                   <li>A chapter that fails to load is retried automatically.</li>
                 </ul></td>
@@ -1706,6 +1711,78 @@
         <button type="button" id="welcomeClose" class="settings-close" aria-label="Close">✕</button>
       </div>
       <div id="welcomeAyah" class="welcome-ayah"></div>
+    </div>
+  </div>
+
+  <div id="privacyOverlay" class="sources-overlay" hidden>
+    <div class="sources-box" role="dialog" aria-modal="true" aria-label="Privacy and Terms">
+      <div class="sources-head sticky-top">
+        <span class="sources-title">Privacy &amp; Terms</span>
+        <button type="button" id="privacyClose" class="settings-close" aria-label="Close privacy and terms">✕</button>
+      </div>
+
+      <div class="pt-heading">Privacy</div>
+      <div class="sources-item">
+        <b>About this website</b><br>
+        <span class="sources-what">Tadabbur Quran is a free, non-commercial website for studying the Quran word by word, in several languages. It is an independent project. It uses the Quran Foundation API (the Quran Foundation also runs Quran.com and QuranReflect) and is not an official app of the Quran Foundation, QuranEnc.com or Al Quran Cloud. Effective from 13 October 2026.</span>
+      </div>
+      <div class="sources-item">
+        <b>What this site collects</b><br>
+        <span class="sources-what">There is no sign-in and no advertising. This site does not ask for your name, email address or location, and does not set cookies of its own.</span>
+      </div>
+      <div class="sources-item">
+        <b>Saved on your device</b><br>
+        <span class="sources-what">Your settings (such as text size, languages and display options) and your Last read position are saved only in your own browser. This site does not receive them. They stay until you clear your browser data.</span>
+      </div>
+      <div class="sources-item">
+        <b>Services used</b><br>
+        <span class="sources-what">When a page opens, your device connects to Vercel (hosting), Cloudflare (which passes requests to the Quran Foundation API), the Quran Foundation, QuranEnc.com, Al Quran Cloud and Google Fonts, to load the website, the text, the translations and the fonts. Like any website, loading this page means these services receive your IP address. The hosting provider may also collect basic, aggregated usage statistics. Each service has its own privacy policy, for example:
+        <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Vercel</a>,
+        <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare</a>,
+        <a href="https://developers.google.com/fonts/faq/privacy" target="_blank" rel="noopener noreferrer">Google Fonts</a>.</span>
+      </div>
+      <div class="sources-item">
+        <b>Feedback emails</b><br>
+        <span class="sources-what">If you send feedback by email, this site receives your email address and your message. They are used only to reply and to fix problems, and are kept only as long as needed for that.</span>
+      </div>
+      <div class="sources-item">
+        <b>Children</b><br>
+        <span class="sources-what">The website is for a general audience. This site does not knowingly collect personal information from anyone, including children.</span>
+      </div>
+      <div class="sources-item">
+        <b>Security</b><br>
+        <span class="sources-what">Connections use HTTPS. The credentials used for the Quran Foundation API are kept on the server side and are never placed in the web page.</span>
+      </div>
+      <div class="sources-item">
+        <b>Changes and contact</b><br>
+        <span class="sources-what">This page may be updated. The date above shows the latest version, and notable changes are listed on the Last updated page. Questions: tqwbwiml.feedback@gmail.com</span>
+      </div>
+
+      <div class="pt-heading">Terms of Use</div>
+      <div class="sources-item">
+        <b>Use</b><br>
+        <span class="sources-what">This website is for personal, non-commercial study and reflection. Please do not misuse it or overload the service.</span>
+      </div>
+      <div class="sources-item">
+        <b>Content</b><br>
+        <span class="sources-what">The Quranic text, translations, fonts and other material belong to their respective owners (see Sources &amp; credits). If you reuse any content, please follow the terms of the original source, and do not change or misrepresent the Quranic text.</span>
+      </div>
+      <div class="sources-item">
+        <b>Word-by-word meanings</b><br>
+        <span class="sources-what">Word-by-word meanings are simple glosses for study, not an authoritative translation. For formal reference, please check a scholarly translation.</span>
+      </div>
+      <div class="sources-item">
+        <b>No warranty</b><br>
+        <span class="sources-what">The website is provided as it is, without any warranty. It may contain mistakes or be unavailable at times. To report a problem, please use Feedback.</span>
+      </div>
+      <div class="sources-item">
+        <b>Changes</b><br>
+        <span class="sources-what">The website and these terms may change from time to time.</span>
+      </div>
+
+      <div class="sources-bottom">
+        <button type="button" id="privacyCloseBottom" class="settings-close" aria-label="Close privacy and terms">✕</button>
+      </div>
     </div>
   </div>
 
@@ -1795,7 +1872,7 @@
     <div class="fa-ref" lang="ar" dir="rtl">(محمد 47:24)</div>
   </div>
     Word-by-word meanings are simple glosses for study, not an authoritative translation. For formal reference, please check a scholarly translation.<br>
-    <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>, <button type="button" id="lastUpdatedFooterBtn" class="sources-link">Last updated</button>
+    <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>, <button type="button" id="lastUpdatedFooterBtn" class="sources-link">Last updated</button>, <button type="button" id="privacyFooterBtn" class="sources-link">Privacy &amp; Terms</button>
   </footer>
 
 </div>
@@ -2007,6 +2084,31 @@
     box.addEventListener('click', function (e) { if (e.target === box) closeSources(); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !box.hidden) closeSources();
+    });
+  })();
+
+  // Privacy & Terms box (opened from the footer link)
+  (function () {
+    var box = document.getElementById('privacyOverlay');
+    var openBtn = document.getElementById('privacyFooterBtn');
+    var closeBtn = document.getElementById('privacyClose');
+    var closeBottom = document.getElementById('privacyCloseBottom');
+    var settings = document.getElementById('settingsOverlay');
+    if (!box || !openBtn) return;
+    function openPrivacy() {
+      box.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closePrivacy() {
+      box.hidden = true;
+      if (!settings || settings.hidden) document.body.style.overflow = '';
+    }
+    openBtn.addEventListener('click', openPrivacy);
+    if (closeBtn) closeBtn.addEventListener('click', closePrivacy);
+    if (closeBottom) closeBottom.addEventListener('click', closePrivacy);
+    box.addEventListener('click', function (e) { if (e.target === box) closePrivacy(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !box.hidden) closePrivacy();
     });
   })();
 

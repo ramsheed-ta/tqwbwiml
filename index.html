@@ -1573,6 +1573,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Faster loading: the Arabic and Malayalam word-by-word appear first, and the translations are added as soon as they arrive.</li>
           <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Gmail website or Outlook) with the message filled in.</li>
           <li>Sources &amp; credits: added the QuranEnc.com Malayalam translation version (V1.0.3) and a note that footnote numbers are hidden.</li>
           <li>Browser auto-translate is switched off for the page, so Quran translations are shown exactly as they are.</li>
@@ -1639,6 +1640,7 @@
                 <td>Oct 2026</td><td>Messages</td>
                 <td><ul>
                   <li>Loading and error messages are in English.</li>
+                  <li>Faster chapter loading: the Arabic and Malayalam word-by-word are shown first; translations and other languages are added as they arrive. A slow source can no longer keep the chapter loading forever.</li>
                   <li>A chapter that fails to load is retried automatically.</li>
                 </ul></td>
               </tr>
@@ -3035,137 +3037,175 @@
     });
   }
 
-  function loadDynamicChapter(surahNum, attempt) {
-    attempt = attempt || 0;
-    Promise.all([
-      qfChapterVerses(surahNum, 'ml'),
-      qfChapterVerses(surahNum, 'en').catch(function () { return []; }),
-      fetchQuranEncSura('malayalam_kunhi', surahNum).catch(function () { return null; }).then(function (a) {
-        return { ayahs: a, name: 'Abdulhamid Haidar Al-Madany & Kunhi Muhammad' };
-      }),
-      fetchSurahAyahs(EN_EDITION, surahNum).catch(function () { return null; }).then(function (a) {
-        return { ayahs: a, name: 'Saheeh International' };
-      }),
-      qfResolveHindi().then(function (tr) {
-        return qfChapterVerses(surahNum, 'hi', tr ? '&translations=' + tr.id : '')
-          .catch(function () { return []; })
-          .then(function (v) { return { verses: v, tr: tr }; });
-      })
-    ]).then(function (results) {
-      var verses = results[0];
-      var enVerses = results[1];
-      var mlData = results[2];
-      var enData = results[3];
-      var hiData = results[4];
-
-      if (!verses.length) {
-        handleLoadFail(surahNum, attempt);
-        return;
+  // Builds the HTML of a whole chapter from whatever data has arrived so far.
+  // `final` is true once every source has answered (or timed out).
+  function buildChapterHtml(surahNum, data, final) {
+    var verses = data.verses, enVerses = data.enVerses, mlData = data.mlData, enData = data.enData, hiData = data.hiData;
+    var enByVerse = {};
+    enVerses.forEach(function (v) { enByVerse[v.verse_number] = qfRealWords(v); });
+    var hiByVerse = {}, hiTextByVerse = {};
+    hiData.verses.forEach(function (v) {
+      hiByVerse[v.verse_number] = qfRealWords(v);
+      if (v.translations && v.translations[0] && v.translations[0].text) {
+        hiTextByVerse[v.verse_number] = qfCleanText(v.translations[0].text);
       }
+    });
 
-      var enByVerse = {};
-      enVerses.forEach(function (v) { enByVerse[v.verse_number] = qfRealWords(v); });
-      var hiByVerse = {}, hiTextByVerse = {};
-      hiData.verses.forEach(function (v) {
-        hiByVerse[v.verse_number] = qfRealWords(v);
-        if (v.translations && v.translations[0] && v.translations[0].text) {
-          hiTextByVerse[v.verse_number] = qfCleanText(v.translations[0].text);
+    var html = '';
+    verses.forEach(function (verse) {
+      var n = verse.verse_number;
+      var realWords = qfRealWords(verse);
+      var enWords = enByVerse[n] || [];
+      var hiWords = hiByVerse[n] || [];
+      var allHafs = realWords.length > 0 && realWords.every(function (w) { return w.text_qpc_hafs; });
+      var arabicText = allHafs
+        ? realWords.map(function (w) { return w.text_qpc_hafs; }).join(' ')
+        : qfFixMarks(verse.text_uthmani || realWords.map(function (w) { return w.text_uthmani || w.text || ''; }).join(' '));
+
+      var enText = enData.ayahs && enData.ayahs[n - 1] ? enData.ayahs[n - 1].text : '';
+      var mlText = mlData.ayahs && mlData.ayahs[n - 1] ? mlData.ayahs[n - 1].text : '';
+      var translationsHtml = '';
+      if (mlText) translationsHtml += '<div class="translation-block"><p class="translation-line ml">' + mlText + '</p><p class="translation-attr ml">— ' + mlData.name + '</p></div>';
+      if (enText) translationsHtml += '<div class="translation-block"><p class="translation-line en">' + enText + '</p><p class="translation-attr en">— ' + enData.name + '</p></div>';
+      var hiText = hiTextByVerse[n] || '';
+      if (hiText && hiData.tr) translationsHtml += '<div class="translation-block"><p class="translation-line hi">' + hiText + '</p><p class="translation-attr hi">— ' + hiData.tr.name + '</p></div>';
+      if (!translationsHtml) translationsHtml = final ? '<p class="translation-loading">Translation not available</p>' : '<p class="translation-loading">Loading translation…</p>';
+
+      // Use the fully-marked words of the whole-ayah text when the counts line up.
+      var markedWords = arabicText.split(/\s+/).filter(Boolean);
+      var useMarked = markedWords.length === realWords.length;
+
+      // Collect the words; when the API gives one Malayalam meaning for several
+      // words (the following words have an empty Malayalam), show them as ONE block.
+      var groups = [];
+      realWords.forEach(function (w, i) {
+        // Use each word's own QPC text whenever the verse has it. (Matching words by splitting the
+        // verse text broke when a word itself holds a space, e.g. "۞ وَلَوْ" at the start of a
+        // rub el hizb; the blocks then fell back to text_uthmani, which this font draws wrongly.)
+        var ar = allHafs ? w.text_qpc_hafs : (useMarked ? markedWords[i] : (w.text_uthmani || w.text || ''));
+        var ml = (w.translation && w.translation.text) ? String(w.translation.text).trim() : '';
+        // When a word has no Malayalam meaning the API sends its English text instead
+        // (language_name "english"). That is not Malayalam, so treat it as empty.
+        if (ml && w.translation.language_name && String(w.translation.language_name).toLowerCase() !== 'malayalam') ml = '';
+        var enW = null;
+        for (var k = 0; k < enWords.length; k++) {
+          if (enWords[k].position === w.position) { enW = enWords[k]; break; }
+        }
+        var en = (enW && enW.translation && enW.translation.text) ? String(enW.translation.text).trim() : '';
+        if (ml && en && ml.toLowerCase() === en.toLowerCase()) ml = '';
+        // Hindi meaning of this word (the API sends English text when there is none)
+        var hiW = null;
+        for (var q = 0; q < hiWords.length; q++) {
+          if (hiWords[q].position === w.position) { hiW = hiWords[q]; break; }
+        }
+        var hi = '';
+        if (hiW && hiW.translation && hiW.translation.text && String(hiW.translation.language_name).toLowerCase() === 'hindi') {
+          hi = String(hiW.translation.text).trim();
+        }
+        var tr = (w.transliteration && w.transliteration.text) ? w.transliteration.text : '';
+        var last = groups.length ? groups[groups.length - 1] : null;
+        if (!ml && last && last.ml) {
+          last.ar += ' ' + ar;
+          if (en) last.en += (last.en ? ' ' : '') + en;
+          if (hi) last.hi += (last.hi ? ' ' : '') + hi;
+          if (tr) last.tr += (last.tr ? ' ' : '') + tr;
+        } else {
+          groups.push({ ar: ar, ml: ml, en: en, hi: hi, tr: tr });
         }
       });
 
-      var html = '';
-      verses.forEach(function (verse) {
-        var n = verse.verse_number;
-        var realWords = qfRealWords(verse);
-        var enWords = enByVerse[n] || [];
-        var hiWords = hiByVerse[n] || [];
-        var allHafs = realWords.length > 0 && realWords.every(function (w) { return w.text_qpc_hafs; });
-        var arabicText = allHafs
-          ? realWords.map(function (w) { return w.text_qpc_hafs; }).join(' ')
-          : qfFixMarks(verse.text_uthmani || realWords.map(function (w) { return w.text_uthmani || w.text || ''; }).join(' '));
+      var wordsHtml = groups.map(function (g) {
+        var searchTag = qfAttr((g.ar + ' ' + g.tr + ' ' + g.en + ' ' + g.ml + ' ' + g.hi).toLowerCase());
+        return '<div class="word-block" data-search="' + searchTag + '">'
+          + '<div class="word-arabic">' + g.ar + '</div>'
+          + (g.ml ? '<div class="word-gloss ml">' + g.ml + '</div>' : '')
+          + (g.en ? '<div class="word-gloss en">' + g.en + '</div>' : '')
+          + (g.hi ? '<div class="word-gloss hi">' + g.hi + '</div>' : '')
+          + '</div>';
+      }).join('');
 
-        var enText = enData.ayahs && enData.ayahs[n - 1] ? enData.ayahs[n - 1].text : '';
-        var mlText = mlData.ayahs && mlData.ayahs[n - 1] ? mlData.ayahs[n - 1].text : '';
-        var translationsHtml = '';
-        if (mlText) translationsHtml += '<div class="translation-block"><p class="translation-line ml">' + mlText + '</p><p class="translation-attr ml">— ' + mlData.name + '</p></div>';
-        if (enText) translationsHtml += '<div class="translation-block"><p class="translation-line en">' + enText + '</p><p class="translation-attr en">— ' + enData.name + '</p></div>';
-        var hiText = hiTextByVerse[n] || '';
-        if (hiText && hiData.tr) translationsHtml += '<div class="translation-block"><p class="translation-line hi">' + hiText + '</p><p class="translation-attr hi">— ' + hiData.tr.name + '</p></div>';
-        if (!translationsHtml) translationsHtml = '<p class="translation-loading">Translation not available</p>';
+      if (!wordsHtml) wordsHtml = '<p class="translation-loading">Word-by-word not available</p>';
 
-        // Use the fully-marked words of the whole-ayah text when the counts line up.
-        var markedWords = arabicText.split(/\s+/).filter(Boolean);
-        var useMarked = markedWords.length === realWords.length;
+      html += '<section class="ayah" data-ayah="' + n + '">'
+        + '<div class="ayah-head"><span class="ayah-number">' + surahNum + ':' + n + '</span>'
+        + '<button type="button" class="share-btn" aria-label="Share this ayah">' + shareIconSvgGeneric + '</button></div>'
+        + '<p class="ayah-full-arabic"><span class="arabic-live" data-ayah="' + n + '">' + arabicText + '</span> <span class="ayah-end-num">(' + toArabicDigitsGeneric(n) + ')</span></p>'
+        + '<div class="word-row">' + wordsHtml + '</div>'
+        + '<div class="ayah-translations">' + translationsHtml + '</div>'
+        + '</section>';
+    });
 
-        // Collect the words; when the API gives one Malayalam meaning for several
-        // words (the following words have an empty Malayalam), show them as ONE block.
-        var groups = [];
-        realWords.forEach(function (w, i) {
-          // Use each word's own QPC text whenever the verse has it. (Matching words by splitting the
-          // verse text broke when a word itself holds a space, e.g. "۞ وَلَوْ" at the start of a
-          // rub el hizb; the blocks then fell back to text_uthmani, which this font draws wrongly.)
-          var ar = allHafs ? w.text_qpc_hafs : (useMarked ? markedWords[i] : (w.text_uthmani || w.text || ''));
-          var ml = (w.translation && w.translation.text) ? String(w.translation.text).trim() : '';
-          // When a word has no Malayalam meaning the API sends its English text instead
-          // (language_name "english"). That is not Malayalam, so treat it as empty.
-          if (ml && w.translation.language_name && String(w.translation.language_name).toLowerCase() !== 'malayalam') ml = '';
-          var enW = null;
-          for (var k = 0; k < enWords.length; k++) {
-            if (enWords[k].position === w.position) { enW = enWords[k]; break; }
-          }
-          var en = (enW && enW.translation && enW.translation.text) ? String(enW.translation.text).trim() : '';
-          if (ml && en && ml.toLowerCase() === en.toLowerCase()) ml = '';
-          // Hindi meaning of this word (the API sends English text when there is none)
-          var hiW = null;
-          for (var q = 0; q < hiWords.length; q++) {
-            if (hiWords[q].position === w.position) { hiW = hiWords[q]; break; }
-          }
-          var hi = '';
-          if (hiW && hiW.translation && hiW.translation.text && String(hiW.translation.language_name).toLowerCase() === 'hindi') {
-            hi = String(hiW.translation.text).trim();
-          }
-          var tr = (w.transliteration && w.transliteration.text) ? w.transliteration.text : '';
-          var last = groups.length ? groups[groups.length - 1] : null;
-          if (!ml && last && last.ml) {
-            last.ar += ' ' + ar;
-            if (en) last.en += (last.en ? ' ' : '') + en;
-            if (hi) last.hi += (last.hi ? ' ' : '') + hi;
-            if (tr) last.tr += (last.tr ? ' ' : '') + tr;
-          } else {
-            groups.push({ ar: ar, ml: ml, en: en, hi: hi, tr: tr });
-          }
-        });
+    return html;
+  }
 
-        var wordsHtml = groups.map(function (g) {
-          var searchTag = qfAttr((g.ar + ' ' + g.tr + ' ' + g.en + ' ' + g.ml + ' ' + g.hi).toLowerCase());
-          return '<div class="word-block" data-search="' + searchTag + '">'
-            + '<div class="word-arabic">' + g.ar + '</div>'
-            + (g.ml ? '<div class="word-gloss ml">' + g.ml + '</div>' : '')
-            + (g.en ? '<div class="word-gloss en">' + g.en + '</div>' : '')
-            + (g.hi ? '<div class="word-gloss hi">' + g.hi + '</div>' : '')
-            + '</div>';
-        }).join('');
+  // Keeps the verse you are reading in the same place on screen while the chapter is redrawn.
+  function repaintKeepingPosition(fn) {
+    var best = null, min = Infinity;
+    dynamicContainer.querySelectorAll('.ayah').forEach(function (el) {
+      var t = el.getBoundingClientRect().top;
+      if (Math.abs(t) < min) { min = Math.abs(t); best = el; }
+    });
+    var n = best ? best.getAttribute('data-ayah') : null;
+    var before = best ? best.getBoundingClientRect().top : 0;
+    fn();
+    if (n) {
+      var el = dynamicContainer.querySelector('.ayah[data-ayah="' + n + '"]');
+      if (el) {
+        var after = el.getBoundingClientRect().top;
+        if (after !== before) window.scrollBy(0, after - before);
+      }
+    }
+  }
 
-        if (!wordsHtml) wordsHtml = '<p class="translation-loading">Word-by-word not available</p>';
+  // Loads a chapter in steps so the page appears quickly:
+  //  1. Arabic + Malayalam word-by-word (one request) are shown as soon as they arrive,
+  //  2. the Malayalam translation is added when QuranEnc answers,
+  //  3. English / Hindi word-by-word and the other translations are added when they arrive.
+  function loadDynamicChapter(surahNum, attempt) {
+    attempt = attempt || 0;
+    var data = {
+      verses: null,
+      enVerses: [],
+      mlData: { ayahs: null, name: 'Abdulhamid Haidar Al-Madany & Kunhi Muhammad' },
+      enData: { ayahs: null, name: 'Saheeh International' },
+      hiData: { verses: [], tr: null }
+    };
+    var restSettled = false;
 
-        html += '<section class="ayah" data-ayah="' + n + '">'
-          + '<div class="ayah-head"><span class="ayah-number">' + surahNum + ':' + n + '</span>'
-          + '<button type="button" class="share-btn" aria-label="Share this ayah">' + shareIconSvgGeneric + '</button></div>'
-          + '<p class="ayah-full-arabic"><span class="arabic-live" data-ayah="' + n + '">' + arabicText + '</span> <span class="ayah-end-num">(' + toArabicDigitsGeneric(n) + ')</span></p>'
-          + '<div class="word-row">' + wordsHtml + '</div>'
-          + '<div class="ayah-translations">' + translationsHtml + '</div>'
-          + '</section>';
-      });
-
-      loadedChapters[surahNum] = html;
+    function paint(final) {
+      if (!data.verses) return;
+      var html = buildChapterHtml(surahNum, data, final);
+      if (final) loadedChapters[surahNum] = html;
       if (String(activeChapter) !== String(surahNum)) return; // user already moved to another surah
-
-      dynamicContainer.innerHTML = html;
+      repaintKeepingPosition(function () { dynamicContainer.innerHTML = html; });
       dynamicContainer.querySelectorAll('.share-btn').forEach(attachShareHandler);
       dynamicContainer.querySelectorAll('.word-block').forEach(attachWordBlockHandler);
       applyTranslationVisibility();
       applyWordByWordVisibility();
       applyFontSize(currentFontStep);
+    }
+
+    // All requests start together, so nothing waits for another.
+    var pVerses = qfChapterVerses(surahNum, 'ml');
+    var pMl = fetchQuranEncSura('malayalam_kunhi', surahNum).catch(function () { return null; }).then(function (a) {
+      data.mlData.ayahs = a;
+    });
+    var pRest = Promise.all([
+      qfChapterVerses(surahNum, 'en').catch(function () { return []; }).then(function (v) { data.enVerses = v; }),
+      fetchSurahAyahs(EN_EDITION, surahNum).catch(function () { return null; }).then(function (a) { data.enData.ayahs = a; }),
+      qfResolveHindi().then(function (tr) {
+        return qfChapterVerses(surahNum, 'hi', tr ? '&translations=' + tr.id : '')
+          .catch(function () { return []; })
+          .then(function (v) { data.hiData = { verses: v, tr: tr }; });
+      })
+    ]).then(function () { restSettled = true; });
+
+    pVerses.then(function (verses) {
+      if (!verses.length) { handleLoadFail(surahNum, attempt); return; }
+      data.verses = verses;
+      paint(false);                                        // step 1
+      pMl.then(function () { if (!restSettled) paint(false); });   // step 2
+      Promise.all([pMl, pRest]).then(function () { paint(true); }); // step 3
     }).catch(function () {
       handleLoadFail(surahNum, attempt);
     });

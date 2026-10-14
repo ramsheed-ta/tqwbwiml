@@ -1248,6 +1248,21 @@
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script>
+/* Always start at the very top (so the Bismillah line is visible) on first open and after refresh */
+(function () {
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+  var touched = false;
+  ['touchstart', 'wheel', 'keydown', 'mousedown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { touched = true; }, { passive: true, once: true });
+  });
+  function top() { if (!touched && (window.pageYOffset || document.documentElement.scrollTop)) window.scrollTo(0, 0); }
+  top();
+  document.addEventListener('DOMContentLoaded', top);
+  window.addEventListener('load', function () { top(); setTimeout(top, 100); setTimeout(top, 400); });
+  window.addEventListener('pageshow', function () { top(); setTimeout(top, 100); });
+})();
+</script>
 </head>
 <body>
 
@@ -1735,27 +1750,23 @@
         <span class="sources-what">Tadabbur Quran is a free, non-commercial website for studying the Quran word by word, in several languages. It is an independent project. It uses the Quran Foundation API (the Quran Foundation also runs Quran.com and QuranReflect) and is not an official app of the Quran Foundation, QuranEnc.com or Al Quran Cloud. Effective from 13 October 2026.</span>
       </div>
       <div class="sources-item">
-        <b>What this site collects</b><br>
-        <span class="sources-what">There is no sign-in and no advertising. This site does not ask for your name, email address or location, and does not set cookies of its own.</span>
-      </div>
-      <div class="sources-item">
-        <b>Saved on your device</b><br>
-        <span class="sources-what">Your settings (such as text size, languages and display options) and your Last read position are saved only in your own browser. This site does not receive them. They stay until you clear your browser data.</span>
-      </div>
-      <div class="sources-item">
         <b>Services used</b><br>
-        <span class="sources-what">When a page opens, your device connects to Vercel (hosting), Cloudflare (which passes requests to the Quran Foundation API), the Quran Foundation, QuranEnc.com, Al Quran Cloud and Google Fonts, to load the website, the text, the translations and the fonts. Like any website, loading this page means these services receive your IP address. The hosting provider may also collect basic, aggregated usage statistics. Each service has its own privacy policy, for example:
+        <span class="sources-what">When a page opens, your device connects to Vercel (hosting), Cloudflare (which passes requests to the Quran Foundation API), the Quran Foundation, QuranEnc.com, Al Quran Cloud and Google Fonts, to load the website, the text, the translations and the fonts. Each service has its own privacy policy, for example:
         <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Vercel</a>,
         <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare</a>,
         <a href="https://developers.google.com/fonts/faq/privacy" target="_blank" rel="noopener noreferrer">Google Fonts</a>.</span>
       </div>
       <div class="sources-item">
-        <b>Feedback emails</b><br>
-        <span class="sources-what">If you send feedback by email, this site receives your email address and your message. They are used only to reply and to fix problems, and are kept only as long as needed for that.</span>
+        <b>Saved on your device</b><br>
+        <span class="sources-what">Your settings (such as text size, languages and display options) and your Last read position are saved only in your own browser. They stay until you clear your browser data.</span>
       </div>
       <div class="sources-item">
-        <b>Children</b><br>
-        <span class="sources-what">The website is for a general audience. This site does not knowingly collect personal information from anyone, including children.</span>
+        <b>What this site acquire</b><br>
+        <span class="sources-what">There is no sign-in and no advertising. This site does not ask for your name, email address or location, and does not set cookies of its own.</span>
+      </div>
+      <div class="sources-item">
+        <b>Feedback emails</b><br>
+        <span class="sources-what">If you send feedback by email, this site receives your email address and your message. They are used only to reply and to fix problems, and are kept only as long as needed for that.</span>
       </div>
       <div class="sources-item">
         <b>Security</b><br>

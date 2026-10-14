@@ -1766,7 +1766,7 @@
       </div>
       <div class="sources-item">
         <b>Feedback emails</b><br>
-        <span class="sources-what">If you send feedback by email, this site receives your email address and your message. They are used only to reply and to fix problems, and are kept only as long as needed for that.</span>
+        <span class="sources-what">If you send feedback by email, this site receives your email address and your message. They are used only to reply and to fix problems, and are kept only as long as needed for that. tqwbwiml.feedback@gmail.com</span>
       </div>
       <div class="sources-item">
         <b>Security</b><br>
@@ -1784,7 +1784,7 @@
       </div>
       <div class="sources-item">
         <b>Content</b><br>
-        <span class="sources-what">The Quranic text, translations, fonts and other material belong to their respective owners (see Sources &amp; credits). If you reuse any content, please follow the terms of the original source, and do not change or misrepresent the Quranic text.</span>
+        <span class="sources-what">The Quranic text, translations, fonts and other material belong to their respective owners (see Sources &amp; credits). If you reuse any content, please follow the terms of the original source.</span>
       </div>
       <div class="sources-item">
         <b>Word-by-word meanings</b><br>
@@ -1792,7 +1792,7 @@
       </div>
       <div class="sources-item">
         <b>No warranty</b><br>
-        <span class="sources-what">The website is provided as it is, without any warranty. It may contain mistakes or be unavailable at times. To report a problem, please use Feedback.</span>
+        <span class="sources-what">The website is provided as it is, without any warranty. It may contain mistakes or be unavailable at times. To report a problem, please email tqwbwiml.feedback@gmail.com</span>
       </div>
       <div class="sources-item">
         <b>Changes</b><br>
@@ -2149,7 +2149,7 @@
     function buildHref() {
       var surah = (typeof activeChapter !== 'undefined' && activeChapter) ? String(activeChapter) : '';
       var typed = textBox ? textBox.value.trim() : '';
-      var footer = '\n\n---\nPage: https://tqwbwiml.vercel.app' + (surah ? ' (surah ' + surah + ' was open)' : '');
+      var footer = '\n\n---\nPage: ' + location.origin + (surah ? ' (surah ' + surah + ' was open)' : '');
       var body = typed
         ? 'Assalamu Alaikum,\n\n' + typed + footer
         : 'Assalamu Alaikum,\n\nSurah:Ayah (for example 96:1): \nWhat is wrong, or your suggestion:\n\n' + footer;

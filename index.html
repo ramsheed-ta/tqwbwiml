@@ -1590,6 +1590,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Word search: tapping a verse to close the search arrows no longer also opens the language box.</li>
           <li>Last read now remembers the order (Mushaf or Revelation) too, and switches back to it when you tap it.</li>
           <li>Added a "Privacy &amp; Terms" page (link at the bottom of the page).</li>
           <li>The title bars of "Last updated" and "Sources &amp; credits" now stay fixed at the top while you scroll. The default text size is now 5.</li>
@@ -1661,6 +1662,7 @@
                 <td>Oct 2026</td><td>Messages</td>
                 <td><ul>
                   <li>Loading and error messages are in English.</li>
+                  <li>Word search: the tap that closes the search arrows no longer also opens the verse language box.</li>
                   <li>Last read: tapping it now also returns to the order (Mushaf or Revelation) the place was read in.</li>
                   <li>Privacy &amp; Terms page added.</li>
                   <li>Faster chapter loading: the Arabic and Malayalam word-by-word are shown first; translations and other languages are added as they arrive. A slow source can no longer keep the chapter loading forever.</li>
@@ -2024,6 +2026,10 @@
       if (card.contains(t)) return;                    // ticking a language inside the box
       clearTimeout(timer);
       if (currentSec) { closeCard(); lastClick = 0; return; }   // tap outside: just close the box
+      // While a word search is on, a tap on the page only closes the search (and its arrow bar);
+      // it must not also open this box.
+      var wsNav = document.getElementById('wordSearchFab'), wsInput = document.getElementById('wordSearchInput');
+      if ((wsNav && !wsNav.hidden) || (wsInput && wsInput.value.trim())) { lastClick = 0; return; }
       var sec = t.closest('.ayah');
       if (!sec) return;
       if (t.closest('button, a, input, select, textarea, label, .word-block, .settings-overlay, .chapter-sheet-overlay, .verse-sheet-overlay, .sources-overlay')) return;

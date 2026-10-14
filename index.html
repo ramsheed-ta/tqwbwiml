@@ -45,10 +45,14 @@
 
   html {
     font-size: 16px;
+    overflow-x: hidden;          /* the page must never slide sideways */
+    overscroll-behavior-x: none; /* no sideways rubber-band on iPhone */
   }
 
   body {
     min-height: 100vh;
+    max-width: 100%;
+    overflow-x: clip;            /* cut off anything wider than the screen */
   }
 
   .page {

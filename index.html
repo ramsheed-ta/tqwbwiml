@@ -1590,6 +1590,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Last read now remembers the order (Mushaf or Revelation) too, and switches back to it when you tap it.</li>
           <li>Added a "Privacy &amp; Terms" page (link at the bottom of the page).</li>
           <li>The title bars of "Last updated" and "Sources &amp; credits" now stay fixed at the top while you scroll. The default text size is now 5.</li>
           <li>Sources &amp; credits: QuranEnc.com translation text is shown exactly as published; only the footnote reference numbers are hidden.</li>
@@ -1660,6 +1661,7 @@
                 <td>Oct 2026</td><td>Messages</td>
                 <td><ul>
                   <li>Loading and error messages are in English.</li>
+                  <li>Last read: tapping it now also returns to the order (Mushaf or Revelation) the place was read in.</li>
                   <li>Privacy &amp; Terms page added.</li>
                   <li>Faster chapter loading: the Arabic and Malayalam word-by-word are shown first; translations and other languages are added as they arrive. A slow source can no longer keep the chapter loading forever.</li>
                   <li>A chapter that fails to load is retried automatically.</li>
@@ -2254,11 +2256,17 @@
     var KEY = 'wbw_lastread_v1';
     var TOP_OFFSET = 68;
     var shown = '';          // what the pill shows: "11:5"
+    var shownMode = '';      // the order (rev / normal) that place was read in
     var cur = '';            // where you are reading now
+    var curMode = '';
     var userScrolled = false;
     var timer = null;
 
-    try { var st = JSON.parse(localStorage.getItem(KEY) || 'null'); if (st && /^\d+:\d+$/.test(st.cur)) shown = st.cur; } catch (e) {}
+    try { var st = JSON.parse(localStorage.getItem(KEY) || 'null'); if (st && /^\d+:\d+$/.test(st.cur)) { shown = st.cur; shownMode = (st.mode === 'normal' || st.mode === 'rev') ? st.mode : ''; } } catch (e) {}
+    function modeNow() {
+      var n = document.getElementById('chapterSheetBtnNormal');
+      return (n && n.classList.contains('box-selected')) ? 'normal' : 'rev';
+    }
 
     function render() {
       if (shown) { pill.textContent = shown; pill.hidden = false; pill.setAttribute('aria-label', 'Last read ' + shown + ' - tap to continue'); }
@@ -2284,11 +2292,11 @@
     function save() {
       var k = currentKey();
       if (!/^\d+:\d+$/.test(k)) return;
-      cur = k;
-      try { localStorage.setItem(KEY, JSON.stringify({ cur: k })); } catch (e) {}
+      cur = k; curMode = modeNow();
+      try { localStorage.setItem(KEY, JSON.stringify({ cur: k, mode: curMode })); } catch (e) {}
     }
     function remember() {   // the place you are leaving becomes the new "last read"
-      if (userScrolled && /^\d+:\d+$/.test(cur)) { shown = cur; render(); }
+      if (userScrolled && /^\d+:\d+$/.test(cur)) { shown = cur; shownMode = curMode; render(); }
     }
 
     window.addEventListener('scroll', function () {
@@ -2312,9 +2320,10 @@
       window.scrollTo({ top: Math.max(0, sec.getBoundingClientRect().top + window.pageYOffset - TOP_OFFSET), behavior: 'smooth' });
     }
     pill.addEventListener('click', function () {
-      var target = shown;
+      var target = shown, mode = shownMode;
       if (!target) return;
       save(); remember();     // the pill now shows where you were before the jump
+      if (mode && typeof window.__setOrderMode === 'function') window.__setOrderMode(mode, target.split(':')[0]);
       var sec = findVerse(target);
       if (sec) { scrollToVerse(sec); return; }
       if (typeof window.switchToChapter === 'function') window.switchToChapter(target.split(':')[0]);
@@ -3466,6 +3475,21 @@
       // (the other order's button is NOT changed - each button only changes when its own list is used)
       savePrefs({ chapter: String(value), chapterList: chapterSheetBtnNormal.classList.contains('box-selected') ? 'normal' : 'rev' });
       return result;
+    };
+    // Used by "Last read": go back to the order (Mushaf / Revelation) that was in use when the place was saved
+    window.__setOrderMode = function (mode, value) {
+      value = String(value);
+      var rev = (mode !== 'normal');
+      chapterSheetBtn.classList.toggle('box-selected', rev);
+      chapterSheetBtnNormal.classList.toggle('box-selected', !rev);
+      window.__lastPick = window.__lastPick || { normal: '1', rev: '96' };
+      if (rev) window.__lastPick.rev = value; else window.__lastPick.normal = value;
+      var row = (rev ? chapterSheetList : chapterSheetListNormal).querySelector('.chapter-sheet-row[data-value="' + value + '"]');
+      if (row) {
+        var html = row.querySelector('.chapter-sheet-num').textContent + '. ' + row.querySelector('.chapter-sheet-name').innerHTML;
+        if (rev) chapterSheetLabel.innerHTML = html; else chapterSheetLabelNormal.innerHTML = html;
+      }
+      updateSurahTitle(value);
     };
     updateSurahTitle('96', true);   // at the start Al-'Alaq is shown as revelation no. 1
     // (no syncChapterLabels here: the two buttons keep their own defaults - Mushaf = Al-Fatiha, Revelation = Al-'Alaq)

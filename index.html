@@ -1852,7 +1852,8 @@
       </div>
       <div class="sources-item">
         <b>Malayalam surah-name meanings</b><br>
-        <span class="sources-what">Sourced from the surah headings of quranmalayalam.com (translation by Cheriyamundam Abdul Hameed Madani &amp; Kunhi Muhammad Parappoor). Where that source gives only the name with no meaning, only the English meaning is shown.</span>
+        <span class="sources-what">Sourced from the surah headings of quranmalayalam.com (translation by Cheriyamundam Abdul Hameed Madani &amp; Kunhi Muhammad Parappoor). Where that source gives only the name with no meaning, only the English meaning is shown.</span><br>
+        <a href="https://quranmalayalam.com" target="_blank" rel="noopener noreferrer">quranmalayalam.com</a>
       </div>
       <div class="sources-item">
         <b>Al Quran Cloud (Islamic Network)</b><br>
@@ -2465,6 +2466,7 @@
       var shareText = "Ayah " + ayahNum + "\n" + arabic;
       if (wordLines.length) shareText += '\n\nWord by word:\n' + wordLines.join('\n');
       if (translationLines.length) shareText += '\n\nTranslation:\n' + translationLines.join('\n');
+      shareText += '\n\nTadabbur Quran';
 
       if (navigator.share) {
         navigator.share({ text: shareText }).catch(function () {});

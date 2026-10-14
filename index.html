@@ -1047,6 +1047,15 @@
   }
   #feedbackOverlay .sources-head { margin-bottom: 0; }
   #feedbackOverlay .sources-item { padding: 5px 0; }
+  /* Feedback box: text a little larger */
+  #feedbackOverlay .sources-title { font-size: 17px; }
+  #feedbackOverlay .sources-item { font-size: 15px; }
+  #feedbackOverlay .sources-what { font-size: 14px; }
+  #feedbackOverlay .feedback-email { font-size: 16px; }
+  #feedbackOverlay .feedback-text { font-size: 17px; }
+  #feedbackOverlay .feedback-send,
+  #feedbackOverlay .feedback-copy,
+  #feedbackOverlay .feedback-choice { font-size: 16px; }
   .feedback-choices {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1616,7 +1625,7 @@
           <li>The title bars of "Last updated" and "Sources &amp; credits" now stay fixed at the top while you scroll. The default text size is now 5.</li>
           <li>Sources &amp; credits: QuranEnc.com translation text is shown exactly as published; only the footnote reference numbers are hidden.</li>
           <li>Faster loading: the Arabic and Malayalam word-by-word appear first, and the translations are added as soon as they arrive.</li>
-          <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Gmail website or Outlook) with the message filled in.</li>
+          <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Yahoo Mail or Outlook) with the message filled in.</li>
           <li>Sources &amp; credits: added the QuranEnc.com Malayalam translation version (V1.0.3) and a note that footnote numbers are hidden.</li>
           <li>Browser auto-translate is switched off for the page, so Quran translations are shown exactly as they are.</li>
           <li>Added Last read: a small chapter:verse button at the top right to continue where you stopped.</li>
@@ -1665,7 +1674,7 @@
                 <td><ul>
                   <li>Added Feedback (email) and Last updated pages in the footer.</li>
                   <li>Sources &amp; credits updated.</li>
-                  <li>Feedback page: added a message box, moved the box higher and tightened the spacing. "Send email" now offers a choice of Mail, Gmail app, Gmail website or Outlook, with your message filled in.</li>
+                  <li>Feedback page: added a message box, moved the box higher and tightened the spacing. "Send email" now offers a choice of Mail, Gmail app, Yahoo Mail or Outlook, with your message filled in.</li>
                   <li>QuranEnc.com Malayalam translation version (V1.0.3, 30/05/2021) added to Sources &amp; credits, with a note that footnote reference numbers are hidden.</li>
                 </ul></td>
               </tr>
@@ -1753,22 +1762,22 @@
       </div>
       <div class="sources-item">
         <b>Services used</b><br>
-        <span class="sources-what">When a page opens, your device connects to Vercel (hosting), Cloudflare (which passes requests to the Quran Foundation API), the Quran Foundation, QuranEnc.com, Al Quran Cloud and Google Fonts, to load the website, the text, the translations and the fonts. Each service has its own privacy policy, for example:
+        <span class="sources-what">Loading this page initiates connections to Vercel and Cloudflare for content delivery. Vercel (hosting), Cloudflare (which passes requests to the Quran Foundation API), the Quran Foundation, QuranEnc.com, Al Quran Cloud and Google Fonts are used to load the website, the text, the translations and the fonts. Each service has its own privacy policy, for example:
         <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Vercel</a>,
         <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare</a>,
         <a href="https://developers.google.com/fonts/faq/privacy" target="_blank" rel="noopener noreferrer">Google Fonts</a>.</span>
       </div>
       <div class="sources-item">
-        <b>Saved on your device</b><br>
-        <span class="sources-what">Your settings (such as text size, languages and display options) and your Last read position are saved only in your own browser. They stay until you clear your browser data.</span>
+        <b>Saved on the user's browser</b><br>
+        <span class="sources-what">The user's settings (such as text size, languages and display options) and the user's Last read position are saved only in the user's own browser. They stay until the user clears their browser data.</span>
       </div>
       <div class="sources-item">
         <b>What this site acquire</b><br>
-        <span class="sources-what">There is no sign-in and no advertising. This site does not ask for your name, email address or location, and does not set cookies of its own.</span>
+        <span class="sources-what">There is no sign-in and no advertising. This site does not ask for the user's name, email address or location, and does not set cookies of its own.</span>
       </div>
       <div class="sources-item">
         <b>Feedback emails</b><br>
-        <span class="sources-what">If you send feedback by email, this site receives your email address and your message. They are used only to reply and to fix problems, and are kept only as long as needed for that. tqwbwiml.feedback@gmail.com</span>
+        <span class="sources-what">If a user sends feedback by email, this site receives the user's email address and message. They are used only to reply and to fix problems, and are kept only as long as needed for that. tqwbwiml.feedback@gmail.com</span>
       </div>
       <div class="sources-item">
         <b>Security</b><br>
@@ -1828,7 +1837,7 @@
       <div id="feedbackChoices" class="feedback-choices" hidden>
         <a id="fbMail" class="feedback-choice" href="#">Mail (Apple / iCloud)</a>
         <a id="fbGmailApp" class="feedback-choice" href="#">Gmail app</a>
-        <a id="fbGmailWeb" class="feedback-choice" href="#" target="_blank" rel="noopener noreferrer">Gmail website</a>
+        <a id="fbYahoo" class="feedback-choice" href="#" target="_blank" rel="noopener noreferrer">Yahoo Mail</a>
         <a id="fbOutlook" class="feedback-choice" href="#">Outlook app</a>
       </div>
     </div>
@@ -1847,12 +1856,12 @@
       </div>
       <div class="sources-item">
         <b>QuranEnc.com</b><br>
-        <span class="sources-what">Malayalam translation: Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad (Version V1.0.3, 30/05/2021). Loaded directly from QuranEnc.com, so it always follows their latest version. Footnote reference numbers are hidden because the footnote text is not shown; the translation text is otherwise not changed.</span><br>
+        <span class="sources-what">Malayalam translation: Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad (Version V1.0.3, 30/05/2021). Loaded directly from QuranEnc.com, so it always follows their latest version. Footnote reference numbers are hidden because the footnote text (additional explanation) is not shown; the translation text is otherwise not changed.</span><br>
         <a href="https://quranenc.com" target="_blank" rel="noopener noreferrer">quranenc.com</a>
       </div>
       <div class="sources-item">
         <b>Malayalam surah-name meanings</b><br>
-        <span class="sources-what">Sourced from the surah headings of quranmalayalam.com (translation by Cheriyamundam Abdul Hameed Madani &amp; Kunhi Muhammad Parappoor). Where that source gives only the name with no meaning, only the English meaning is shown.</span><br>
+        <span class="sources-what">Sourced from the surah headings of quranmalayalam.com (translation by Abdulhamid Haidar Al-Madany &amp; Kunhi Muhammad). Where that source gives only the name with no meaning, only the English meaning is shown.</span><br>
         <a href="https://quranmalayalam.com" target="_blank" rel="noopener noreferrer">quranmalayalam.com</a>
       </div>
       <div class="sources-item">
@@ -2162,7 +2171,7 @@
       var set = function (id, href) { var a = document.getElementById(id); if (a) a.href = href; };
       set('fbMail', 'mailto:' + EMAIL + '?subject=' + subj + '&body=' + bod);
       set('fbGmailApp', 'googlegmail:///co?to=' + to + '&subject=' + subj + '&body=' + bod);
-      set('fbGmailWeb', 'https://mail.google.com/mail/?view=cm&fs=1&to=' + to + '&su=' + subj + '&body=' + bod);
+      set('fbYahoo', 'https://compose.mail.yahoo.com/?to=' + to + '&subject=' + subj + '&body=' + bod);
       set('fbOutlook', 'ms-outlook://compose?to=' + to + '&subject=' + subj + '&body=' + bod);
     }
     var choices = document.getElementById('feedbackChoices');

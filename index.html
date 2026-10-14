@@ -181,6 +181,9 @@
   .chapter-sheet-list {
     position: relative;
     overflow-y: auto;
+    overflow-x: hidden;           /* the list must never slide sideways */
+    overscroll-behavior: contain;
+    touch-action: pan-y;
     padding: 0 16px;
     flex: 1 1 auto;
     min-height: 0;
@@ -219,7 +222,10 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    flex: 1 1 auto;
+    min-width: 0;                 /* lets long names go to the next line instead of widening the row */
   }
+  .chapter-sheet-name, .chapter-sheet-meaning { overflow-wrap: anywhere; }
 
   .chapter-sheet-name {
     font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif;
@@ -238,6 +244,7 @@
     white-space: nowrap;
     color: var(--ink-soft);
   }
+  .chapter-sheet-row .chapter-sheet-translit { white-space: normal; } /* only in the list: may go to the next line */
 
   .chapter-sheet-meaning {
     font-size: 14.5px;
@@ -771,6 +778,7 @@
 
   /* ---------- Floating settings button + modal ---------- */
   .page { padding-top: 68px; }
+  #dynamicChapterContent, .page { overflow-anchor: none; } /* the code keeps the reading position itself */
 
   .settings-fab {
     position: fixed;
@@ -945,6 +953,14 @@
   .surah-title-pill .stp-num { font-weight: 600; }
   .surah-title-pill .stp-en { overflow: hidden; text-overflow: ellipsis; }
   .surah-title-pill .stp-ar { font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; font-size: 17px; font-weight: 700; line-height: 1; }
+  /* Long surah names must never be cut off (seen on narrow Android phones) */
+  .surah-title-pill .stp-num, .surah-title-pill .stp-ar { flex: 0 0 auto; }
+  .surah-title-pill .stp-en:empty { display: none; }
+  @media (max-width: 420px) {
+    .surah-title-pill { padding: 0 10px; gap: 6px; }
+    .surah-order-tag { padding: 0 8px; font-size: 10.5px; }
+    .surah-title-wrap { gap: 4px; }
+  }
 
   /* Jump-to-ayah picker: centred card with a number box, a drum wheel and Go */
   html { touch-action: manipulation; } /* no double-tap zoom, so double tap can open the picker */
@@ -2309,6 +2325,7 @@
       if (shown) { pill.textContent = shown; pill.hidden = false; pill.setAttribute('aria-label', 'Last read ' + shown + ' - tap to continue'); }
       else pill.hidden = true;
       document.body.classList.toggle('has-last-read', !!shown);
+      if (window.fitSurahTitle) window.fitSurahTitle();
     }
     function verses() {
       return Array.prototype.filter.call(document.querySelectorAll('.ayah'), function (el) { return el.offsetParent !== null; });
@@ -3307,6 +3324,7 @@
   }
 
   // Keeps the verse you are reading in the same place on screen while the chapter is redrawn.
+  // (The page height is held for a moment, so a long surah such as Al-Baqarah cannot jump to the top.)
   function repaintKeepingPosition(fn) {
     var best = null, min = Infinity;
     dynamicContainer.querySelectorAll('.ayah').forEach(function (el) {
@@ -3315,6 +3333,8 @@
     });
     var n = best ? best.getAttribute('data-ayah') : null;
     var before = best ? best.getBoundingClientRect().top : 0;
+    var h = dynamicContainer.offsetHeight;
+    if (h) dynamicContainer.style.minHeight = h + 'px';
     fn();
     if (n) {
       var el = dynamicContainer.querySelector('.ayah[data-ayah="' + n + '"]');
@@ -3323,7 +3343,12 @@
         if (after !== before) window.scrollBy(0, after - before);
       }
     }
+    setTimeout(function () { dynamicContainer.style.minHeight = ''; }, 300);
   }
+
+  // Do not redraw the chapter while the finger is still scrolling - wait until the page is still.
+  var lastScrollAt = 0;
+  window.addEventListener('scroll', function () { lastScrollAt = Date.now(); }, { passive: true });
 
   // Loads a chapter in steps so the page appears quickly:
   //  1. Arabic + Malayalam word-by-word (one request) are shown as soon as they arrive,
@@ -3340,17 +3365,35 @@
     };
     var restSettled = false;
 
-    function paint(final) {
-      if (!data.verses) return;
-      var html = buildChapterHtml(surahNum, data, final);
-      if (final) loadedChapters[surahNum] = html;
-      if (String(activeChapter) !== String(surahNum)) return; // user already moved to another surah
+    var pendingHtml = null, pendingTimer = null, waited = 0;
+    function applyPending() {
+      pendingTimer = null;
+      if (pendingHtml === null) return;
+      if (String(activeChapter) !== String(surahNum)) { pendingHtml = null; return; } // user moved to another surah
+      // still scrolling? try again in a moment (at most about 4 seconds)
+      if (Date.now() - lastScrollAt < 250 && waited < 4000) {
+        waited += 120;
+        pendingTimer = setTimeout(applyPending, 120);
+        return;
+      }
+      waited = 0;
+      var html = pendingHtml;
+      pendingHtml = null;
       repaintKeepingPosition(function () { dynamicContainer.innerHTML = html; });
       dynamicContainer.querySelectorAll('.share-btn').forEach(attachShareHandler);
       dynamicContainer.querySelectorAll('.word-block').forEach(attachWordBlockHandler);
       applyTranslationVisibility();
       applyWordByWordVisibility();
       applyFontSize(currentFontStep);
+    }
+
+    function paint(final) {
+      if (!data.verses) return;
+      var html = buildChapterHtml(surahNum, data, final);
+      if (final) loadedChapters[surahNum] = html;
+      if (String(activeChapter) !== String(surahNum)) return; // user already moved to another surah
+      pendingHtml = html;                                      // the newest version always wins
+      if (!pendingTimer) pendingTimer = setTimeout(applyPending, 0);
     }
 
     // All requests start together, so nothing waits for another.
@@ -3462,6 +3505,21 @@
     var stpEn = document.getElementById('stpEn');
     var stpAr = document.getElementById('stpAr');
 
+    // Shrink the Arabic surah name a little when the pill is too narrow, so it is never cut off
+    function fitSurahTitle() {
+      if (!pill || !stpAr) return;
+      stpAr.style.fontSize = '';
+      var size = 17;
+      while (pill.scrollWidth > pill.clientWidth + 0.5 && size > 11) {
+        size -= 0.5;
+        stpAr.style.fontSize = size + 'px';
+      }
+    }
+    window.fitSurahTitle = fitSurahTitle;
+    window.addEventListener('resize', fitSurahTitle);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitSurahTitle);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSurahTitle);
+
     function updateSurahTitle(value, forceRev) {
       var row = chapterSheetListNormal.querySelector('.chapter-sheet-row[data-value="' + value + '"]');
       if (!row) return;
@@ -3484,6 +3542,7 @@
       stpAr.textContent = ar;
       var tagEl = document.getElementById('surahOrderTag');
       if (tagEl) tagEl.textContent = tag;
+      fitSurahTitle();
     }
     // Keep BOTH Settings buttons showing the surah that is open now
     // (before this, the Mushaf Order button always stayed on "1. Al-Fatiha")

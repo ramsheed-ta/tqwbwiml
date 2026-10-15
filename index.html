@@ -86,11 +86,12 @@
     font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', 'Lora', serif;
     font-size: 13px;
     font-weight: 400;
-    color: var(--ink);
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    color: #24292f;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
     padding: 4px 9px;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -168,9 +169,9 @@
     padding: 6px 12px;
     font-family: 'Lora', serif;
     font-size: 16px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: #f7f7f7;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    background: #f6f8fa;
     color: var(--ink);
   }
 
@@ -274,8 +275,8 @@
   }
 
   .chapter-sheet-btn.box-selected {
-    border-color: #90c978;
-    border-width: 1.5px;
+    border-color: #8c959f;
+    background: #eaeef2;
   }
 
   .chapter-select-label {
@@ -317,10 +318,12 @@
   }
 
   .font-size-btn {
-    background: none;
-    border: none;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06);
     font-size: 18px;
-    color: var(--ink);
+    color: #24292f;
     cursor: pointer;
     padding: 0 8px;
     line-height: 1;
@@ -382,7 +385,7 @@
     text-overflow: ellipsis;
   }
 
-  .word-search-input:focus { outline: none; border-color: var(--ink-soft); }
+  .word-search-input:focus { outline: none; border-color: #8c959f; }
 
   .word-search-clear {
     position: absolute;
@@ -814,10 +817,10 @@
     width: 44px;
     height: 44px;
     padding: 0;
-    border-radius: 50%;
-    background: #fff;
-    border: 1.5px solid #b9e0a5;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+    border-radius: 8px;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06), 0 2px 8px rgba(0,0,0,0.10);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -825,7 +828,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   .settings-fab svg { width: 22px; height: 22px; stroke: #000; stroke-width: 2; stroke-linecap: round; }
-  .settings-fab:active { background: #f0f0f0; }
+  .settings-fab:active { background: #eaeef2; }
 
   .settings-overlay {
     position: fixed;
@@ -845,7 +848,7 @@
     max-width: 440px;
     max-height: 100%;
     overflow-y: auto;
-    border: 1.5px solid #b9e0a5;
+    border: 1px solid #d0d7de;
     border-radius: 16px;
     padding: 10px 16px 12px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.25);
@@ -863,13 +866,32 @@
     margin-bottom: 6px;
   }
   .settings-modal-title { font-size: 14px; font-weight: 600; }
+  .settings-modal-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .howto-box .sources-head.sticky-top { flex-wrap: wrap; }
+  .howto-tabs { display: flex; gap: 6px; width: 100%; margin-top: 8px; }
+  .howto-tab { flex: 1; font: inherit; font-size: 14px; font-weight: 500; padding: 7px 0; border-radius: 8px; border: 1px solid #d0d7de; background: #f6f8fa; color: #24292f; cursor: pointer; box-shadow: 0 1px 0 rgba(27,31,36,0.06); }
+  .howto-tab.active { background: #e2e6ea; border-color: #afb8c1; font-weight: 600; }
+  .howto-pane { font-size: 14px; line-height: 1.55; color: var(--ink); }
+  .howto-pane[lang="ml"] { font-family: 'Noto Serif Malayalam', serif; }
+  .howto-pane[lang="en"] { font-family: 'Inter', sans-serif; }
+  .howto-pane[lang="hi"] { font-family: 'Noto Serif Devanagari', serif; }
+  .howto-pane[hidden] { display: none; }
+  .howto-pane .ht-main { font-size: 16px; font-weight: 600; margin: 8px 0 10px; }
+  .howto-pane .ht-head { margin: 12px 0 6px; font-weight: 600; }
+  .howto-pane .ht-item { margin: 0 0 10px; }
+  .howto-pane .ht-t { font-weight: 600; }
+  .howto-pane .ht-quote { margin: 8px 0 4px; padding-left: 10px; border-left: 3px solid #b9e0a5; }
+  .howto-pane .ht-quote div { margin: 0 0 6px; }
+  .howto-btn { font: inherit; font-size: 13px; font-weight: 500; color: #24292f; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 6px 12px; cursor: pointer; white-space: nowrap; box-shadow: 0 1px 0 rgba(27,31,36,0.06); }
+  .howto-btn:active { background: #eaeef2; }
   .settings-close {
     width: 28px;
     height: 28px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: #fff;
-    color: var(--ink);
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    background: #f6f8fa;
+    color: #24292f;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06);
     font-size: 12px;
     line-height: 1;
     cursor: pointer;
@@ -885,19 +907,19 @@
     height: 34px;
     margin-left: auto;
     padding: 0 12px;
-    border-radius: 9px;
-    border: none;
-    background: #d3eebc;
-    color: #24500f;
-    box-shadow: 0 2px 8px rgba(150, 205, 110, 0.35);
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    background: #f6f8fa;
+    color: #24292f;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06);
     font-family: inherit;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .wsm-go-btn:active { background: #c1e5a5; box-shadow: 0 1px 4px rgba(150, 205, 110, 0.3); }
+  .wsm-go-btn:active { background: #eaeef2; }
   .wsm-go-btn[hidden] { display: none; }
   .word-search-fabbtn svg {
     width: 22px;
@@ -917,10 +939,10 @@
   .settings-controls .chapter-row { gap: 8px; }
   .settings-controls .chapter-row + .chapter-row { margin-top: 0 !important; }
   .settings-controls .chapter-note:empty { display: none; }
-  .settings-controls .chapter-sheet-btn { padding: 6px 12px; line-height: 1.3; font-size: 1rem; border-radius: 10px; }
+  .settings-controls .chapter-sheet-btn { padding: 6px 12px; line-height: 1.3; font-size: 1rem; border-radius: 8px; }
   .settings-controls .toggle-label { margin-bottom: 0; }
   .settings-controls .lang-toggles { gap: 12px; }
-  .settings-controls .font-size-btn { padding: 0 10px; }
+  .settings-controls .font-size-btn { padding: 0 12px; height: 30px; min-width: 36px; }
   .settings-controls .word-search-row { margin-top: 0; }
 
   .settings-controls.search-focused > *:not(.word-search-row) { display: none !important; }
@@ -947,13 +969,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #fff;
-    border: 1.5px solid #b9e0a5;
-    border-radius: 999px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06), 0 2px 8px rgba(0,0,0,0.10);
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    color: var(--ink);
+    color: #24292f;
     cursor: pointer;
     overflow: hidden;
     white-space: nowrap;
@@ -965,17 +987,17 @@
     padding: 0 10px;
     display: flex;
     align-items: center;
-    background: #fff;
-    border: 1px solid #b9e0a5;
-    border-radius: 999px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06);
     font-family: 'Inter', sans-serif;
     font-size: 11px;
-    color: #4d7a35;
+    color: #24292f;
     white-space: nowrap;
   }
   .surah-order-tag:empty { display: none; }
-  .surah-title-pill:active { background: #f0f0f0; }
+  .surah-title-pill:active { background: #eaeef2; }
   .surah-title-pill .stp-num { font-weight: 600; }
   .surah-title-pill .stp-en { overflow: hidden; text-overflow: ellipsis; }
   .surah-title-pill .stp-ar { font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; font-size: 17px; font-weight: 700; line-height: 1; }
@@ -1114,47 +1136,33 @@
     box-sizing: border-box;
     text-align: center;
     padding: 9px 6px;
-    border-radius: 12px;
-    border: 1.5px solid #b9e0a5;
-    background: #fff;
-    color: var(--ink);
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    background: #f6f8fa;
+    color: #24292f;
     font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06);
   }
-  .feedback-text {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 64px;
-    max-height: 160px;
-    margin: 6px 0 0;
-    padding: 10px 12px;
-    border: 1.5px solid #b9e0a5;
-    border-radius: 12px;
-    background: #fff;
-    color: var(--ink);
-    font: inherit;
-    font-size: 16px; /* 16px stops iOS auto-zoom on focus */
-    line-height: 1.5;
-    resize: vertical;
-  }
-  .feedback-text:focus { outline: none; border-color: #8fcb73; }
   .feedback-actions { display: flex; gap: 8px; margin-top: 8px; }
   .feedback-send, .feedback-copy {
     flex: 1;
     box-sizing: border-box;
     text-align: center;
     padding: 10px 8px;
-    border-radius: 12px;
-    border: 1.5px solid #b9e0a5;
-    background: #fff;
-    color: var(--ink);
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    background: #f6f8fa;
+    color: #24292f;
     font: inherit;
     font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
     cursor: pointer;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06);
   }
-  .feedback-send { background: #f1f9ec; }
+  .feedback-send:active, .feedback-copy:active, .feedback-choice:active { background: #eaeef2; }
 
   /* Bottom close button of the Sources & credits / Last updated boxes: same plain button as the top one, at the end of the content (not a sticky bar) */
   .sources-bottom {
@@ -1274,20 +1282,20 @@
     padding: 0 12px;
     display: flex;
     align-items: center;
-    background: #fff;
-    border: 1.5px solid #b9e0a5;
-    border-radius: 999px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.06), 0 2px 8px rgba(0,0,0,0.10);
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 400;
-    color: var(--ink);
+    color: #24292f;
     white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
   .last-read-pill[hidden] { display: none; }
-  .last-read-pill:active { background: #f0f0f0; }
+  .last-read-pill:active { background: #eaeef2; }
   body.has-last-read .surah-title-wrap { max-width: calc(100vw - 160px); }
 
   /* Verse shown at the top of the footer */
@@ -1611,7 +1619,10 @@
   <div id="settingsOverlay" class="settings-overlay" hidden>
     <div class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings">
       <div class="settings-modal-head">
-        <span class="settings-modal-title">Settings</span>
+        <span class="settings-modal-left">
+          <span class="settings-modal-title">Settings</span>
+          <button type="button" id="howToBtn" class="howto-btn">How to use Quran website</button>
+        </span>
         <button type="button" id="settingsClose" class="settings-close" aria-label="Close settings">✕</button>
       </div>
 
@@ -1813,6 +1824,74 @@
         <button type="button" id="welcomeClose" class="settings-close" aria-label="Close">✕</button>
       </div>
       <div id="welcomeAyah" class="welcome-ayah"></div>
+    </div>
+  </div>
+
+  <div id="howToOverlay" class="sources-overlay" hidden>
+    <div class="sources-box howto-box" role="dialog" aria-modal="true" aria-label="How to use Quran website">
+      <div class="sources-head sticky-top">
+        <span class="sources-title">How to use Quran website</span>
+        <button type="button" id="howToClose" class="settings-close" aria-label="Close how to use">✕</button>
+        <div class="howto-tabs">
+          <button type="button" class="howto-tab active" data-tab="ml">മലയാളം</button>
+          <button type="button" class="howto-tab" data-tab="en">English</button>
+          <button type="button" class="howto-tab" data-tab="hi">हिन्दी</button>
+        </div>
+      </div>
+      <div class="howto-pane" data-pane="ml" lang="ml">
+<p class="ht-main">📖 <i>ഖുർആൻ വെബ്‌സൈറ്റ് ഉപയോഗിക്കുന്ന വിധം</i></p>
+<div class="ht-item"><div class="ht-t">🖥️ <i>GUI (Graphical User Interface):</i></div><div class="ht-b">വെബ്‌സൈറ്റിലെ മെനുകൾ, ബട്ടണുകൾ, ഐക്കണുകൾ എന്നിവ ഉപയോഗിച്ച് വിവിധ ഫീച്ചറുകൾ എളുപ്പത്തിൽ ഉപയോഗിക്കാം.</div></div>
+<p class="ht-head"><i>മെനു &amp; സെറ്റിംഗ്‌സ്:</i></p>
+<div class="ht-item"><div class="ht-t">📚 <i>Surah Order:</i></div><div class="ht-b">ഖുർആൻ ക്രമത്തിലോ, അവതരണ ക്രമത്തിലോ <i>(Revelation Order)</i> വായിക്കാം.</div></div>
+<div class="ht-item"><div class="ht-t">🔤 <i>Languages:</i></div><div class="ht-b">മലയാളം, ഇംഗ്ലീഷ്, ഹിന്ദി ഭാഷകളിലെ വാക്ക്-പ്രതി-വാക്ക് <i>(Word-by-word)</i> അർത്ഥവും വിവർത്തനവും തിരഞ്ഞെടുക്കാം.</div></div>
+<div class="ht-item"><div class="ht-t">🔠 <i>Font Size:</i></div><div class="ht-b">- / + അമർത്തി അക്ഷരങ്ങളുടെ വലിപ്പം കൂട്ടാം/കുറയ്ക്കാം.</div></div>
+<div class="ht-item"><div class="ht-t">🔍 <i>Search - പദങ്ങൾ തിരയാൻ:</i></div><div class="ht-b">സെറ്റിംഗ്സിലെ സെർച്ച് ബാർ ഉപയോഗിച്ച് <i>Arabic, Malayalam, English, Hindi</i> യിൽ ഉള്ള ഏത് പദങ്ങളും വേഗത്തിൽ തിരയാം.</div></div>
+<div class="ht-item"><div class="ht-t">📖 <i>Word Meaning:</i></div><div class="ht-b">ഓരോ അറബി വാക്കിനും താഴെയായി അതിന്റെ അർത്ഥം കാണാം.</div></div>
+<div class="ht-item"><div class="ht-t">✅ <i>Ayah - ഖുർആൻ മാത്രം വായിക്കാൻ:</i></div><div class="ht-b">സെറ്റിംഗ്സിൽ Ayah ഓപ്ഷനിൽ ഗ്രീൻ ടിക്ക് ചെയ്താൽ, അർത്ഥങ്ങൾ ഒഴിവാക്കി <i>'ഖുർആൻ ആയത്തുകൾ മാത്രം'</i> വ്യക്തമായി വായിക്കാം.</div></div>
+<div class="ht-item"><div class="ht-t">💡 <i>Single Tap:</i></div><div class="ht-b">ആയത്തിലെ ഏതെങ്കിലും വാക്കിൽ തൊട്ടാൽ, ആ വാക്കിന്റെ അർത്ഥം ഏത് ഭാഷയിൽ വേണം എന്ന് തിരഞ്ഞെടുക്കാം.</div></div>
+<div class="ht-item"><div class="ht-t">🔢 <i>Double Tap:</i></div><div class="ht-b">പേജിൽ എവിടെയും ഡബിൾ ടാപ്പ് ചെയ്താൽ <i>'Go to Ayah'</i> ഓപ്ഷൻ വരും. ആയത്ത് നമ്പർ സെലക്ട് ചെയ്ത് നേരിട്ട് പോകാം.</div></div>
+<div class="ht-item"><div class="ht-t">🔖 <i>Last Read - അവസാനം വായിച്ചത്:</i></div><div class="ht-b">മുകളിൽ കാണുന്ന സൂറത്തിന്റെ പേരും ആയത്ത് നമ്പറും <i>(ഉദാ: 96:1)</i> അമർത്തിയാൽ അവസാനം വായിച്ചു നിർത്തിയ ഭാഗത്തേക്ക് പോകാം.</div></div>
+<div class="ht-item"><div class="ht-t">🔼🔽 <i>Change Ayahs:</i></div><div class="ht-b">Up/Down ആരോ ബട്ടണുകൾ ഉപയോഗിക്കാം.</div></div>
+<div class="ht-item"><div class="ht-t">↗️ <i>Share:</i></div><div class="ht-b">ഏതൊരു ആയത്തും വാട്ട്‌സ്ആപ്പിലോ മറ്റ് ആപ്പുകളിലോ ഷെയർ ചെയ്യാൻ Share ഐക്കൺ അമർത്താം.</div></div>
+<p class="ht-head"><i>മറ്റ് വിവരങ്ങൾ - Footer / Info:</i></p>
+<div class="ht-quote"><div>🔍 <i>Sources &amp; credits:</i> ഉപയോഗിച്ചിരിക്കുന്ന വിവരങ്ങളുടെ ഉറവിടങ്ങൾ അറിയാൻ.</div><div>💬 <i>Feedback:</i> അഭിപ്രായങ്ങളോ നിർദ്ദേശങ്ങളോ അയക്കാൻ.</div><div>🔄 <i>Last updated:</i> വെബ്‌സൈറ്റ് അവസാനം അപ്‌ഡേറ്റ് ചെയ്ത തീയതി.</div></div>
+      </div>
+      <div class="howto-pane" data-pane="en" lang="en" hidden>
+<p class="ht-main">📖 <i>How to Use the Quran Website</i></p>
+<div class="ht-item"><div class="ht-t">🖥️ <i>GUI (Graphical User Interface):</i></div><div class="ht-b">User can easily use various features using menus, buttons, and icons on the website.</div></div>
+<p class="ht-head"><i>Menu &amp; Settings:</i></p>
+<div class="ht-item"><div class="ht-t">📚 <i>Surah Order:</i></div><div class="ht-b">User can read in Quran Order or <i>(Revelation Order).</i></div></div>
+<div class="ht-item"><div class="ht-t">🔤 <i>Languages:</i></div><div class="ht-b">User can select word-by-word meaning and translation in <i>Malayalam, English, Hindi.</i></div></div>
+<div class="ht-item"><div class="ht-t">🔠 <i>Font Size:</i></div><div class="ht-b">Press - / + to increase/decrease the font size.</div></div>
+<div class="ht-item"><div class="ht-t">🔍 <i>Search - To Search Words:</i></div><div class="ht-b">Using the search bar in Settings, user can quickly search for any word in <i>Arabic, Malayalam, English, Hindi.</i></div></div>
+<div class="ht-item"><div class="ht-t">📖 <i>Word Meaning:</i></div><div class="ht-b">User can see the meaning below each Arabic word.</div></div>
+<div class="ht-item"><div class="ht-t">✅ <i>Ayah - To Read Quran Only:</i></div><div class="ht-b">In Settings, if user green ticks the Ayah option, user can clearly read <i>'Quran Ayahs Only'</i> without meanings.</div></div>
+<div class="ht-item"><div class="ht-t">💡 <i>Single Tap:</i></div><div class="ht-b">If user taps on any word in the Ayah, user can select the language for its meaning.</div></div>
+<div class="ht-item"><div class="ht-t">🔢 <i>Double Tap:</i></div><div class="ht-b">If user double taps anywhere on the page, <i>'Go to Ayah'</i> option will appear. User can select the Ayah number and go directly.</div></div>
+<div class="ht-item"><div class="ht-t">🔖 <i>Last Read:</i></div><div class="ht-b">If user presses the Surah name and Ayah number shown on top <i>(e.g: 96:1),</i> user will go to the last read portion.</div></div>
+<div class="ht-item"><div class="ht-t">🔼🔽 <i>Change Ayahs:</i></div><div class="ht-b">User can use Up/Down arrow buttons.</div></div>
+<div class="ht-item"><div class="ht-t">↗️ <i>Share:</i></div><div class="ht-b">User can press the Share icon to share any Ayah on WhatsApp or other apps.</div></div>
+<p class="ht-head"><i>Other Information - Footer / Info:</i></p>
+<div class="ht-quote"><div>🔍 <i>Sources &amp; credits:</i> To know the sources of information used.</div><div>💬 <i>Feedback:</i> To send opinions or suggestions.</div><div>🔄 <i>Last updated:</i> The date when the website was last updated.</div></div>
+      </div>
+      <div class="howto-pane" data-pane="hi" lang="hi" hidden>
+<p class="ht-main">📖 <i>क़ुरआन वेबसाइट का उपयोग कैसे करें</i></p>
+<div class="ht-item"><div class="ht-t">🖥️ <i>GUI (Graphical User Interface):</i></div><div class="ht-b">वेबसाइट पर मौजूद मेनू, बटन और आइकन का उपयोग करके यूज़र विभिन्न फीचर्स को आसानी से इस्तेमाल कर सकता है।</div></div>
+<p class="ht-head"><i>मेनू और सेटिंग्स:</i></p>
+<div class="ht-item"><div class="ht-t">📚 <i>Surah Order:</i></div><div class="ht-b">यूज़र क़ुरआन के क्रम में या नुज़ूल के क्रम <i>(Revelation Order)</i> में पढ़ सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">🔤 <i>Languages:</i></div><div class="ht-b">यूज़र मलयालम, अंग्रेजी, हिंदी भाषाओं में शब्द-दर-शब्द <i>(Word-by-word)</i> अर्थ और अनुवाद चुन सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">🔠 <i>Font Size:</i></div><div class="ht-b">- / + दबाकर अक्षरों का साइज़ बढ़ा/घटा सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">🔍 <i>Search - शब्द खोजने के लिए:</i></div><div class="ht-b">सेटिंग्स में सर्च बार का उपयोग करके <i>Arabic, Malayalam, English, Hindi</i> में किसी भी शब्द को जल्दी खोज सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">📖 <i>Word Meaning:</i></div><div class="ht-b">हर अरबी शब्द के नीचे उसका अर्थ देख सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">✅ <i>Ayah - सिर्फ क़ुरआन पढ़ने के लिए:</i></div><div class="ht-b">सेटिंग्स में Ayah ऑप्शन पर ग्रीन टिक करने से, मतलब हटाकर <i>'सिर्फ क़ुरआन की आयतें ही'</i> साफ़ तौर पर पढ़ सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">💡 <i>Single Tap:</i></div><div class="ht-b">आयत के किसी भी शब्द पर टैप करने से, यूज़र उस शब्द का अर्थ किस भाषा में चाहिए यह चुन सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">🔢 <i>Double Tap:</i></div><div class="ht-b">पेज पर कहीं भी डबल टैप करने से <i>'Go to Ayah'</i> ऑप्शन आएगा। आयत नंबर सेलेक्ट करके सीधे जा सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">🔖 <i>Last Read - आख़िरी बार पढ़ा हुआ:</i></div><div class="ht-b">ऊपर दिख रहे सूरह के नाम और आयत नंबर <i>(जैसे: 96:1)</i> पर क्लिक करने से यूज़र आख़िरी बार पढ़े हुए हिस्से पर जा सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">🔼🔽 <i>Change Ayahs:</i></div><div class="ht-b">Up/Down एरो बटन का उपयोग कर सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">↗️ <i>Share:</i></div><div class="ht-b">किसी भी आयत को WhatsApp या दूसरे ऐप्स पर शेयर करने के लिए Share आइकन दबा सकता है।</div></div>
+<p class="ht-head"><i>अन्य जानकारी - Footer / Info:</i></p>
+<div class="ht-quote"><div>🔍 <i>Sources &amp; credits:</i> इस्तेमाल की गई जानकारी के स्रोत जानने के लिए।</div><div>💬 <i>Feedback:</i> राय या सुझाव भेजने के लिए।</div><div>🔄 <i>Last updated:</i> वेबसाइट आख़िरी बार कब अपडेट हुई थी।</div></div>
+      </div>
     </div>
   </div>
 
@@ -3603,11 +3682,11 @@
       // Which order is in use? Revelation when its dropdown was last used (or at the very start,
       // where Al-'Alaq is shown as revelation no. 1); otherwise Mushaf.
       var useRev = forceRev || chapterSheetBtn.classList.contains('box-selected');
-      var num = value, tag = 'Mushaf';
+      var num = value, tag = 'Mushaf order';
       if (useRev) {
         var revRow = chapterSheetList.querySelector('.chapter-sheet-row[data-value="' + value + '"]');
         var revNum = revRow && revRow.querySelector('.chapter-sheet-num');
-        if (revNum) { num = revNum.textContent.replace(/\D/g, '') || value; tag = 'Revelation'; }
+        if (revNum) { num = revNum.textContent.replace(/\D/g, '') || value; tag = 'Revelation order'; }
       }
       stpNum.textContent = num;
       stpEn.textContent = m ? m[1] : '';
@@ -3941,6 +4020,30 @@
     });
     closeBtn.addEventListener('click', hide);
     ov.addEventListener('click', function (e) { if (e.target === ov) hide(); });
+  })();
+</script>
+<script>
+  // "How to use Quran website" box (opened from Settings)
+  (function () {
+    var box = document.getElementById('howToOverlay');
+    var openBtn = document.getElementById('howToBtn');
+    var closeBtn = document.getElementById('howToClose');
+    if (!box || !openBtn) return;
+    var tabs = box.querySelectorAll('.howto-tab');
+    var panes = box.querySelectorAll('.howto-pane');
+    function showTab(name) {
+      tabs.forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-tab') === name); });
+      panes.forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== name; });
+      box.scrollTop = 0;
+      var b = box.querySelector('.howto-box'); if (b) b.scrollTop = 0;
+    }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { showTab(t.getAttribute('data-tab')); }); });
+    function openIt() { showTab('ml'); box.hidden = false; }
+    function closeIt() { box.hidden = true; }
+    openBtn.addEventListener('click', openIt);
+    closeBtn.addEventListener('click', closeIt);
+    box.addEventListener('click', function (e) { if (e.target === box) closeIt(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) closeIt(); });
   })();
 </script>
 </body>

@@ -764,20 +764,31 @@
   .pt-heading { font-size: 15px; font-weight: 700; padding: 10px 0 2px; }
   .sources-note { font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin-top: 6px; }
 
+
+  /* Open / Close question when a footer logo is tapped */
+  .logo-confirm-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .logo-confirm-overlay[hidden] { display: none; }
+  .logo-confirm-box { background: #fff; width: 100%; max-width: 300px; border: 1.5px solid #b9e0a5; border-radius: 16px; padding: 16px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+  .logo-confirm-text { font-size: 15px; line-height: 1.5; color: #222; margin: 0 0 14px; }
+  .logo-confirm-text b { word-break: break-word; }
+  .logo-confirm-btns { display: flex; gap: 10px; }
+  .logo-confirm-btns button { flex: 1; font: inherit; font-size: 15px; padding: 9px 0; border-radius: 10px; border: 1.5px solid #b9e0a5; background: #fff; color: #222; cursor: pointer; }
+  .logo-confirm-btns button.lc-open { background: #e3f4da; }
+
   /* Logos of the services this website is built with (each one links to that service) */
-  .partner-logos { margin: 8.5em auto 8px; }   /* about 5 empty lines under "Privacy & Terms" */
+  .partner-logos { margin: calc(8.5em + 90px) auto 0; }   /* about 5 empty lines under "Privacy & Terms" */
   .partner-logos .pl-row { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; }
-  .partner-logos .pl-row-quran { gap: 26px; margin-bottom: 20px; }  /* first row: the 3 Quran logos */
-  .partner-logos .pl-row-tools { gap: 18px; }                          /* second row: everything else, one row */
+  .partner-logos .pl-row-quran { gap: 22px; margin-bottom: 16px; }  /* first row: the 3 Quran logos */
+  .partner-logos .pl-row-tools { gap: 15px; }                          /* second row: everything else, one row */
   .partner-logos a { display: inline-flex; align-items: center; }
   .partner-logos img { display: block; width: auto; }
-  .partner-logos .pl-quran { height: 18px; }
-  .partner-logos .pl-quranenc { height: 34px; }
-  .partner-logos .pl-alquran { height: 28px; }
-  .partner-logos .pl-github { height: 13px; }
-  .partner-logos .pl-vercel { height: 11px; }
-  .partner-logos .pl-cloudflare { height: 20px; }
-  .partner-logos .pl-claude { height: 13px; }
+  .partner-logos .pl-quran { height: 15px; }
+  .partner-logos .pl-quranenc { height: 29px; }
+  .partner-logos .pl-alquran { height: 24px; }
+  .partner-logos .pl-github { height: 11px; }
+  .partner-logos .pl-vercel { height: 9px; }
+  .partner-logos .pl-cloudflare { height: 17px; }
+  .partner-logos .pl-claude { height: 11px; }
 
   footer {
     text-align: center;
@@ -1305,6 +1316,12 @@
   .welcome-ayah .fa-en { font-size: calc(0.95rem + 0.5px); }
   .welcome-ayah .fa-ml, .welcome-ayah .fa-en, .welcome-ayah .fa-hi { margin: 3px 0; line-height: 1.55; }
   .welcome-ayah .fa-ref { line-height: 1.6; margin-top: 0; }
+  /* Welcome box keeps one fixed size: not affected by the Settings font size */
+  .welcome-ayah .fa-ar { font-size: 22.5px; }
+  .welcome-ayah .fa-ml { font-size: 16px; }
+  .welcome-ayah .fa-en { font-size: 16.5px; }
+  .welcome-ayah .fa-hi { font-size: 17px; }
+  .welcome-ayah .fa-ref { font-size: 18px; }
 </style>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -1929,6 +1946,16 @@
       <p class="sources-note">All sources belong to their respective owners. Please check their own terms before reusing any content. Logos are trademarks of their respective owners and link to their websites.</p>
       <div class="sources-bottom">
         <button type="button" id="sourcesCloseBottom" class="settings-close" aria-label="Close sources">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="logoConfirmOverlay" class="logo-confirm-overlay" hidden>
+    <div class="logo-confirm-box" role="dialog" aria-modal="true">
+      <p class="logo-confirm-text">Open <b id="logoConfirmName"></b>?</p>
+      <div class="logo-confirm-btns">
+        <button type="button" id="logoConfirmClose">Close</button>
+        <button type="button" id="logoConfirmOpen" class="lc-open">Open</button>
       </div>
     </div>
   </div>
@@ -3881,5 +3908,30 @@
 </script>
 
 
+<script>
+  // Footer logos: ask Open / Close before leaving the site
+  (function () {
+    var ov = document.getElementById('logoConfirmOverlay');
+    var nameEl = document.getElementById('logoConfirmName');
+    var openBtn = document.getElementById('logoConfirmOpen');
+    var closeBtn = document.getElementById('logoConfirmClose');
+    var pending = '';
+    function hide() { ov.hidden = true; pending = ''; }
+    document.querySelectorAll('.partner-logos a').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        pending = a.href;
+        nameEl.textContent = a.getAttribute('aria-label') || a.hostname;
+        ov.hidden = false;
+      });
+    });
+    openBtn.addEventListener('click', function () {
+      var u = pending; hide();
+      if (u) window.open(u, '_blank', 'noopener');
+    });
+    closeBtn.addEventListener('click', hide);
+    ov.addEventListener('click', function (e) { if (e.target === ov) hide(); });
+  })();
+</script>
 </body>
 </html>

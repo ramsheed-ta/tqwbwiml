@@ -1028,6 +1028,7 @@
     display: grid; grid-template-columns: repeat(6, 1fr);
     max-height: 220px; overflow-y: auto; -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain; border-top: 1px solid #d3e9c6; padding-top: 4px;
+    position: relative;   /* so each number's offsetTop is measured inside this box */
   }
   .vp-cell {
     height: 36px; display: flex; align-items: center; justify-content: center;
@@ -1075,7 +1076,7 @@
   #feedbackOverlay .feedback-text { font-size: 17px; }
   #feedbackOverlay .feedback-send,
   #feedbackOverlay .feedback-copy,
-  #feedbackOverlay .feedback-choice { font-size: 16px; }
+  #feedbackOverlay .feedback-choice { font-size: 14px; }
   .feedback-choices {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1182,6 +1183,21 @@
   .lu-table tbody tr:first-child td { border-top: none; }
   .lu-table td:first-child { white-space: nowrap; }
   .lu-table td ul { margin: 0; padding-left: 14px; }
+  /* Phones: each entry becomes a small card - "Oct 2026 · Navigation" on top, the changes below
+     using the full width (instead of a narrow third column) */
+  @media (max-width: 560px) {
+    .lu-table, .lu-table tbody, .lu-table tr { display: block; width: 100%; }
+    .lu-table thead { display: none; }
+    .lu-table tr { padding: 8px 0; border-top: 1px solid var(--line); }
+    .lu-table tbody tr:first-child { border-top: none; }
+    .lu-table td { display: block; padding: 0 10px; border-top: none; }
+    .lu-table td:first-child, .lu-table td:nth-child(2) { display: inline-block; font-weight: 700; }
+    .lu-table td:first-child { padding-right: 0; }
+    .lu-table td:nth-child(2) { padding-left: 0; }
+    .lu-table td:nth-child(2)::before { content: " \00b7  "; font-weight: 700; }
+    .lu-table td:nth-child(3) { margin-top: 4px; }
+    .lu-table td ul { padding-left: 18px; }
+  }
 
   /* Floating up / down arrows (same light grey as the share icon) */
   .verse-nav {
@@ -1645,7 +1661,7 @@
           <li>The title bars of "Last updated" and "Sources &amp; credits" now stay fixed at the top while you scroll. The default text size is now 5.</li>
           <li>Sources &amp; credits: QuranEnc.com translation text is shown exactly as published; only the footnote reference numbers are hidden.</li>
           <li>Faster loading: the Arabic and Malayalam word-by-word appear first, and the translations are added as soon as they arrive.</li>
-          <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Yahoo Mail or Outlook) with the message filled in.</li>
+          <li>Feedback: added a box to type your message. "Send email" lets you choose the app to open (Mail, Gmail app, Yahoo app or Outlook) with the message filled in.</li>
           <li>Sources &amp; credits: added the QuranEnc.com Malayalam translation version (V1.0.3) and a note that footnote numbers are hidden.</li>
           <li>Browser auto-translate is switched off for the page, so Quran translations are shown exactly as they are.</li>
           <li>Added Last read: a small chapter:verse button at the top right to continue where you stopped.</li>
@@ -1694,7 +1710,7 @@
                 <td><ul>
                   <li>Added Feedback (email) and Last updated pages in the footer.</li>
                   <li>Sources &amp; credits updated.</li>
-                  <li>Feedback page: added a message box, moved the box higher and tightened the spacing. "Send email" now offers a choice of Mail, Gmail app, Yahoo Mail or Outlook, with your message filled in.</li>
+                  <li>Feedback page: added a message box, moved the box higher and tightened the spacing. "Send email" now offers a choice of Mail, Gmail app, Yahoo app or Outlook, with your message filled in.</li>
                   <li>QuranEnc.com Malayalam translation version (V1.0.3, 30/05/2021) added to Sources &amp; credits, with a note that footnote reference numbers are hidden.</li>
                 </ul></td>
               </tr>
@@ -1857,7 +1873,7 @@
       <div id="feedbackChoices" class="feedback-choices" hidden>
         <a id="fbMail" class="feedback-choice" href="#">Mail (Apple / iCloud)</a>
         <a id="fbGmailApp" class="feedback-choice" href="#">Gmail app</a>
-        <a id="fbYahoo" class="feedback-choice" href="#" target="_blank" rel="noopener noreferrer">Yahoo Mail</a>
+        <a id="fbYahoo" class="feedback-choice" href="#">Yahoo app</a>
         <a id="fbOutlook" class="feedback-choice" href="#">Outlook app</a>
       </div>
     </div>
@@ -2191,7 +2207,7 @@
       var set = function (id, href) { var a = document.getElementById(id); if (a) a.href = href; };
       set('fbMail', 'mailto:' + EMAIL + '?subject=' + subj + '&body=' + bod);
       set('fbGmailApp', 'googlegmail:///co?to=' + to + '&subject=' + subj + '&body=' + bod);
-      set('fbYahoo', 'https://compose.mail.yahoo.com/?to=' + to + '&subject=' + subj + '&body=' + bod);
+      set('fbYahoo', 'ymail://mail/compose?to=' + to + '&subject=' + subj + '&body=' + bod);
       set('fbOutlook', 'ms-outlook://compose?to=' + to + '&subject=' + subj + '&body=' + bod);
     }
     var choices = document.getElementById('feedbackChoices');
@@ -3762,7 +3778,8 @@
       document.body.style.overflow = 'hidden';
       fitToViewport();
       var cur = cells[currentIdx];
-      grid.scrollTop = cur ? Math.max(0, cur.offsetTop - grid.clientHeight / 2 + cur.offsetHeight / 2) : 0;
+      // Start the box at the row of the ayah that was double-tapped (that number is highlighted)
+      grid.scrollTop = cur ? Math.max(0, cur.offsetTop - 4) : 0;
     }
 
     // Tapping outside the card closes it (ignore the click that follows the double tap).

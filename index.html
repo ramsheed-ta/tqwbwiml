@@ -1501,7 +1501,7 @@
 <div id="chapterSheetOverlayNormal" class="chapter-sheet-overlay" hidden>
   <div class="chapter-sheet">
     <div class="chapter-sheet-handle"></div>
-    <p class="chapter-sheet-title">Select Surah (Mushaf Order)</p>
+    <p class="chapter-sheet-title">Select Surah</p>
     <input type="text" id="chapterSheetSearchNormal" class="chapter-sheet-search" placeholder="Search surah…">
     <div class="chapter-sheet-list" id="chapterSheetListNormal">
       <button type="button" class="chapter-sheet-row active" data-value="1"><span class="chapter-sheet-num">1</span><span class="chapter-sheet-text"><span class="chapter-sheet-name">الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)</span></span><span class="chapter-sheet-meaning">പ്രാരംഭം / The Opening</span></span></button>
@@ -1667,7 +1667,7 @@
 
   <div class="controls settings-controls">
     <div class="chapter-row">
-      <span class="chapter-select-label">Mushaf Order:</span>
+      <span class="chapter-select-label">Surah Order:</span>
       <button type="button" id="chapterSheetBtnNormal" class="chapter-sheet-btn">
         <span id="chapterSheetLabelNormal">1. الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)</span></span>
         <span class="chapter-sheet-chevron">⌄</span>
@@ -1675,7 +1675,7 @@
       <p class="chapter-note" id="chapterNote"></p>
     </div>
     <div class="chapter-row" style="margin-top:-4px;">
-      <span class="chapter-select-label">Revelation Order:</span>
+      <span class="chapter-select-label">Revelation:</span>
       <button type="button" id="chapterSheetBtn" class="chapter-sheet-btn box-selected">
         <span id="chapterSheetLabel">1. العلق <span class="chapter-sheet-translit">(Al-'Alaq)-96</span></span>
         <span class="chapter-sheet-chevron">⌄</span>
@@ -1738,7 +1738,7 @@
         <ul class="lu-list">
           <li>The small language box (Malayalam / English / Hindi) that opens when you tap a verse is bigger, with more space and thin lines between the options, so it is easier to tap.</li>
           <li>Word search: tapping a verse to close the search arrows no longer also opens the language box.</li>
-          <li>Last read now remembers the order (Mushaf or Revelation) too, and switches back to it when you tap it.</li>
+          <li>Last read now remembers the order (Surah or Revelation) too, and switches back to it when you tap it.</li>
           <li>Added a "Privacy &amp; Terms" page (link at the bottom of the page).</li>
           <li>The title bars of "Last updated" and "Sources &amp; credits" now stay fixed at the top while you scroll. The default text size is now 5.</li>
           <li>Sources &amp; credits: QuranEnc.com translation text is shown exactly as published; only the footnote reference numbers are hidden.</li>
@@ -1768,7 +1768,7 @@
                 <td>Oct 2026</td><td>Design</td>
                 <td><ul>
                   <li>New look for buttons: light grey with a thin border, in the top bar, Settings, Feedback and the help tabs.</li>
-                  <li>The top bar now says "Mushaf order" or "Revelation order".</li>
+                  <li>The top bar now says "Surah order" or "Revelation order".</li>
                   <li>A solid strip at the top of the page, so the phone's clock and battery stay clear while scrolling and verse numbers no longer hide behind the buttons.</li>
                 </ul></td>
               </tr>
@@ -1797,7 +1797,7 @@
               <tr>
                 <td>Oct 2026</td><td>Surah lists</td>
                 <td><ul>
-                  <li>Mushaf and Revelation order lists: larger text, bold surah names, about five surahs visible. Each list remembers its own last selection.</li>
+                  <li>Surah and Revelation order lists: larger text, bold surah names, about five surahs visible. Each list remembers its own last selection.</li>
                   <li>Malayalam surah-name meanings from quranmalayalam.com.</li>
                   <li>Makki / Madani and ayah counts from the Quran Foundation API.</li>
                 </ul></td>
@@ -1826,7 +1826,7 @@
                   <li>Loading and error messages are in English.</li>
                   <li>Verse language box made bigger, with more space between the options, for easier tapping.</li>
                   <li>Word search: the tap that closes the search arrows no longer also opens the verse language box.</li>
-                  <li>Last read: tapping it now also returns to the order (Mushaf or Revelation) the place was read in.</li>
+                  <li>Last read: tapping it now also returns to the order (Surah or Revelation) the place was read in.</li>
                   <li>Privacy &amp; Terms page added.</li>
                   <li>Faster chapter loading: the Arabic and Malayalam word-by-word are shown first; translations and other languages are added as they arrive. A slow source can no longer keep the chapter loading forever.</li>
                   <li>A chapter that fails to load is retried automatically.</li>
@@ -3744,7 +3744,7 @@
       // Which order is in use? Revelation when its dropdown was last used (or at the very start,
       // where Al-'Alaq is shown as revelation no. 1); otherwise Mushaf.
       var useRev = forceRev || chapterSheetBtn.classList.contains('box-selected');
-      var num = value, tag = 'Mushaf order';
+      var num = value, tag = 'Surah order';
       if (useRev) {
         var revRow = chapterSheetList.querySelector('.chapter-sheet-row[data-value="' + value + '"]');
         var revNum = revRow && revRow.querySelector('.chapter-sheet-num');

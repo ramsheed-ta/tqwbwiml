@@ -1,7 +1,9 @@
 <!DOCTYPE html>
+<!-- Website Owner and Designed by Abdul Ramsheed | ramsheedabdul1404@gmail.com -->
 <html lang="en" translate="no">
 <head>
 <meta charset="UTF-8">
+<meta name="author" content="Abdul Ramsheed">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google" content="notranslate">
 <title>Tadabbur Quran</title>
@@ -873,7 +875,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 6px;
+    margin-bottom: 16px;
   }
   .settings-modal-title { font-size: 14px; font-weight: 600; }
   .settings-modal-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -952,7 +954,12 @@
   .settings-controls .chapter-sheet-btn { padding: 6px 12px; line-height: 1.3; font-size: 1rem; border-radius: 8px; }
   .settings-controls .toggle-label { margin-bottom: 0; }
   .settings-controls .lang-toggles { gap: 12px; }
-  .settings-controls .font-size-btn { padding: 0; height: 24px; width: 28px; min-width: 0; font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+  /* Keep "Font size - 4 +  Translator  Ayah" on ONE line, even on small phones */
+  .settings-controls .font-size-row { flex-wrap: nowrap; gap: 3px; }
+  .settings-controls .font-size-label { font-size: 0.92rem; white-space: nowrap; margin-right: 2px; }
+  .settings-controls .translator-toggle-label { margin-inline-start: 5px; font-size: 14px; gap: 3px; }
+  .settings-controls .translator-toggle-label input { margin: 0; }
+  .settings-controls .font-size-btn { padding: 0; height: 24px; width: 26px; min-width: 0; font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
   .settings-controls .word-search-row { margin-top: 0; }
 
   .settings-controls.search-focused > *:not(.word-search-row) { display: none !important; }
@@ -1155,6 +1162,25 @@
     text-decoration: none;
     box-shadow: 0 1px 0 rgba(27,31,36,0.06);
   }
+  .feedback-text {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 84px;
+    margin: 8px 0 0;
+    padding: 10px 12px;
+    font-family: inherit;
+    line-height: 1.4;
+    color: #24292f;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    resize: vertical;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .feedback-text::placeholder { color: #8c959f; }
+  .feedback-text:focus { outline: none; border-color: #8c959f; }
   .feedback-actions { display: flex; gap: 8px; margin-top: 8px; }
   .feedback-send, .feedback-copy {
     flex: 1;
@@ -1401,7 +1427,6 @@
         <span class="chapter-sheet-num">5</span>
         <span class="chapter-sheet-text">
           <span class="chapter-sheet-name">الفاتحة <span class="chapter-sheet-translit">(Al-Fatiha)<span class="chapter-sheet-order">-1</span></span></span>
-      <!-- Website Owner and Designed by Abdul Ramsheed -->
           <span class="chapter-sheet-meaning">പ്രാരംഭം / The Opening</span>
         </span>
       </button>
@@ -2676,7 +2701,7 @@
       var shareText = "Ayah " + ayahNum + "\n" + arabic;
       if (wordLines.length) shareText += '\n\nWord by word:\n' + wordLines.join('\n');
       if (translationLines.length) shareText += '\n\nTranslation:\n' + translationLines.join('\n');
-      shareText += '\n\nTadabbur Quran';
+      shareText += '\n\nTadabbur Quran\ntqwbwiml.vercel.app';
 
       if (navigator.share) {
         navigator.share({ text: shareText }).catch(function () {});

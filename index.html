@@ -2763,11 +2763,19 @@
     if (e.target === chapterSheetOverlay) { closeChapterSheet(); resetChapterSheetSearch(); }
   });
 
+  // Typing only digits = surah numbers that START with it ("1" -> 1, 10-19, 100-114); not "6" inside 286 Ayahs etc. Otherwise search the text
+  function chapterRowMatches(row, q) {
+    if (/^\d+$/.test(q)) {
+      var n = row.querySelector('.chapter-sheet-num');
+      return !!n && n.textContent.trim().indexOf(q) === 0;   // number STARTS with what was typed
+    }
+    return row.textContent.toLowerCase().indexOf(q) !== -1;
+  }
+
   chapterSheetSearch.addEventListener('input', function () {
     var q = this.value.trim().toLowerCase();
     chapterSheetList.querySelectorAll('.chapter-sheet-row').forEach(function (row) {
-      var hay = row.textContent.toLowerCase();
-      row.classList.toggle('hidden-by-search', q !== '' && hay.indexOf(q) === -1);
+      row.classList.toggle('hidden-by-search', q !== '' && !chapterRowMatches(row, q));
     });
     chapterSheetList.scrollTop = 0;
   });
@@ -2813,8 +2821,7 @@
   chapterSheetSearchNormal.addEventListener('input', function () {
     var q = this.value.trim().toLowerCase();
     chapterSheetListNormal.querySelectorAll('.chapter-sheet-row').forEach(function (row) {
-      var hay = row.textContent.toLowerCase();
-      row.classList.toggle('hidden-by-search', q !== '' && hay.indexOf(q) === -1);
+      row.classList.toggle('hidden-by-search', q !== '' && !chapterRowMatches(row, q));
     });
     chapterSheetListNormal.scrollTop = 0;
   });

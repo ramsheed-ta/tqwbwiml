@@ -810,6 +810,15 @@
   .page { padding-top: 68px; }
   #dynamicChapterContent, .page { overflow-anchor: none; } /* the code keeps the reading position itself */
 
+  /* Solid strip at the very top: the page scrolls UNDER it, so the phone's clock / battery stay readable
+     and verse numbers never slide beneath the floating buttons. */
+  .top-cover {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    height: calc(env(safe-area-inset-top, 0px) + 68px);
+    background: var(--parchment);
+    border-bottom: 1px solid #d0d7de;
+    pointer-events: none;
+  }
   .settings-fab {
     position: fixed;
     top: calc(env(safe-area-inset-top, 0px) + 12px);
@@ -1012,7 +1021,7 @@
   }
 
   /* Jump-to-ayah picker: centred card with a number box, a drum wheel and Go */
-  html { touch-action: manipulation; } /* no double-tap zoom, so double tap can open the picker */
+  html { touch-action: manipulation; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 74px); } /* no double-tap zoom, so double tap can open the picker */
   .verse-sheet-overlay {
     position: fixed;
     left: 0; right: 0; top: 0;
@@ -1589,6 +1598,8 @@
 <div class="page">
 
   <!-- Floating settings button (top-left) + settings modal -->
+  <div class="top-cover" aria-hidden="true"></div>
+  <script>window.topCoverH = function () { var e = document.querySelector('.top-cover'); return e ? Math.round(e.getBoundingClientRect().height) : 68; };</script>
   <button type="button" id="settingsFab" class="settings-fab" aria-label="Settings" aria-haspopup="dialog">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
   </button>
@@ -2415,7 +2426,7 @@
     var upBtns = document.querySelectorAll('.verse-up');
     var downBtns = document.querySelectorAll('.verse-down');
     if (!upBtns.length || !downBtns.length) return;
-    var TOP_OFFSET = 68;     // same offset as "Go to Ayah": the verse head sits just under the round buttons
+    var TOP_OFFSET = window.topCoverH() + 6;     // same offset as "Go to Ayah": the verse head sits just under the round buttons
     var BOTTOM_GAP = 100;    // keeps the end of a verse above the phone's bottom bar
 
     function visibleVerses() {
@@ -2460,7 +2471,7 @@
     var pill = document.getElementById('lastReadPill');
     if (!pill) return;
     var KEY = 'wbw_lastread_v1';
-    var TOP_OFFSET = 68;
+    var TOP_OFFSET = window.topCoverH() + 6;
     var shown = '';          // what the pill shows: "11:5"
     var shownMode = '';      // the order (rev / normal) that place was read in
     var cur = '';            // where you are reading now
@@ -3837,7 +3848,7 @@
       var sec = sections[idx];
       if (!sec) return;
       closePicker();
-      var top = sec.getBoundingClientRect().top + window.pageYOffset - 68;
+      var top = sec.getBoundingClientRect().top + window.pageYOffset - (window.topCoverH() + 6);
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }
 

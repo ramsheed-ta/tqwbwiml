@@ -1358,6 +1358,14 @@
   }
   /* Footer Arabic line a little larger (13px) */
   footer .footer-ayah .fa-ar { font-size: 14px; }
+  /* line between the verse references and the footer text: same colour/thickness as the line under the top bar, only as wide as the text */
+  footer .footer-ayah::after {
+    content: '';
+    display: block;
+    margin: 17px 0 0;   /* 17px above the line, 16px margin + 1px line below it = equal space */
+    height: 1px;
+    background: #d0d7de;
+  }
   /* Welcome box shown when the page opens (compact: little empty space) */
   .welcome-box { text-align: center; padding: 16px 14px 8px; }
   .welcome-box .sources-head { justify-content: flex-end; margin-bottom: -12px; position: relative; z-index: 1; }
@@ -1370,7 +1378,7 @@
   /* Welcome box keeps one fixed size: not affected by the Settings font size */
   .welcome-ayah .fa-ar { font-size: 22.5px; }
   .welcome-ayah .fa-ml { font-size: 16px; }
-  .welcome-ayah .fa-en { font-size: 15px; }
+  .welcome-ayah .fa-en { font-size: 15.5px; }
   .welcome-ayah .fa-hi { font-size: 17px; }
   .welcome-ayah .fa-ref { font-size: 18px; }
 </style>
@@ -1668,7 +1676,6 @@
           <span class="settings-modal-title">Settings</span>
           <button type="button" id="howToBtn" class="howto-btn">How to use Quran website</button>
         </span>
-        <button type="button" id="settingsClose" class="settings-close" aria-label="Close settings">✕</button>
       </div>
 
   <div class="controls settings-controls">

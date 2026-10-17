@@ -2471,15 +2471,19 @@
     });
   })();
 
-  // Floating arrows. Up: start of the verse you are reading (if you are already there: the previous verse).
-  // Down: end of the verse (if its end is already on screen: the start of the next verse).
+  // Floating arrows move page by page inside a long verse, so nothing in the middle is skipped.
+  // Down: scrolls one screen further (the last words you saw stay a little visible at the top). When the end of the verse
+  //       is on screen, the next tap goes to the start of the next verse.
+  // Up:   scrolls one screen back. When the start of the verse is reached, the next tap shows the last screen of the previous verse.
   (function () {
     var upBtns = document.querySelectorAll('.verse-up');
     var downBtns = document.querySelectorAll('.verse-down');
     if (!upBtns.length || !downBtns.length) return;
     var TOP_OFFSET = window.topCoverH() + 6;     // same offset as "Go to Ayah": the verse head sits just under the round buttons
     var BOTTOM_GAP = 100;    // keeps the end of a verse above the phone's bottom bar
+    var OVERLAP = 30;        // the last line of the old screen stays visible after a page jump
 
+    function pageStep() { return Math.max(120, window.innerHeight - TOP_OFFSET - BOTTOM_GAP - OVERLAP); }
     function visibleVerses() {
       return Array.prototype.filter.call(document.querySelectorAll('.ayah'), function (el) {
         return el.offsetParent !== null;
@@ -2494,21 +2498,27 @@
       return idx;
     }
     function topOf(el) { return el.getBoundingClientRect().top + window.pageYOffset - TOP_OFFSET; }
+    // scroll position that puts the end of a verse just above the bottom gap (but never above the verse's own start)
+    function endViewOf(el) {
+      var y = el.getBoundingClientRect().bottom + window.pageYOffset - (window.innerHeight - BOTTOM_GAP);
+      return Math.max(y, topOf(el));
+    }
     function goTo(y) { window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
 
     function goUp() {
       var list = visibleVerses();
       if (!list.length) return;
       var i = currentIndex(list);
-      if (list[i].getBoundingClientRect().top < TOP_OFFSET - 14) { goTo(topOf(list[i])); return; }
-      goTo(i > 0 ? topOf(list[i - 1]) : 0);
+      var above = TOP_OFFSET - list[i].getBoundingClientRect().top;   // how much of this verse is already above the screen
+      if (above > 14) { window.scrollBy({ top: -Math.min(above, pageStep()), behavior: 'smooth' }); return; }
+      if (i > 0) goTo(endViewOf(list[i - 1])); else goTo(0);
     }
     function goDown() {
       var list = visibleVerses();
       if (!list.length) return;
       var i = currentIndex(list);
-      var delta = list[i].getBoundingClientRect().bottom - (window.innerHeight - BOTTOM_GAP);
-      if (delta > 14) { window.scrollBy({ top: delta, behavior: 'smooth' }); return; }
+      var delta = list[i].getBoundingClientRect().bottom - (window.innerHeight - BOTTOM_GAP);   // how much of this verse is still below the screen
+      if (delta > 14) { window.scrollBy({ top: Math.min(delta, pageStep()), behavior: 'smooth' }); return; }
       if (i < list.length - 1) goTo(topOf(list[i + 1]));
       else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     }

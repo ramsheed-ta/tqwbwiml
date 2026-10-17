@@ -211,8 +211,14 @@
     border-bottom: none;
   }
 
-  .chapter-sheet-row.active {
+  /* every second row (1, 3, 5 ...) has a light shade, in both the Surah order and Revelation order lists */
+  .chapter-sheet-row:nth-child(odd) {
     background: #f6f6f6;
+  }
+
+  /* the chapter that is selected: a clearly darker shade */
+  .chapter-sheet-row.active {
+    background: #eaf0e5;
   }
 
   .chapter-sheet-num {
@@ -625,7 +631,7 @@
     display: flex;
     flex-direction: row-reverse;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 0 10px;   /* no extra space between the lines; the top space of the first word stays as it was */
   }
 
   .word-row.word-row-hidden {
@@ -635,7 +641,7 @@
   .word-block {
     background: var(--parchment);
     border-radius: var(--radius);
-    padding: 12px 14px 14px;
+    padding: 12px 14px 5px;   /* less space between the last gloss and the thin line */
     min-width: 108px;
     text-align: center;
     transition: background 0.15s ease;
@@ -805,7 +811,7 @@
   }
 
   @media (max-width: 480px) {
-    .word-block { min-width: 92px; padding: 10px 10px 12px; }
+    .word-block { min-width: 92px; padding: 10px 10px 4px; }
   }
 
   /* ---------- Floating settings button + modal ---------- */
@@ -1351,9 +1357,9 @@
     margin: 0;
   }
   /* Footer Arabic line a little larger (13px) */
-  footer .footer-ayah .fa-ar { font-size: 13px; }
+  footer .footer-ayah .fa-ar { font-size: 14px; }
   /* Welcome box shown when the page opens (compact: little empty space) */
-  .welcome-box { text-align: center; padding: 8px 14px 6px; }
+  .welcome-box { text-align: center; padding: 16px 14px 8px; }
   .welcome-box .sources-head { justify-content: flex-end; margin-bottom: -12px; position: relative; z-index: 1; }
   .welcome-ayah { padding: 0 8px 2px; color: var(--ink); }
   .welcome-ayah .fa-ar { line-height: 1.8; margin-bottom: 0; }
@@ -1364,7 +1370,7 @@
   /* Welcome box keeps one fixed size: not affected by the Settings font size */
   .welcome-ayah .fa-ar { font-size: 22.5px; }
   .welcome-ayah .fa-ml { font-size: 16px; }
-  .welcome-ayah .fa-en { font-size: 16.5px; }
+  .welcome-ayah .fa-en { font-size: 15px; }
   .welcome-ayah .fa-hi { font-size: 17px; }
   .welcome-ayah .fa-ref { font-size: 18px; }
 </style>
@@ -1873,10 +1879,6 @@
 
   <div id="welcomeOverlay" class="sources-overlay" hidden>
     <div class="sources-box welcome-box" role="dialog" aria-modal="true" aria-label="Tadabbur">
-      <div class="sources-head">
-        <span></span>
-        <button type="button" id="welcomeClose" class="settings-close" aria-label="Close">✕</button>
-      </div>
       <div id="welcomeAyah" class="welcome-ayah"></div>
     </div>
   </div>
@@ -2108,11 +2110,11 @@
 
   <footer>
   <div class="footer-ayah">
-    <div class="fa-ar" lang="ar" dir="rtl">أَفَلَا يَتَدَبَّرُونَ ٱلۡقُرۡءَانَ</div>
-    <div class="fa-ml" lang="ml">അപ്പോൾ അവർ ഖുർആൻ ചിന്തിച്ചുമനസ്സിലാക്കുന്നില്ലേ</div>
-    <div class="fa-en" lang="en">Then do they not reflect upon the Qur'an</div>
-    <div class="fa-hi" lang="hi">तो क्या वे क़ुरआन में सोच-विचार नहीं करते</div>
-    <div class="fa-ref" lang="ar" dir="rtl"><span style="white-space:nowrap">(محمد 47:24)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(النساء 4:82)</span></div>
+    <div class="fa-ar" lang="ar" dir="rtl">وَلَقَدۡ يَسَّرۡنَا ٱلۡقُرۡءَانَ لِلذِّكۡرِ</div>
+    <div class="fa-ml" lang="ml">തീര്‍ച്ചയായും ആലോചിച്ചു മനസ്സിലാക്കാന്‍ ഖുര്‍ആന്‍ നാം എളുപ്പമുള്ളതാക്കിയിരിക്കുന്നു.</div>
+    <div class="fa-en" lang="en">And We have certainly made the Qur'an easy for remembrance</div>
+    <div class="fa-hi" lang="hi">और निःसंदेह हमने क़ुरआन को उपदेश ग्रहण करने के लिए आसान बना दिया</div>
+    <div class="fa-ref" lang="ar" dir="rtl"><span style="white-space:nowrap">(القمر 54:17)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(القمر 54:22)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(القمر 54:32)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(القمر 54:40)</span></div>
   </div>
     Word-by-word meanings are simple glosses for study, not an authoritative translation. For formal reference, please check a scholarly translation.<br>
     <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>, <button type="button" id="lastUpdatedFooterBtn" class="sources-link">Last updated</button>, <button type="button" id="privacyFooterBtn" class="sources-link">Privacy &amp; Terms</button>
@@ -2606,7 +2608,13 @@
     var src = document.querySelector('.footer-ayah');
     var closeBtn = document.getElementById('welcomeClose');
     if (!box || !body || !src) return;
-    body.innerHTML = src.innerHTML;
+    // Opening box keeps the original verse (4:82 / 47:24); the footer shows a different verse.
+    body.innerHTML =
+      '<div class="fa-ar" lang="ar" dir="rtl">أَفَلَا يَتَدَبَّرُونَ ٱلۡقُرۡءَانَ</div>' +
+      '<div class="fa-ml" lang="ml">അപ്പോൾ അവർ ഖുർആൻ ചിന്തിച്ചുമനസ്സിലാക്കുന്നില്ലേ</div>' +
+      '<div class="fa-en" lang="en">Then do they not reflect upon the Qur\'an</div>' +
+      '<div class="fa-hi" lang="hi">तो क्या वे क़ुरआन में सोच-विचार नहीं करते</div>' +
+      '<div class="fa-ref" lang="ar" dir="rtl"><span style="white-space:nowrap">(محمد 47:24)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(النساء 4:82)</span></div>';
     function closeBox() {
       box.hidden = true;
       document.body.style.overflow = '';

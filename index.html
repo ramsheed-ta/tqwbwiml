@@ -1277,6 +1277,16 @@
   .vw-card label + label { border-top: 1px solid var(--line); }
   .vw-card input { width: 19px; height: 19px; margin: 0; flex: none; accent-color: var(--teal); }
   .ayah.vw-selected { position: relative; z-index: 3; background: #f6fbf2; }
+  /* grip at the top of the box: hold it and drag to move the box to another place in the verse */
+  .vw-grip {
+    display: flex; align-items: center; justify-content: center;
+    height: 20px; margin: 0 -14px; border-bottom: 1px solid var(--line);
+    cursor: grab; touch-action: none;
+    -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  .vw-grip span { width: 34px; height: 4px; border-radius: 2px; background: #c3cfbb; }
+  .vw-card.dragging { box-shadow: 0 8px 22px rgba(0,0,0,0.28); }
+  .vw-card.dragging .vw-grip { cursor: grabbing; }
 
   /* Last updated panel: plain, same look as Sources & credits */
   .sources-box.lu-box { max-width: 500px; }
@@ -1959,7 +1969,7 @@
 <div class="ht-item"><div class="ht-t">💡 <i>Single Tap:</i></div><div class="ht-b">ആയത്തിലെ ഏതെങ്കിലും വാക്കിൽ തൊട്ടാൽ, ആ വാക്കിന്റെ അർത്ഥം ഏത് ഭാഷയിൽ വേണം എന്ന് തിരഞ്ഞെടുക്കാം.</div></div>
 <div class="ht-item"><div class="ht-t">🔢 <i>Double Tap:</i></div><div class="ht-b">പേജിൽ എവിടെയും ഡബിൾ ടാപ്പ് ചെയ്താൽ <i>'Go to Ayah'</i> ഓപ്ഷൻ വരും. ആയത്ത് നമ്പർ സെലക്ട് ചെയ്ത് നേരിട്ട് പോകാം.</div></div>
 <div class="ht-item"><div class="ht-t">🔖 <i>Last Read - അവസാനം വായിച്ചത്:</i></div><div class="ht-b">മുകളിൽ കാണുന്ന സൂറത്തിന്റെ പേരും ആയത്ത് നമ്പറും <i>(ഉദാ: 96:1)</i> അമർത്തിയാൽ അവസാനം വായിച്ചു നിർത്തിയ ഭാഗത്തേക്ക് പോകാം.</div></div>
-<div class="ht-item"><div class="ht-t">🔼🔽 <i>Change Ayahs:</i></div><div class="ht-b">Up/Down ആരോ ബട്ടണുകൾ ഉപയോഗിക്കാം.</div></div>
+<div class="ht-item"><div class="ht-t">↕️ <i>Ayah Navigation &amp; Scrolling:</i></div><div class="ht-b">Up/Down ആരോ ബട്ടണുകൾ ഉപയോഗിച്ച് നീണ്ട ആയത്ത് ഒരു സ്ക്രീൻ വീതം scroll ചെയ്യാം. ആയത്തിന്റെ അവസാനത്തിൽ (തുടക്കത്തിൽ) എത്തിയാൽ അടുത്ത (മുമ്പത്തെ) ആയത്തിലേക്ക് പോകും.</div></div>
 <div class="ht-item"><div class="ht-t">↗️ <i>Share:</i></div><div class="ht-b">ഏതൊരു ആയത്തും വാട്ട്‌സ്ആപ്പിലോ മറ്റ് ആപ്പുകളിലോ ഷെയർ ചെയ്യാൻ Share ഐക്കൺ അമർത്താം.</div></div>
 <p class="ht-head"><i>മറ്റ് വിവരങ്ങൾ - Footer / Info:</i></p>
 <div class="ht-quote"><div>🔍 <i>Sources &amp; credits:</i> ഉപയോഗിച്ചിരിക്കുന്ന വിവരങ്ങളുടെ ഉറവിടങ്ങൾ അറിയാൻ.</div><div>💬 <i>Feedback:</i> അഭിപ്രായങ്ങളോ നിർദ്ദേശങ്ങളോ അയക്കാൻ.</div><div>🔄 <i>Last updated:</i> വെബ്‌സൈറ്റ് അവസാനം അപ്‌ഡേറ്റ് ചെയ്ത തീയതി.</div></div>
@@ -1977,7 +1987,7 @@
 <div class="ht-item"><div class="ht-t">💡 Single Tap:</div><div class="ht-b">Tap any word in an ayah to choose the language in which you want to see its meaning.</div></div>
 <div class="ht-item"><div class="ht-t">🔢 Double Tap:</div><div class="ht-b">Double-tap anywhere on the page to display the Go to Ayah option. Select an ayah number to navigate directly to it.</div></div>
 <div class="ht-item"><div class="ht-t">🔖 Last Read – Resume Reading:</div><div class="ht-b">Tap the Surah name and ayah number displayed at the top (e.g., 96:1) to return to the last reading position.</div></div>
-<div class="ht-item"><div class="ht-t">🔼🔽 Change Ayahs:</div><div class="ht-b">Use the Up/Down arrow buttons to navigate between ayahs.</div></div>
+<div class="ht-item"><div class="ht-t">↕️ Ayah Navigation &amp; Scrolling:</div><div class="ht-b">Use the Up/Down arrow buttons to scroll through a long ayah one screen at a time. At the end (or start) of an ayah, they move to the next (or previous) ayah.</div></div>
 <div class="ht-item"><div class="ht-t">↗️ Share:</div><div class="ht-b">Tap the Share icon to share any ayah via WhatsApp or other apps.</div></div>
 <p class="ht-head">Other Information – Footer / Info:</p>
 <div class="ht-quote"><div><b>🔍 Sources &amp; Credits:</b> View the sources of the information used on the website.</div><div><b>💬 Feedback:</b> Send comments, suggestions, or feedback.</div><div><b>🔄 Last Updated:</b> View the date when the website was last updated.</div></div>
@@ -1995,7 +2005,7 @@
 <div class="ht-item"><div class="ht-t">💡 <i>Single Tap:</i></div><div class="ht-b">आयत के किसी भी शब्द पर टैप करने से, यूज़र उस शब्द का अर्थ किस भाषा में चाहिए यह चुन सकता है।</div></div>
 <div class="ht-item"><div class="ht-t">🔢 <i>Double Tap:</i></div><div class="ht-b">पेज पर कहीं भी डबल टैप करने से <i>'Go to Ayah'</i> ऑप्शन आएगा। आयत नंबर सेलेक्ट करके सीधे जा सकता है।</div></div>
 <div class="ht-item"><div class="ht-t">🔖 <i>Last Read - आख़िरी बार पढ़ा हुआ:</i></div><div class="ht-b">ऊपर दिख रहे सूरह के नाम और आयत नंबर <i>(जैसे: 96:1)</i> पर क्लिक करने से यूज़र आख़िरी बार पढ़े हुए हिस्से पर जा सकता है।</div></div>
-<div class="ht-item"><div class="ht-t">🔼🔽 <i>Change Ayahs:</i></div><div class="ht-b">Up/Down एरो बटन का उपयोग कर सकता है।</div></div>
+<div class="ht-item"><div class="ht-t">↕️ <i>Ayah Navigation &amp; Scrolling:</i></div><div class="ht-b">Up/Down एरो बटन से लंबी आयत को एक स्क्रीन आगे-पीछे स्क्रॉल कर सकता है। आयत के अंत (या शुरुआत) में पहुँचने पर अगली (या पिछली) आयत पर चला जाता है।</div></div>
 <div class="ht-item"><div class="ht-t">↗️ <i>Share:</i></div><div class="ht-b">किसी भी आयत को WhatsApp या दूसरे ऐप्स पर शेयर करने के लिए Share आइकन दबा सकता है।</div></div>
 <p class="ht-head"><i>अन्य जानकारी - Footer / Info:</i></p>
 <div class="ht-quote"><div>🔍 <i>Sources &amp; credits:</i> इस्तेमाल की गई जानकारी के स्रोत जानने के लिए।</div><div>💬 <i>Feedback:</i> राय या सुझाव भेजने के लिए।</div><div>🔄 <i>Last updated:</i> वेबसाइट आख़िरी बार कब अपडेट हुई थी।</div></div>
@@ -2264,6 +2274,7 @@
     var card = document.createElement('div');
     card.className = 'vw-card';
     card.innerHTML =
+      '<div class="vw-grip" title="Drag to move"><span></span></div>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="ml"> മലയാളം</label>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="en"> English</label>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="hi"> हिन्दी</label>';
@@ -2301,6 +2312,7 @@
       // open the box at the height where the verse was tapped (not always at the top of the verse)
       var maxTop = sec.offsetHeight - card.offsetHeight - 6;
       var top = Math.max(30, Math.min((relY || 0) - 24, maxTop));
+      card.style.left = '';        // a box moved earlier opens at the normal place again
       card.style.top = top + 'px';
       // make sure the whole box is visible on screen
       var r = card.getBoundingClientRect();
@@ -2309,6 +2321,36 @@
       else if (r.top < 90) delta = r.top - 90;
       if (delta) window.scrollBy({ top: delta, behavior: 'smooth' });
     }
+
+    // Drag the box by its grip (finger or mouse). It stays inside the verse it belongs to.
+    (function () {
+      var grip = card.querySelector('.vw-grip');
+      var drag = null;
+      grip.addEventListener('pointerdown', function (e) {
+        if (!currentSec) return;
+        e.preventDefault();
+        try { grip.setPointerCapture(e.pointerId); } catch (err) {}
+        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, left: card.offsetLeft, top: card.offsetTop };
+        card.classList.add('dragging');
+      });
+      grip.addEventListener('pointermove', function (e) {
+        if (!drag || e.pointerId !== drag.id || !currentSec) return;
+        var maxLeft = currentSec.clientWidth - card.offsetWidth - 2;
+        var maxTop = currentSec.offsetHeight - card.offsetHeight - 2;
+        var left = Math.max(2, Math.min(drag.left + (e.clientX - drag.x), maxLeft));
+        var top = Math.max(2, Math.min(drag.top + (e.clientY - drag.y), maxTop));
+        card.style.left = left + 'px';
+        card.style.top = top + 'px';
+      });
+      function endDrag(e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        drag = null;
+        card.classList.remove('dragging');
+        try { grip.releasePointerCapture(e.pointerId); } catch (err) {}
+      }
+      grip.addEventListener('pointerup', endDrag);
+      grip.addEventListener('pointercancel', endDrag);
+    })();
 
     boxes.forEach(function (b) {
       b.addEventListener('change', function () {

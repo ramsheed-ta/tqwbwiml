@@ -861,7 +861,7 @@
   .settings-overlay[hidden] { display: none; }
 
   .settings-modal {
-    background: #fff;
+    background: #f6f8fa;   /* light grey like the GitHub header bar; the boxes inside are white (below) */
     width: 100%;
     max-width: 440px;
     max-height: 100%;
@@ -872,6 +872,22 @@
     box-shadow: 0 10px 40px rgba(0,0,0,0.25);
     animation: settingsPop 0.18s ease-out;
   }
+  .settings-modal .chapter-sheet-btn:not(.box-selected),
+  .settings-modal .font-size-btn,
+  .settings-modal .word-search-input,
+  .settings-modal .wsm-go-btn { background: #fff; }
+  /* "How to use Quran website": a very light blue help button with a ? icon, so it is clearly a button */
+  .settings-modal .howto-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #f0f6fd; border-color: #cddff2; font-weight: 600;
+    box-shadow: 0 1px 0 rgba(27,31,36,0.08), 0 2px 6px rgba(70,130,200,0.16);
+  }
+  .settings-modal .howto-btn::before {
+    content: '?'; flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%;
+    background: #6b9fd6; color: #fff; font-size: 13px; font-weight: 700; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .settings-modal .howto-btn:active { background: #e1eefb; }
   @keyframes settingsPop {
     from { opacity: 0; transform: translateY(-8px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -1762,6 +1778,7 @@
         <b>Recent changes</b>
         <ul class="lu-list">
           <li>In Settings, the Surah Order and Revelation boxes now have the same size and line up neatly.</li>
+          <li>The Settings box has a new look: a light grey background, white boxes and a clearer help button.</li>
           <li>The up / down arrows now move one screen at a time, so nothing in a long verse is skipped, and the surah lists have alternate shaded rows.</li>
           <li>The small language box (Malayalam / English / Hindi) that opens when you tap a verse is bigger, with more space and thin lines between the options, so it is easier to tap.</li>
           <li>Word search: tapping a verse to close the search arrows no longer also opens the language box.</li>
@@ -1795,6 +1812,7 @@
                 <td>18 Oct 2026</td><td>Design</td>
                 <td><ul>
                   <li>In Settings, the Surah Order and Revelation boxes now have the same size and line up neatly.</li>
+                  <li>The Settings box has a new look: a light grey background, white boxes and a clearer help button.</li>
                 </ul></td>
               </tr>
               <tr>

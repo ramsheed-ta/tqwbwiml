@@ -1279,8 +1279,8 @@
   .ayah.vw-selected { position: relative; z-index: 3; background: #f6fbf2; }
   /* move icon at the top of the box (four arrows, like Microsoft Office): hold it and drag the box anywhere on the screen */
   .vw-grip {
-    display: flex; align-items: center; justify-content: center;
-    height: 30px; margin: 0 -14px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: flex-start;
+    height: 30px; margin: 0 -14px; padding-left: 12px; border-bottom: 1px solid var(--line);
     color: #57606a; cursor: grab; touch-action: none;
     -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
   }
@@ -2314,7 +2314,8 @@
       // open the box at the height where the verse was tapped (not always at the top of the verse)
       var maxTop = sec.offsetHeight - card.offsetHeight - 6;
       var top = Math.max(30, Math.min((relY || 0) - 24, maxTop));
-      card.style.left = '';        // a box moved earlier opens at the normal place again
+      card.style.position = '';    // a box moved earlier opens at the normal place again
+      card.style.left = '';
       card.style.top = top + 'px';
       // make sure the whole box is visible on screen
       var r = card.getBoundingClientRect();
@@ -2324,8 +2325,9 @@
       if (delta) window.scrollBy({ top: delta, behavior: 'smooth' });
     }
 
-    // Drag the box by its move icon (finger or mouse). It can go anywhere on the screen, also onto the next verses.
-    // The language choice still belongs to the verse that was tapped (it stays highlighted).
+    // Drag the box by its move icon (finger or mouse). Once moved, the box stays fixed on the screen,
+    // so it comes along while you scroll through the verses. The language choice still belongs to the
+    // verse that was tapped (it stays highlighted). Tap outside the box to close it.
     (function () {
       var grip = card.querySelector('.vw-grip');
       var drag = null;
@@ -2334,17 +2336,20 @@
         e.preventDefault();
         try { grip.setPointerCapture(e.pointerId); } catch (err) {}
         var r = card.getBoundingClientRect();
-        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, left: card.offsetLeft, top: card.offsetTop, rl: r.left, rt: r.top };
+        card.style.position = 'fixed';              // fixed to the screen from now on
+        card.style.left = r.left + 'px';
+        card.style.top = r.top + 'px';
+        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, left: r.left, top: r.top };
         card.classList.add('dragging');
       });
       grip.addEventListener('pointermove', function (e) {
         if (!drag || e.pointerId !== drag.id || !currentSec) return;
         var minTop = window.topCoverH() + 4;                         // not under the top buttons
         var maxTop = window.innerHeight - card.offsetHeight - 90;     // not under the phone's bottom bar
-        var rl = Math.max(4, Math.min(drag.rl + (e.clientX - drag.x), window.innerWidth - card.offsetWidth - 4));
-        var rt = Math.max(minTop, Math.min(drag.rt + (e.clientY - drag.y), Math.max(minTop, maxTop)));
-        card.style.left = (drag.left + (rl - drag.rl)) + 'px';
-        card.style.top = (drag.top + (rt - drag.rt)) + 'px';
+        var left = Math.max(4, Math.min(drag.left + (e.clientX - drag.x), window.innerWidth - card.offsetWidth - 4));
+        var top = Math.max(minTop, Math.min(drag.top + (e.clientY - drag.y), Math.max(minTop, maxTop)));
+        card.style.left = left + 'px';
+        card.style.top = top + 'px';
       });
       function endDrag(e) {
         if (!drag || e.pointerId !== drag.id) return;

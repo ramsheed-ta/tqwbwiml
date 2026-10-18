@@ -1277,14 +1277,14 @@
   .vw-card label + label { border-top: 1px solid var(--line); }
   .vw-card input { width: 19px; height: 19px; margin: 0; flex: none; accent-color: var(--teal); }
   .ayah.vw-selected { position: relative; z-index: 3; background: #f6fbf2; }
-  /* grip at the top of the box: hold it and drag to move the box to another place in the verse */
+  /* move icon at the top of the box (four arrows, like Microsoft Office): hold it and drag the box anywhere on the screen */
   .vw-grip {
     display: flex; align-items: center; justify-content: center;
-    height: 20px; margin: 0 -14px; border-bottom: 1px solid var(--line);
-    cursor: grab; touch-action: none;
+    height: 30px; margin: 0 -14px; border-bottom: 1px solid var(--line);
+    color: #57606a; cursor: grab; touch-action: none;
     -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
   }
-  .vw-grip span { width: 34px; height: 4px; border-radius: 2px; background: #c3cfbb; }
+  .vw-grip svg { width: 20px; height: 20px; display: block; }
   .vw-card.dragging { box-shadow: 0 8px 22px rgba(0,0,0,0.28); }
   .vw-card.dragging .vw-grip { cursor: grabbing; }
 
@@ -2274,7 +2274,9 @@
     var card = document.createElement('div');
     card.className = 'vw-card';
     card.innerHTML =
-      '<div class="vw-grip" title="Drag to move"><span></span></div>' +
+      '<div class="vw-grip" title="Drag to move">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg></div>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="ml"> മലയാളം</label>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="en"> English</label>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="hi"> हिन्दी</label>';
@@ -2322,7 +2324,8 @@
       if (delta) window.scrollBy({ top: delta, behavior: 'smooth' });
     }
 
-    // Drag the box by its grip (finger or mouse). It stays inside the verse it belongs to.
+    // Drag the box by its move icon (finger or mouse). It can go anywhere on the screen, also onto the next verses.
+    // The language choice still belongs to the verse that was tapped (it stays highlighted).
     (function () {
       var grip = card.querySelector('.vw-grip');
       var drag = null;
@@ -2330,17 +2333,18 @@
         if (!currentSec) return;
         e.preventDefault();
         try { grip.setPointerCapture(e.pointerId); } catch (err) {}
-        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, left: card.offsetLeft, top: card.offsetTop };
+        var r = card.getBoundingClientRect();
+        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, left: card.offsetLeft, top: card.offsetTop, rl: r.left, rt: r.top };
         card.classList.add('dragging');
       });
       grip.addEventListener('pointermove', function (e) {
         if (!drag || e.pointerId !== drag.id || !currentSec) return;
-        var maxLeft = currentSec.clientWidth - card.offsetWidth - 2;
-        var maxTop = currentSec.offsetHeight - card.offsetHeight - 2;
-        var left = Math.max(2, Math.min(drag.left + (e.clientX - drag.x), maxLeft));
-        var top = Math.max(2, Math.min(drag.top + (e.clientY - drag.y), maxTop));
-        card.style.left = left + 'px';
-        card.style.top = top + 'px';
+        var minTop = window.topCoverH() + 4;                         // not under the top buttons
+        var maxTop = window.innerHeight - card.offsetHeight - 90;     // not under the phone's bottom bar
+        var rl = Math.max(4, Math.min(drag.rl + (e.clientX - drag.x), window.innerWidth - card.offsetWidth - 4));
+        var rt = Math.max(minTop, Math.min(drag.rt + (e.clientY - drag.y), Math.max(minTop, maxTop)));
+        card.style.left = (drag.left + (rl - drag.rl)) + 'px';
+        card.style.top = (drag.top + (rt - drag.rt)) + 'px';
       });
       function endDrag(e) {
         if (!drag || e.pointerId !== drag.id) return;

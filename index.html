@@ -910,6 +910,45 @@
   .howto-tabs { margin-top: 6px; }
   .howto-tab { padding: 3px 0; font-size: 13.5px; line-height: 1.3; }
   .howto-box .settings-close { width: 24px; height: 24px; }
+
+  /* Settings: "Adv. Search" button to the right of the Word-by-word / Translation boxes */
+  .settings-controls .wt-row { flex-basis: 100%; display: flex; align-items: stretch; gap: 10px; }
+  .settings-controls .wt-groups { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; }
+  .adv-search-btn {
+    flex: 1 1 auto; min-width: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    background: #fff; border: 1px solid #d0d7de; border-radius: 10px; box-shadow: 0 1px 0 rgba(27,31,36,0.08);
+    font: inherit; font-size: 14px; font-weight: 600; line-height: 1.2; color: #24292f; padding: 6px 8px;
+    cursor: pointer; text-align: center; -webkit-tap-highlight-color: transparent;
+  }
+  .adv-search-btn svg { width: 22px; height: 22px; display: block; color: #57606a; }
+  .adv-search-btn:active { background: #eef2f6; }
+
+  /* Advanced search box */
+  .adv-box { max-width: 520px; min-height: min(78vh, 600px); }
+  .adv-box .sources-head.sticky-top { flex-wrap: wrap; }
+  .adv-bar { display: flex; gap: 8px; width: 100%; margin-top: 8px; }
+  .adv-input {
+    flex: 1; min-width: 0; height: 42px; border: 1.5px solid #b9e0a5; border-radius: 10px; padding: 0 12px;
+    font-size: 18px;   /* 16px or more stops iPhone zooming in */
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', 'Lora', serif;
+    background: #fff; color: #111; outline: none; -webkit-appearance: none; appearance: none;
+  }
+  .adv-input:focus { border-color: #7fc25f; }
+  .adv-go {
+    flex: none; height: 42px; padding: 0 14px; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa;
+    font: inherit; font-size: 14px; font-weight: 600; color: #24292f; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .adv-go:active { background: #e9edf1; }
+  .adv-status { margin-top: 12px; font-size: 14px; line-height: 1.5; color: #57606a; }
+  .adv-result { margin-top: 12px; }
+  .adv-word { text-align: center; font-size: 32px; line-height: 1.6; margin: 2px 0 10px; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
+  .adv-tile { border: 1px solid #d0d7de; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: #f6f8fa; }
+  .adv-tile-label { font-size: 13px; font-weight: 600; color: #57606a; }
+  .adv-tile-num { font-size: 32px; font-weight: 700; line-height: 1.2; color: #24292f; }
+  .adv-tile-num small { font-size: 14px; font-weight: 500; color: #57606a; margin-left: 6px; }
+  .adv-tile-sub { font-size: 13px; color: #57606a; }
+  .adv-note { font-size: 12px; line-height: 1.55; color: #6e7781; margin-top: 4px; }
+  .howto-foot { display: flex; justify-content: flex-end; margin-top: 6px; }   /* same close button again at the bottom */
   .howto-pane { font-size: 14px; line-height: 1.55; color: var(--ink); }
   .howto-pane[lang="ml"] { font-family: 'Noto Serif Malayalam', serif; }
   .howto-pane[lang="en"] { font-family: 'Inter', sans-serif; }
@@ -1733,6 +1772,8 @@
         <span class="chapter-sheet-chevron">⌄</span>
       </button>
     </div>
+    <div class="wt-row">
+      <div class="wt-groups">
     <div>
       <div class="toggle-label">Word-by-word:</div>
       <div class="lang-toggles">
@@ -1748,6 +1789,12 @@
         <label><input type="checkbox" class="trans-switch" data-lang="en"> English</label>
         <label><input type="checkbox" class="trans-switch" data-lang="hi"> हिन्दी</label>
       </div>
+    </div>
+      </div>
+      <button type="button" id="advSearchBtn" class="adv-search-btn" aria-label="Advanced search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+        <span>Adv.<br>Search</span>
+      </button>
     </div>
     <div class="font-size-row">
       <span class="font-size-label">Font size</span>
@@ -1769,6 +1816,21 @@
 
     </div><!-- /settings-modal -->
   </div><!-- /settings-overlay -->
+
+  <div id="advSearchOverlay" class="sources-overlay" hidden>
+    <div class="sources-box adv-box" role="dialog" aria-modal="true" aria-label="Advanced search">
+      <div class="sources-head sticky-top">
+        <span class="sources-title">Advanced Search</span>
+        <button type="button" id="advClose" class="settings-close" aria-label="Close advanced search">✕</button>
+        <div class="adv-bar">
+          <input type="text" id="advInput" class="adv-input" dir="auto" lang="ar" placeholder="Type an Arabic word" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+          <button type="button" id="advGo" class="adv-go">Search</button>
+        </div>
+      </div>
+      <div id="advStatus" class="adv-status">How many times does a word appear in the whole Quran? Type an Arabic word above.</div>
+      <div id="advResult" class="adv-result"></div>
+    </div>
+  </div>
 
   <div id="lastUpdatedOverlay" class="sources-overlay" hidden>
     <div class="sources-box lu-box" role="dialog" aria-modal="true" aria-label="Last updated">
@@ -2009,6 +2071,9 @@
 <div class="ht-item"><div class="ht-t">↗️ <i>Share:</i></div><div class="ht-b">किसी भी आयत को WhatsApp या दूसरे ऐप्स पर शेयर करने के लिए Share आइकन दबा सकता है।</div></div>
 <p class="ht-head"><i>अन्य जानकारी - Footer / Info:</i></p>
 <div class="ht-quote"><div>🔍 <i>Sources &amp; credits:</i> इस्तेमाल की गई जानकारी के स्रोत जानने के लिए।</div><div>💬 <i>Feedback:</i> राय या सुझाव भेजने के लिए।</div><div>🔄 <i>Last updated:</i> वेबसाइट आख़िरी बार कब अपडेट हुई थी।</div></div>
+      </div>
+      <div class="howto-foot">
+        <button type="button" id="howToCloseBottom" class="settings-close" aria-label="Close how to use">✕</button>
       </div>
     </div>
   </div>
@@ -3487,6 +3552,190 @@
     return out;
   }
 
+  // ---- Advanced search: how many times a word appears in the whole Quran ----
+  // The whole Quran text is fetched once (one request), prepared for searching and kept on the phone,
+  // so the next searches are instant. Spelling marks are ignored when matching.
+  (function () {
+    var overlay = document.getElementById('advSearchOverlay');
+    var openBtn = document.getElementById('advSearchBtn');
+    if (!overlay || !openBtn) return;
+    var closeBtn = document.getElementById('advClose');
+    var input = document.getElementById('advInput');
+    var goBtn = document.getElementById('advGo');
+    var statusEl = document.getElementById('advStatus');
+    var resultEl = document.getElementById('advResult');
+    var CACHE_KEY = 'tq_adv_corpus_v1';
+    var BISMILLAH = 'بسم الله الرحمن الرحيم';
+    var corpus = null;        // [{ s: surah, a: ayah, t: [words] }]
+    var loading = null;
+
+    // Same spelling for what the Quran text has and what the user types: no marks, alef / hamza / ya forms unified.
+    function norm(str) {
+      return String(str || '')
+        .replace(/\u0648\u0670/g, '\u0627')                                   // صلوٰة -> صلاة
+        .replace(/[\u0640\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF\u061C]/g, '')
+        .replace(/[\u0671\u0622\u0623\u0625]/g, '\u0627')                     // ٱ آ أ إ -> ا
+        .replace(/\u0624/g, '\u0648').replace(/\u0626/g, '\u064A')            // ؤ -> و , ئ -> ي
+        .replace(/\u0621/g, '')                                               // ء
+        .replace(/[\u0649\u06CC]/g, '\u064A').replace(/\u06A9/g, '\u0643');   // ى ی -> ي , ک -> ك
+    }
+    function tokens(str) { return norm(str).split(/\s+/).filter(Boolean); }
+
+    function buildCorpus(rows) {          // rows: [surah, ayah, text]
+      return rows.map(function (r) {
+        var t = tokens(r[2]);
+        // some sources put the Bismillah in front of ayah 1 of every surah; it is not part of that ayah
+        if (r[0] !== 1 && r[0] !== 9 && r[1] === 1 && t.slice(0, 4).join(' ') === BISMILLAH) t = t.slice(4);
+        return { s: r[0], a: r[1], t: t };
+      });
+    }
+    function saveCache(list) {
+      try {
+        localStorage.setItem(CACHE_KEY, list.map(function (v) { return v.s + '|' + v.a + '|' + v.t.join(' '); }).join('\n'));
+      } catch (e) { /* storage full or blocked: just search again next time */ }
+    }
+    function readCache() {
+      try {
+        var raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        var list = raw.split('\n').map(function (line) {
+          var p = line.split('|');
+          return { s: +p[0], a: +p[1], t: (p[2] || '').split(' ').filter(Boolean) };
+        });
+        return list.length > 6000 ? list : null;    // the Quran has 6236 ayahs
+      } catch (e) { return null; }
+    }
+
+    function fetchWholeQuran() {
+      return withTimeout(fetch('https://api.alquran.cloud/v1/quran/quran-uthmani').then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }), 60000).then(function (d) {
+        var rows = [];
+        d.data.surahs.forEach(function (su) {
+          su.ayahs.forEach(function (ay) { rows.push([su.number, ay.numberInSurah, ay.text]); });
+        });
+        if (rows.length < 6000) throw new Error('incomplete');
+        return rows;
+      });
+    }
+    // second way (the same source the pages use), surah by surah, if the first one fails
+    function fetchBySurah() {
+      var rows = [], next = 1, done = 0, failed = false;
+      return new Promise(function (resolve, reject) {
+        function worker() {
+          if (failed) return;
+          if (next > 114) { if (done === 114) resolve(rows); return; }
+          var n = next++;
+          qfChapterVerses(n, 'en').then(function (verses) {
+            verses.forEach(function (v) {
+              var txt = v.text_uthmani || qfRealWords(v).map(function (w) { return w.text_uthmani || w.text || ''; }).join(' ');
+              rows.push([n, v.verse_number, txt]);
+            });
+            done++;
+            statusEl.textContent = 'Preparing the Quran text (first time only)… ' + done + ' / 114';
+            if (done === 114) resolve(rows); else worker();
+          }, function (e) { failed = true; reject(e); });
+        }
+        worker(); worker(); worker();
+      }).then(function (r) {
+        r.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+        return r;
+      });
+    }
+
+    function ensureCorpus() {
+      if (corpus) return Promise.resolve(corpus);
+      var cached = readCache();
+      if (cached) { corpus = cached; return Promise.resolve(corpus); }
+      if (!loading) {
+        loading = fetchWholeQuran().catch(function () { return fetchBySurah(); }).then(function (rows) {
+          corpus = buildCorpus(rows);
+          saveCache(corpus);
+          loading = null;
+          return corpus;
+        }, function (e) { loading = null; throw e; });
+      }
+      return loading;
+    }
+
+    function fmt(n) { return Number(n).toLocaleString('en-US'); }
+    function tile(label, n, ayahs, surahs) {
+      var d = document.createElement('div');
+      d.className = 'adv-tile';
+      var l = document.createElement('div'); l.className = 'adv-tile-label'; l.textContent = label;
+      var num = document.createElement('div'); num.className = 'adv-tile-num';
+      num.appendChild(document.createTextNode(fmt(n)));
+      var sm = document.createElement('small'); sm.textContent = n === 1 ? 'time' : 'times'; num.appendChild(sm);
+      var sub = document.createElement('div'); sub.className = 'adv-tile-sub';
+      sub.textContent = n ? ('in ' + fmt(ayahs) + (ayahs === 1 ? ' ayah' : ' ayahs') + ', ' + fmt(surahs) + (surahs === 1 ? ' surah' : ' surahs')) : 'not found';
+      d.appendChild(l); d.appendChild(num); d.appendChild(sub);
+      return d;
+    }
+    function note(text) { var d = document.createElement('div'); d.className = 'adv-note'; d.textContent = text; return d; }
+
+    function count(q) {                   // q: array of normalized words
+      var exact = { n: 0, v: 0, s: {} }, cont = { n: 0, v: 0, s: {} };
+      function add(o, v, k) { o.n += k; o.v++; o.s[v.s] = 1; }
+      corpus.forEach(function (v) {
+        var t = v.t, e = 0, c = 0, i, j;
+        if (q.length === 1) {
+          for (i = 0; i < t.length; i++) {
+            if (t[i] === q[0]) { e++; c++; } else if (t[i].indexOf(q[0]) !== -1) c++;
+          }
+        } else {
+          for (i = 0; i + q.length <= t.length; i++) {
+            for (j = 0; j < q.length && t[i + j] === q[j]; j++) {}
+            if (j === q.length) e++;
+          }
+        }
+        if (e) add(exact, v, e);
+        if (c) add(cont, v, c);
+      });
+      return { exact: exact, cont: cont };
+    }
+
+    function search() {
+      var raw = input.value.trim();
+      resultEl.textContent = '';
+      var q = tokens(raw);
+      if (!q.length) { statusEl.textContent = 'Type an Arabic word above.'; return; }
+      if (!/[\u0621-\u064A]/.test(q.join(''))) { statusEl.textContent = 'Please type the word in Arabic letters.'; return; }
+      statusEl.textContent = corpus ? 'Counting…' : 'Preparing the Quran text (first time only)…';
+      ensureCorpus().then(function () {
+        var r = count(q);
+        statusEl.textContent = '';
+        var w = document.createElement('div'); w.className = 'adv-word'; w.setAttribute('lang', 'ar'); w.setAttribute('dir', 'rtl');
+        w.textContent = raw;
+        resultEl.appendChild(w);
+        var nS = function (o) { return Object.keys(o.s).length; };
+        if (q.length === 1) {
+          resultEl.appendChild(tile('Exact word', r.exact.n, r.exact.v, nS(r.exact)));
+          resultEl.appendChild(tile('Contains these letters', r.cont.n, r.cont.v, nS(r.cont)));
+          resultEl.appendChild(note('"Exact word" is the word on its own. "Contains these letters" also counts words that carry extra letters in front or behind it (for example وَٱللَّهِ for ٱللَّه). Marks and different forms of alef / hamza are ignored.'));
+        } else {
+          resultEl.appendChild(tile('This phrase', r.exact.n, r.exact.v, nS(r.exact)));
+          resultEl.appendChild(note('Counted when the words come one after the other in an ayah. Marks and different forms of alef / hamza are ignored.'));
+        }
+      }, function () {
+        statusEl.textContent = 'Could not load the Quran text. Please check your internet connection and try again.';
+      });
+    }
+
+    function openIt() {
+      overlay.hidden = false;
+      if (!corpus) { var c = readCache(); if (c) corpus = c; else ensureCorpus().catch(function () {}); }   // start preparing while the user types
+      setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
+    }
+    function closeIt() { overlay.hidden = true; input.blur(); }
+    openBtn.addEventListener('click', openIt);
+    closeBtn.addEventListener('click', closeIt);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeIt(); });
+    goBtn.addEventListener('click', search);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); search(); input.blur(); } });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeIt(); });
+  })();
+
   function qfAttr(s) { return String(s || '').replace(/"/g, "'"); }
 
   // Finds the Hindi translation (Maulana Azizul Haque al-Umari) in the API's translation list, once.
@@ -4225,6 +4474,8 @@
     function closeIt() { box.hidden = true; }
     openBtn.addEventListener('click', openIt);
     closeBtn.addEventListener('click', closeIt);
+    var closeBottom = document.getElementById('howToCloseBottom');
+    if (closeBottom) closeBottom.addEventListener('click', closeIt);
     box.addEventListener('click', function (e) { if (e.target === box) closeIt(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) closeIt(); });
   })();

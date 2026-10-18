@@ -889,6 +889,10 @@
   .howto-tabs { display: flex; gap: 6px; width: 100%; margin-top: 8px; }
   .howto-tab { flex: 1; font: inherit; font-size: 14px; font-weight: 500; padding: 7px 0; border-radius: 8px; border: 1px solid #d0d7de; background: #f6f8fa; color: #24292f; cursor: pointer; box-shadow: 0 1px 0 rgba(27,31,36,0.06); }
   .howto-tab.active { background: #e2e6ea; border-color: #afb8c1; font-weight: 600; }
+  /* thinner boxes in "How to use": language tabs and the close button */
+  .howto-tabs { margin-top: 6px; }
+  .howto-tab { padding: 3px 0; font-size: 13.5px; line-height: 1.3; }
+  .howto-box .settings-close { width: 24px; height: 24px; }
   .howto-pane { font-size: 14px; line-height: 1.55; color: var(--ink); }
   .howto-pane[lang="ml"] { font-family: 'Noto Serif Malayalam', serif; }
   .howto-pane[lang="en"] { font-family: 'Inter', sans-serif; }
@@ -1363,8 +1367,9 @@
     line-height: inherit;
     margin: 0;
   }
-  /* Footer Arabic line a little larger (13px) */
-  footer .footer-ayah .fa-ar { font-size: 14px; }
+  /* Footer verse: Arabic 15px; Malayalam / English / Hindi footer size + 0.5px; the (54:xx) references keep the footer size */
+  footer .footer-ayah .fa-ar { font-size: 15px; }
+  footer .footer-ayah .fa-ml, footer .footer-ayah .fa-en, footer .footer-ayah .fa-hi { font-size: calc(0.78rem + 0.5px); }
   /* line between the verse references and the footer text: same colour/thickness as the line under the top bar, only as wide as the text */
   footer .footer-ayah::after {
     content: '';
@@ -2054,12 +2059,12 @@
         <button type="button" id="feedbackClose" class="settings-close" aria-label="Close feedback">✕</button>
       </div>
       <div class="sources-item">
-        Found a mistake, missing text, a broken link or a technical problem? Or have a suggestion? Please send us an email.
+        Found a mistake, missing text, a broken link or a technical problem? Or have a suggestion? Please send an email.
       </div>
       <div class="sources-item">
         <span class="sources-what">Please mention the surah and ayah number (for example 96:1) so it is easy to find.</span>
       </div>
-      <textarea id="feedbackText" class="feedback-text" rows="2" placeholder="Type your message here (surah and ayah, for example 96:1)"></textarea>
+      <textarea id="feedbackText" class="feedback-text" rows="2" placeholder="Type your message here"></textarea>
       <div class="feedback-email" id="feedbackEmailText">tqwbwiml.feedback@gmail.com</div>
       <div class="feedback-actions">
         <button type="button" id="feedbackSend" class="feedback-send">Send email</button>
@@ -2142,7 +2147,7 @@
     <div class="fa-ml" lang="ml">തീര്‍ച്ചയായും ആലോചിച്ചു മനസ്സിലാക്കാന്‍ ഖുര്‍ആന്‍ നാം എളുപ്പമുള്ളതാക്കിയിരിക്കുന്നു.</div>
     <div class="fa-en" lang="en">And We have certainly made the Qur'an easy for remembrance</div>
     <div class="fa-hi" lang="hi">और निःसंदेह हमने क़ुरआन को उपदेश ग्रहण करने के लिए आसान बना दिया</div>
-    <div class="fa-ref" lang="ar" dir="rtl"><span style="white-space:nowrap">(القمر 54:17)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(القمر 54:22)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(القمر 54:32)</span>&nbsp;&nbsp;&nbsp;<span style="white-space:nowrap">(القمر 54:40)</span></div>
+    <div class="fa-ref" lang="ar" dir="rtl"><span style="white-space:nowrap">(القمر 54:17)</span>&nbsp;<span style="white-space:nowrap">(القمر 54:22)</span>&nbsp;<span style="white-space:nowrap">(القمر 54:32)</span>&nbsp;<span style="white-space:nowrap">(القمر 54:40)</span></div>
   </div>
     Word-by-word meanings are simple glosses for study, not an authoritative translation. For formal reference, please check a scholarly translation.<br>
     <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>, <button type="button" id="lastUpdatedFooterBtn" class="sources-link">Last updated</button>, <button type="button" id="privacyFooterBtn" class="sources-link">Privacy &amp; Terms</button>

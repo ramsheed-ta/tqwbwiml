@@ -912,10 +912,14 @@
   .howto-box .settings-close { width: 24px; height: 24px; }
 
   /* Settings: "Adv. Search" button to the right of the Word-by-word / Translation boxes */
-  .settings-controls .wt-row { flex-basis: 100%; display: flex; align-items: stretch; gap: 10px; }
-  .settings-controls .wt-groups { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; }
+  /* The checkbox rows are in column 1; the button is in column 2 and covers exactly the two checkbox rows
+     (top edge = top of the upper हिन्दी row, bottom edge = bottom of the lower हिन्दी row). */
+  .settings-controls .wt-row { flex-basis: 100%; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; align-items: stretch; }
+  .settings-controls .wt-groups, .settings-controls .wt-groups > div { display: contents; }
+  .settings-controls .wt-groups .toggle-label, .settings-controls .wt-groups .lang-toggles { grid-column: 1; }
+  .settings-controls .wt-groups > div + div > .toggle-label { margin-top: 8px; }
   .adv-search-btn {
-    flex: 1 1 auto; min-width: 70px; align-self: flex-end; margin-bottom: 4px; display: flex;   /* bottom edge in line with the हिन्दी checkboxes (Word-by-word / Translation rows) */
+    flex: 1 1 auto; min-width: 70px; grid-column: 2; grid-row: 2 / 5; align-self: stretch; display: flex;   /* bottom edge in line with the हिन्दी checkboxes (Word-by-word / Translation rows) */
     flex-direction: column; align-items: center; justify-content: center; gap: 1px;
     background: #f0f6fd; border: 1px solid #cddff2; border-radius: 10px;   /* same very light blue as the "How to use" button */
     box-shadow: 0 1px 0 rgba(27,31,36,0.08), 0 2px 6px rgba(70,130,200,0.16);

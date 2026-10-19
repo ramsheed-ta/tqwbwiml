@@ -958,6 +958,8 @@
   .adv-status:empty { display: none; }
   .adv-result { margin-top: 2px; }
   .adv-word { text-align: center; font-size: 26px; line-height: 1.4; margin: 0 0 0; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
+  .adv-result-head { width: 100%; }
+  .adv-result-head:empty { display: none; }
   .adv-sum { text-align: center; font-size: 14px; color: #57606a; margin-bottom: 4px; }
   .adv-list { border-top: 1px solid #e3e7eb; }
   .adv-row { display: flex; align-items: baseline; gap: 12px; padding: 5px 4px; border-bottom: 1px solid #e3e7eb; font-size: 17px; direction: ltr; }
@@ -1850,6 +1852,7 @@
           <input type="text" id="advInput" class="adv-input" dir="auto" lang="ar" placeholder="Type an Arabic word" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
           <button type="button" id="advGo" class="adv-go">Search</button>
         </div>
+        <div id="advResultHead" class="adv-result-head"></div>
       </div>
       <div id="advStatus" class="adv-status">How many times does a word appear in the whole Quran? Type an Arabic word above.</div>
       <div id="advResult" class="adv-result"></div>
@@ -3598,6 +3601,7 @@
     var goBtn = document.getElementById('advGo');
     var statusEl = document.getElementById('advStatus');
     var resultEl = document.getElementById('advResult');
+    var headEl = document.getElementById('advResultHead');   // frozen part: the word, the counts and the "other forms" button
     var CACHE_KEY = 'tq_adv_corpus_v1';
     var BISMILLAH = 'بسم الله الرحمن الرحيم';
     var corpus = null;        // [{ s: surah, a: ayah, t: [words] }]
@@ -3775,6 +3779,7 @@
     function search() {
       var raw = input.value.trim();
       resultEl.textContent = '';
+      headEl.textContent = '';
       var q = tokens(raw);
       if (!q.length) { statusEl.textContent = 'Type an Arabic word above.'; return; }
       if (!/[\u0621-\u064A]/.test(q.join(''))) { statusEl.textContent = 'Please type the word in Arabic letters.'; return; }
@@ -3784,14 +3789,14 @@
         statusEl.textContent = '';
         var w = document.createElement('div'); w.className = 'adv-word'; w.setAttribute('lang', 'ar'); w.setAttribute('dir', 'rtl');
         w.textContent = raw;
-        resultEl.appendChild(w);
+        headEl.appendChild(w);
         var sum = document.createElement('div'); sum.className = 'adv-sum';
         sum.textContent = 'Occurrences: ' + fmt(r.occ) + ' / Ayahs: ' + fmt(r.rows.length);
-        resultEl.appendChild(sum);
+        headEl.appendChild(sum);
         if (q.length === 1 && r.occ2 > r.occ) {
           var sum2 = document.createElement('div'); sum2.className = 'adv-sum adv-sum2';
           sum2.textContent = 'Including other forms: ' + fmt(r.occ2) + ' / Ayahs: ' + fmt(r.ayahs2);
-          resultEl.appendChild(sum2);
+          headEl.appendChild(sum2);
           var tgl = document.createElement('button'); tgl.type = 'button'; tgl.className = 'adv-more adv-tgl';
           tgl.textContent = 'Show the other forms (' + fmt(r.extra.length) + (r.extra.length === 1 ? ' ayah)' : ' ayahs)');
           var xl = document.createElement('div'); xl.className = 'adv-list adv-xlist'; xl.hidden = true;
@@ -3803,7 +3808,7 @@
             if (shown && !xl.childNodes.length) showRows(r.extra, 0, xl, xm, true);
             xm.style.display = shown ? '' : 'none';      // the "Show more" button follows the list
           };
-          resultEl.appendChild(tgl); resultEl.appendChild(xl); resultEl.appendChild(xm);
+          headEl.appendChild(tgl); resultEl.appendChild(xl); resultEl.appendChild(xm);
         }
         if (!r.rows.length) { if (!(q.length === 1 && r.occ2 > r.occ)) statusEl.textContent = 'Not found.'; return; }
         var list = document.createElement('div'); list.className = 'adv-list';

@@ -924,27 +924,28 @@
   .adv-search-btn:active { background: #eef2f6; }
 
   /* Advanced search box */
-  .adv-box { max-width: 520px; min-height: min(78vh, 600px); }
-  .adv-box .sources-head.sticky-top { flex-wrap: wrap; }
-  .adv-bar { display: flex; gap: 8px; width: 100%; margin-top: 8px; }
+  .adv-box { max-width: 520px; min-height: min(78vh, 600px); padding-bottom: 10px; }
+  .adv-box .sources-head.sticky-top { flex-wrap: wrap; padding-top: 4px; padding-bottom: 6px; margin-bottom: 0; }
+  .adv-bar { display: flex; gap: 8px; width: 100%; margin-top: 2px; }
   .adv-input {
-    flex: 1; min-width: 0; height: 42px; border: 1.5px solid #b9e0a5; border-radius: 10px; padding: 0 12px;
-    font-size: 18px;   /* 16px or more stops iPhone zooming in */
+    flex: 1; min-width: 0; height: 32px; border: 1.5px solid #b9e0a5; border-radius: 8px; padding: 0 10px;
+    font-size: 16px;   /* 16px or more stops iPhone zooming in */
     font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', 'Lora', serif;
     background: #fff; color: #111; outline: none; -webkit-appearance: none; appearance: none;
   }
   .adv-input:focus { border-color: #7fc25f; }
   .adv-go {
-    flex: none; height: 42px; padding: 0 14px; border: 1px solid #d0d7de; border-radius: 10px; background: #f6f8fa;
-    font: inherit; font-size: 14px; font-weight: 600; color: #24292f; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    flex: none; height: 32px; padding: 0 12px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa;
+    font: inherit; font-size: 13px; font-weight: 600; color: #24292f; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
   .adv-go:active { background: #e9edf1; }
-  .adv-status { margin-top: 12px; font-size: 14px; line-height: 1.5; color: #57606a; }
-  .adv-result { margin-top: 12px; }
-  .adv-word { text-align: center; font-size: 32px; line-height: 1.6; margin: 2px 0 10px; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
-  .adv-sum { text-align: center; font-size: 14px; color: #57606a; margin-bottom: 10px; }
+  .adv-status { margin-top: 6px; font-size: 14px; line-height: 1.5; color: #57606a; }
+  .adv-status:empty { display: none; }
+  .adv-result { margin-top: 2px; }
+  .adv-word { text-align: center; font-size: 26px; line-height: 1.4; margin: 0 0 0; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
+  .adv-sum { text-align: center; font-size: 14px; color: #57606a; margin-bottom: 4px; }
   .adv-list { border-top: 1px solid #e3e7eb; }
-  .adv-row { display: flex; align-items: baseline; gap: 12px; padding: 9px 4px; border-bottom: 1px solid #e3e7eb; font-size: 17px; direction: ltr; }
+  .adv-row { display: flex; align-items: baseline; gap: 12px; padding: 5px 4px; border-bottom: 1px solid #e3e7eb; font-size: 17px; direction: ltr; }
   .adv-row-n { flex: 0 0 36px; color: #57606a; }
   .adv-more {
     display: block; width: 100%; margin: 12px 0 4px; padding: 10px; border: 1px solid #d0d7de; border-radius: 10px;
@@ -1846,7 +1847,7 @@
         </div>
 
         <div class="sources-item">
-          <b>Last updated: 18 October 2026</b><br>
+          <b>Last updated: 19 October 2026</b><br>
           Website created on 03 September 2026<br>
           <span class="sources-what" style="font-size:14px;">The site regularly makes improvements to provide you with a better experience. Check below for the latest changes.</span>
         </div>
@@ -1855,6 +1856,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>New Advanced Search in Settings: type an Arabic word to see how many times it appears in the Quran, with the surah and ayah numbers.</li>
           <li>The Settings box has a new look: a light grey background, white boxes and a clearer help button.</li>
           <li>In Settings, the Surah Order and Revelation boxes now have the same size and line up neatly.</li>
           <li>The up / down arrows now move one screen at a time, so nothing in a long verse is skipped, and the surah lists have alternate shaded rows.</li>
@@ -1886,6 +1888,12 @@
           <table class="lu-table">
             <thead><tr><th>Date</th><th>Section</th><th>Changes made</th></tr></thead>
             <tbody>
+              <tr>
+                <td>19 Oct 2026</td><td>Search</td>
+                <td><ul>
+                  <li>New Advanced Search in Settings: type an Arabic word to see how many times it appears in the Quran, with the surah and ayah numbers.</li>
+                </ul></td>
+              </tr>
               <tr>
                 <td>18 Oct 2026</td><td>Design</td>
                 <td><ul>

@@ -944,13 +944,15 @@
   .adv-word { text-align: center; font-size: 32px; line-height: 1.6; margin: 2px 0 10px; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
   .adv-sum { text-align: center; font-size: 14px; color: #57606a; margin-bottom: 10px; }
   .adv-list { border-top: 1px solid #e3e7eb; }
-  .adv-row { display: flex; gap: 12px; padding: 9px 4px; border-bottom: 1px solid #e3e7eb; font-size: 17px; direction: ltr; }
-  .adv-row-n { flex: 0 0 44px; color: #57606a; }
+  .adv-row { display: flex; align-items: baseline; gap: 12px; padding: 9px 4px; border-bottom: 1px solid #e3e7eb; font-size: 17px; direction: ltr; }
+  .adv-row-n { flex: 0 0 36px; color: #57606a; }
   .adv-more {
     display: block; width: 100%; margin: 12px 0 4px; padding: 10px; border: 1px solid #d0d7de; border-radius: 10px;
     background: #f6f8fa; font: inherit; font-size: 14px; font-weight: 600; color: #24292f; cursor: pointer;
   }
   .adv-more:active { background: #e9edf1; }
+  .adv-more[hidden] { display: none; }   /* the "Show more" box is only visible when there is more to show */
+  .adv-row-name { margin-left: auto; text-align: right; color: #57606a; font-size: 15px; }
   .howto-foot { display: flex; justify-content: flex-end; margin-top: 6px; }   /* same close button again at the bottom */
   .howto-pane { font-size: 14px; line-height: 1.55; color: var(--ink); }
   .howto-pane[lang="ml"] { font-family: 'Noto Serif Malayalam', serif; }
@@ -3683,6 +3685,22 @@
       return { rows: rows, occ: occ };
     }
 
+    // Surah name (e.g. Al-E-Imran) from the Surah list that is already on the page
+    var nameCache = {};
+    function surahName(n) {
+      if (nameCache[n] !== undefined) return nameCache[n];
+      var name = '';
+      var row = document.querySelector('#chapterSheetOverlayNormal .chapter-sheet-row[data-value="' + n + '"]');
+      var tr = row && row.querySelector('.chapter-sheet-translit');
+      if (tr) {
+        var c = tr.cloneNode(true);
+        Array.prototype.forEach.call(c.querySelectorAll('.chapter-sheet-order'), function (x) { x.remove(); });
+        name = c.textContent.replace(/[()]/g, '').trim();
+      }
+      if (name) nameCache[n] = name;
+      return name;
+    }
+
     var PAGE = 200;
     function showRows(rows, from, listEl, moreBtn) {
       var to = Math.min(rows.length, from + PAGE);
@@ -3694,6 +3712,8 @@
         var n = document.createElement('span'); n.className = 'adv-row-n'; n.textContent = (i + 1) + '.';
         var ref = document.createElement('span'); ref.textContent = r.s + '-' + r.a + (r.c > 1 ? '  (\u00D7' + r.c + ')' : '');
         d.appendChild(n); d.appendChild(ref);
+        var nm = surahName(r.s);
+        if (nm) { var nmEl = document.createElement('span'); nmEl.className = 'adv-row-name'; nmEl.textContent = nm; d.appendChild(nmEl); }
         frag.appendChild(d);
       }
       listEl.appendChild(frag);

@@ -942,12 +942,15 @@
   .adv-status { margin-top: 12px; font-size: 14px; line-height: 1.5; color: #57606a; }
   .adv-result { margin-top: 12px; }
   .adv-word { text-align: center; font-size: 32px; line-height: 1.6; margin: 2px 0 10px; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
-  .adv-tile { border: 1px solid #d0d7de; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: #f6f8fa; }
-  .adv-tile-label { font-size: 13px; font-weight: 600; color: #57606a; }
-  .adv-tile-num { font-size: 32px; font-weight: 700; line-height: 1.2; color: #24292f; }
-  .adv-tile-num small { font-size: 14px; font-weight: 500; color: #57606a; margin-left: 6px; }
-  .adv-tile-sub { font-size: 13px; color: #57606a; }
-  .adv-note { font-size: 12px; line-height: 1.55; color: #6e7781; margin-top: 4px; }
+  .adv-sum { text-align: center; font-size: 14px; color: #57606a; margin-bottom: 10px; }
+  .adv-list { border-top: 1px solid #e3e7eb; }
+  .adv-row { display: flex; gap: 12px; padding: 9px 4px; border-bottom: 1px solid #e3e7eb; font-size: 17px; direction: ltr; }
+  .adv-row-n { flex: 0 0 44px; color: #57606a; }
+  .adv-more {
+    display: block; width: 100%; margin: 12px 0 4px; padding: 10px; border: 1px solid #d0d7de; border-radius: 10px;
+    background: #f6f8fa; font: inherit; font-size: 14px; font-weight: 600; color: #24292f; cursor: pointer;
+  }
+  .adv-more:active { background: #e9edf1; }
   .howto-foot { display: flex; justify-content: flex-end; margin-top: 6px; }   /* same close button again at the bottom */
   .howto-pane { font-size: 14px; line-height: 1.55; color: var(--ink); }
   .howto-pane[lang="ml"] { font-family: 'Noto Serif Malayalam', serif; }
@@ -3660,39 +3663,47 @@
     }
 
     function fmt(n) { return Number(n).toLocaleString('en-US'); }
-    function tile(label, n, ayahs, surahs) {
-      var d = document.createElement('div');
-      d.className = 'adv-tile';
-      var l = document.createElement('div'); l.className = 'adv-tile-label'; l.textContent = label;
-      var num = document.createElement('div'); num.className = 'adv-tile-num';
-      num.appendChild(document.createTextNode(fmt(n)));
-      var sm = document.createElement('small'); sm.textContent = n === 1 ? 'time' : 'times'; num.appendChild(sm);
-      var sub = document.createElement('div'); sub.className = 'adv-tile-sub';
-      sub.textContent = n ? ('in ' + fmt(ayahs) + (ayahs === 1 ? ' ayah' : ' ayahs') + ', ' + fmt(surahs) + (surahs === 1 ? ' surah' : ' surahs')) : 'not found';
-      d.appendChild(l); d.appendChild(num); d.appendChild(sub);
-      return d;
-    }
-    function note(text) { var d = document.createElement('div'); d.className = 'adv-note'; d.textContent = text; return d; }
 
-    function count(q) {                   // q: array of normalized words
-      var exact = { n: 0, v: 0, s: {} }, cont = { n: 0, v: 0, s: {} };
-      function add(o, v, k) { o.n += k; o.v++; o.s[v.s] = 1; }
+    // One word: every word that contains these letters (so words with extra letters in front or behind are included).
+    // Several words: they must follow one another in an ayah.
+    function findAyahs(q) {
+      var rows = [], occ = 0;
       corpus.forEach(function (v) {
-        var t = v.t, e = 0, c = 0, i, j;
+        var t = v.t, c = 0, i, j;
         if (q.length === 1) {
-          for (i = 0; i < t.length; i++) {
-            if (t[i] === q[0]) { e++; c++; } else if (t[i].indexOf(q[0]) !== -1) c++;
-          }
+          for (i = 0; i < t.length; i++) if (t[i].indexOf(q[0]) !== -1) c++;
         } else {
           for (i = 0; i + q.length <= t.length; i++) {
-            for (j = 0; j < q.length && t[i + j] === q[j]; j++) {}
-            if (j === q.length) e++;
+            for (j = 0; j < q.length && t[i + j].indexOf(q[j]) !== -1; j++) {}
+            if (j === q.length) c++;
           }
         }
-        if (e) add(exact, v, e);
-        if (c) add(cont, v, c);
+        if (c) { rows.push({ s: v.s, a: v.a, c: c }); occ += c; }
       });
-      return { exact: exact, cont: cont };
+      return { rows: rows, occ: occ };
+    }
+
+    var PAGE = 200;
+    function showRows(rows, from, listEl, moreBtn) {
+      var to = Math.min(rows.length, from + PAGE);
+      var frag = document.createDocumentFragment();
+      for (var i = from; i < to; i++) {
+        var r = rows[i];
+        var d = document.createElement('div');
+        d.className = 'adv-row';
+        var n = document.createElement('span'); n.className = 'adv-row-n'; n.textContent = (i + 1) + '.';
+        var ref = document.createElement('span'); ref.textContent = r.s + '-' + r.a + (r.c > 1 ? '  (\u00D7' + r.c + ')' : '');
+        d.appendChild(n); d.appendChild(ref);
+        frag.appendChild(d);
+      }
+      listEl.appendChild(frag);
+      if (to < rows.length) {
+        moreBtn.hidden = false;
+        moreBtn.textContent = 'Show more (' + fmt(rows.length - to) + ' left)';
+        moreBtn.onclick = function () { showRows(rows, to, listEl, moreBtn); };
+      } else {
+        moreBtn.hidden = true;
+      }
     }
 
     function search() {
@@ -3703,20 +3714,19 @@
       if (!/[\u0621-\u064A]/.test(q.join(''))) { statusEl.textContent = 'Please type the word in Arabic letters.'; return; }
       statusEl.textContent = corpus ? 'Counting…' : 'Preparing the Quran text (first time only)…';
       ensureCorpus().then(function () {
-        var r = count(q);
+        var r = findAyahs(q);
         statusEl.textContent = '';
         var w = document.createElement('div'); w.className = 'adv-word'; w.setAttribute('lang', 'ar'); w.setAttribute('dir', 'rtl');
         w.textContent = raw;
         resultEl.appendChild(w);
-        var nS = function (o) { return Object.keys(o.s).length; };
-        if (q.length === 1) {
-          resultEl.appendChild(tile('Exact word', r.exact.n, r.exact.v, nS(r.exact)));
-          resultEl.appendChild(tile('Contains these letters', r.cont.n, r.cont.v, nS(r.cont)));
-          resultEl.appendChild(note('"Exact word" is the word on its own. "Contains these letters" also counts words that carry extra letters in front or behind it (for example وَٱللَّهِ for ٱللَّه). Marks and different forms of alef / hamza are ignored.'));
-        } else {
-          resultEl.appendChild(tile('This phrase', r.exact.n, r.exact.v, nS(r.exact)));
-          resultEl.appendChild(note('Counted when the words come one after the other in an ayah. Marks and different forms of alef / hamza are ignored.'));
-        }
+        var sum = document.createElement('div'); sum.className = 'adv-sum';
+        sum.textContent = 'Occurrences: ' + fmt(r.occ) + ' / Ayahs: ' + fmt(r.rows.length);
+        resultEl.appendChild(sum);
+        if (!r.rows.length) { statusEl.textContent = 'Not found.'; return; }
+        var list = document.createElement('div'); list.className = 'adv-list';
+        var more = document.createElement('button'); more.type = 'button'; more.className = 'adv-more'; more.hidden = true;
+        resultEl.appendChild(list); resultEl.appendChild(more);
+        showRows(r.rows, 0, list, more);
       }, function () {
         statusEl.textContent = 'Could not load the Quran text. Please check your internet connection and try again.';
       });

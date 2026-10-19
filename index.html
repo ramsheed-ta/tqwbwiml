@@ -939,7 +939,8 @@
 
   /* Advanced search box */
   /* Same size, spacing and look as the "How to use Quran website" box (it shares the .howto-box rules) */
-  .adv-box { min-height: min(78vh, 600px); }
+  .adv-box { min-height: min(78vh, 600px); display: flex; flex-direction: column; }
+  .adv-box .howto-foot { margin-top: auto; padding-top: 8px; }   /* the bottom ✕ sits in the bottom corner of the box */
   .adv-bar { display: flex; gap: 6px; width: 100%; margin-top: 6px; }
   .adv-input {
     flex: 1; min-width: 0; height: 30px; border: 1px solid #b9e0a5; border-radius: 8px; padding: 0 10px;

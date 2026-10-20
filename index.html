@@ -943,8 +943,8 @@
   .adv-box .howto-foot { margin-top: auto; padding-top: 8px; }   /* the bottom ✕ sits in the bottom corner of the box */
   .adv-bar { display: flex; gap: 6px; width: 100%; margin-top: 6px; }
   .adv-input {
-    flex: 1; min-width: 0; height: 30px; border: 1px solid #b9e0a5; border-radius: 8px; padding: 0 10px;
-    font-size: 16px;   /* 16px or more stops iPhone zooming in */
+    flex: 1; min-width: 0; height: 30px; border: 1px solid #b9e0a5; border-radius: 8px; padding: 0 8px;
+    font-size: 19px; line-height: 28px;   /* 16px or more stops iPhone zooming in; typed text a bit bigger */
     font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', 'Lora', serif;
     background: #fff; color: #111; outline: none; -webkit-appearance: none; appearance: none;
   }
@@ -954,6 +954,7 @@
     font: inherit; font-size: 13px; font-weight: 600; color: #24292f; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
   .adv-go:active { background: #e9edf1; }
+  .adv-clear { padding: 0 10px; font-weight: 500; }
   .adv-status { margin-top: 6px; font-size: 14px; line-height: 1.5; color: #57606a; }
   .adv-status:empty { display: none; }
   .adv-result { margin-top: 2px; }
@@ -1851,6 +1852,7 @@
         <div class="adv-bar">
           <input type="text" id="advInput" class="adv-input" dir="auto" lang="ar" placeholder="Type an Arabic word" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
           <button type="button" id="advGo" class="adv-go">Search</button>
+          <button type="button" id="advClear" class="adv-go adv-clear">Clear</button>
         </div>
         <div id="advResultHead" class="adv-result-head"></div>
       </div>
@@ -3601,6 +3603,8 @@
     var closeBtn = document.getElementById('advClose');
     var input = document.getElementById('advInput');
     var goBtn = document.getElementById('advGo');
+    var clearBtn = document.getElementById('advClear');
+    if (clearBtn) clearBtn.addEventListener('click', function () { input.value = ''; input.focus(); });   // empties only the text box
     var statusEl = document.getElementById('advStatus');
     var resultEl = document.getElementById('advResult');
     var headEl = document.getElementById('advResultHead');   // frozen part: the word, the counts and the "other forms" button

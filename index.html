@@ -1061,6 +1061,16 @@
   .settings-controls .translator-toggle-label input { margin: 0; }
   .settings-controls #fontSizePlus + .translator-toggle-label { margin-inline-start: 12px; }  /* gap between + and the Translator tick */
   .settings-controls .font-size-btn { padding: 0; height: 24px; width: 26px; min-width: 0; font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+  /* Narrow phones (seen on an Oppo): a little less padding and a tighter Font size row, so "Ayah" is never cut off at the edge */
+  @media (max-width: 360px) {
+    .settings-modal { padding-left: 12px; padding-right: 12px; }
+    .settings-controls .font-size-row { gap: 2px; flex-wrap: wrap; row-gap: 4px; }
+    .settings-controls .font-size-label { font-size: 12.5px; margin-right: 0; }
+    .settings-controls .font-size-btn { width: 24px; }
+    .settings-controls .translator-toggle-label { margin-inline-start: 3px; font-size: 12.5px; gap: 2px; }
+    .settings-controls #fontSizePlus + .translator-toggle-label { margin-inline-start: 8px; }
+    .settings-controls .lang-toggles { gap: 10px; }
+  }
   .settings-controls .word-search-row { margin-top: 0; }
 
   .settings-controls.search-focused > *:not(.word-search-row) { display: none !important; }
@@ -1873,7 +1883,7 @@
         </div>
 
         <div class="sources-item">
-          <b>Last updated: 19 October 2026</b><br>
+          <b>Last updated: 20 October 2026</b><br>
           Website created on 03 September 2026<br>
           <span class="sources-what" style="font-size:14px;">The site regularly makes improvements to provide you with a better experience. Check below for the latest changes.</span>
         </div>
@@ -1882,6 +1892,7 @@
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>Advanced Search: the "other forms" matching is now stricter, so unrelated words are no longer included.</li>
           <li>Advanced Search now also shows the count including other forms of the word (for example plurals), with a button to see the extra ayahs.</li>
           <li>New Advanced Search in Settings: type an Arabic word to see how many times it appears in the Quran, with the surah and ayah numbers.</li>
           <li>The Settings box has a new look: a light grey background, white boxes and a clearer help button.</li>
@@ -1915,6 +1926,12 @@
           <table class="lu-table">
             <thead><tr><th>Date</th><th>Section</th><th>Changes made</th></tr></thead>
             <tbody>
+              <tr>
+                <td>20 Oct 2026</td><td>Search</td>
+                <td><ul>
+                  <li>Advanced Search: the "other forms" matching is now stricter, so unrelated words are no longer included.</li>
+                </ul></td>
+              </tr>
               <tr>
                 <td>19 Oct 2026</td><td>Search</td>
                 <td><ul>

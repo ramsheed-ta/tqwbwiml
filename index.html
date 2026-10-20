@@ -3707,13 +3707,17 @@
 
     // One word: every word that contains these letters (so words with extra letters in front or behind are included).
     // Several words: they must follow one another in an ayah.
-    // "Other forms" (one word only): the letters come in the same order, with up to 2 other letters between them,
+    // "Other forms" (one word only): the letters come in the same order, with up to 2 letters between them that must be ا و or ي,
     // up to 3 in front and up to 4 behind (for example الشهور for شهر). It is a spelling check, not a real root search.
+    var WEAK = '\u0627\u0648\u064A';   // ا و ي : the only letters allowed in between (like the و of الشهور), so unrelated words are not matched
     function looseMatch(t, q) {
       if (t.indexOf(q) !== -1) return true;
       function go(k, pos) {                       // q[k-1] was found at position pos
         if (k === q.length) return t.length - 1 - pos <= 4;
-        for (var j = pos + 1; j <= pos + 3 && j < t.length; j++) if (t[j] === q[k] && go(k + 1, j)) return true;
+        for (var j = pos + 1; j <= pos + 3 && j < t.length; j++) {
+          if (t[j] === q[k] && go(k + 1, j)) return true;
+          if (WEAK.indexOf(t[j]) === -1) break;     // a letter in between must be ا و or ي, otherwise stop looking further
+        }
         return false;
       }
       for (var i = 0; i <= 3 && i < t.length; i++) if (t[i] === q[0] && go(1, i)) return true;

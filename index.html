@@ -3628,10 +3628,19 @@
     var input = document.getElementById('advInput');
     var goBtn = document.getElementById('advGo');
     var clearBtn = document.getElementById('advClear');
-    if (clearBtn) clearBtn.addEventListener('click', function () { input.value = ''; input.focus(); });   // empties only the text box
     var statusEl = document.getElementById('advStatus');
     var resultEl = document.getElementById('advResult');
     var headEl = document.getElementById('advResultHead');   // frozen part: the word, the counts and the "other forms" button
+    var IDLE_TEXT = statusEl.textContent;   // the first message, shown again after Clear
+    var searchId = 0;                       // lets Clear cancel a search that is still counting
+    if (clearBtn) clearBtn.addEventListener('click', function () {   // Clear empties the text box AND everything below it
+      searchId++;
+      input.value = '';
+      headEl.textContent = '';
+      resultEl.textContent = '';
+      statusEl.textContent = IDLE_TEXT;
+      input.focus();
+    });
     var CACHE_KEY = 'tq_adv_corpus_v1';
     var BISMILLAH = 'بسم الله الرحمن الرحيم';
     var corpus = null;        // [{ s: surah, a: ayah, t: [words] }]
@@ -3812,6 +3821,7 @@
 
     function search() {
       var raw = input.value.trim();
+      var myId = ++searchId;
       resultEl.textContent = '';
       headEl.textContent = '';
       var q = tokens(raw);
@@ -3819,6 +3829,7 @@
       if (!/[\u0621-\u064A]/.test(q.join(''))) { statusEl.textContent = 'Please type the word in Arabic letters.'; return; }
       statusEl.textContent = corpus ? 'Counting…' : 'Preparing the Quran text (first time only)…';
       ensureCorpus().then(function () {
+        if (myId !== searchId) return;   // Clear (or a newer search) came in meanwhile
         var r = findAyahs(q);
         statusEl.textContent = '';
         var w = document.createElement('div'); w.className = 'adv-word'; w.setAttribute('lang', 'ar'); w.setAttribute('dir', 'rtl');
@@ -3850,6 +3861,7 @@
         resultEl.appendChild(list); resultEl.appendChild(more);
         showRows(r.rows, 0, list, more);
       }, function () {
+        if (myId !== searchId) return;
         statusEl.textContent = 'Could not load the Quran text. Please check your internet connection and try again.';
       });
     }

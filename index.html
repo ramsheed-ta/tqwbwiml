@@ -3641,7 +3641,7 @@
       statusEl.textContent = IDLE_TEXT;
       input.focus();
     });
-    var CACHE_KEY = 'tq_adv_corpus_v1';
+    var CACHE_KEY = 'tq_adv_corpus_v2';   // v2: spelling rule above changed, so the stored text is rebuilt once
     var BISMILLAH = 'بسم الله الرحمن الرحيم';
     var corpus = null;        // [{ s: surah, a: ayah, t: [words] }]
     var loading = null;
@@ -3650,6 +3650,7 @@
     function norm(str) {
       return String(str || '')
         .replace(/\u0648\u0670/g, '\u0627')                                   // صلوٰة -> صلاة
+        .replace(/[\u0649\u06CC][\u064B-\u065F]*\u0670(?=[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]*[\u0621-\u063A\u0641-\u064A\u0671\u06A9\u06CC])/g, '\u0627')   // يلقىٰها -> يلقاها (ى with small alef inside a word is written ا today; at the end of a word it stays ى)
         .replace(/[\u0640\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF\u061C]/g, '')
         .replace(/[\u0671\u0622\u0623\u0625]/g, '\u0627')                     // ٱ آ أ إ -> ا
         .replace(/\u0624/g, '\u0648').replace(/\u0626/g, '\u064A')            // ؤ -> و , ئ -> ي
@@ -3668,6 +3669,7 @@
     }
     function saveCache(list) {
       try {
+        localStorage.removeItem('tq_adv_corpus_v1');   // old copy is not needed any more
         localStorage.setItem(CACHE_KEY, list.map(function (v) { return v.s + '|' + v.a + '|' + v.t.join(' '); }).join('\n'));
       } catch (e) { /* storage full or blocked: just search again next time */ }
     }

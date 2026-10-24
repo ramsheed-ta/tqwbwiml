@@ -1081,6 +1081,9 @@
   .settings-controls.search-focused > *:not(.word-search-row) { display: none !important; }
   .settings-controls.search-focused .word-search-row { margin-top: 2px; }
   .settings-controls .word-search-wrap { flex: 0 1 165px; }
+  /* while searching, give the box the full row so a pasted Arabic phrase is not cut off */
+  .settings-controls.search-focused .word-search-wrap { flex: 1 1 auto; min-width: 0; }
+  .word-search-input { font-family: 'Lora', 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; unicode-bidi: plaintext; }
   .settings-controls .word-search-input { padding: 3px 26px 3px 12px; font-size: 16px; }
   .settings-controls .word-search-clear { right: 4px; font-size: 13px; }
 
@@ -1848,7 +1851,7 @@
     </div>
     <div class="word-search-row">
       <div class="word-search-wrap">
-        <input type="text" id="wordSearchInput" class="word-search-input" placeholder="Search: Arb/മലയ/Eng">
+        <input type="text" id="wordSearchInput" class="word-search-input" dir="auto" enterkeyhint="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search: Arb/മലയ/Eng">
         <button type="button" id="wordSearchClear" class="word-search-clear" aria-label="Clear search" hidden>✕</button>
       </div>
       <span class="word-search-count" id="wordSearchCount"></span>
@@ -3377,11 +3380,25 @@
   }
 
   // ---- Arabic-aware matching (ignores harakat, unifies alef/ya/ta-marbuta forms) ----
-  var AR_MARKS = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED\u0640]/;
+  var AR_MARKS = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED\u0640\u08D3-\u08FF]/;
+
+  // Same spelling rules as Advanced Search (ء removed, ؤ ئ ى unified, small alef inside words ...)
+  function tqNormAr(str) {
+      return String(str || '')
+        .replace(/\u0648\u0670/g, '\u0627')                                   // صلوٰة -> صلاة
+        .replace(/[\u0649\u06CC][\u064B-\u065F]*\u0670(?=[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]*[\u0621-\u063A\u0641-\u064A\u0671\u06A9\u06CC])/g, '\u0627')   // يلقىٰها -> يلقاها (ى with small alef inside a word is written ا today; at the end of a word it stays ى)
+        .replace(/[\u0640\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF\u061C]/g, '')
+        .replace(/[\u0671\u0622\u0623\u0625]/g, '\u0627')                     // ٱ آ أ إ -> ا
+        .replace(/\u0624/g, '\u0648').replace(/\u0626/g, '\u064A')            // ؤ -> و , ئ -> ي
+        .replace(/\u0621/g, '')                                               // ء
+        .replace(/[\u0649\u06CC]/g, '\u064A').replace(/\u06A9/g, '\u0643');   // ى ی -> ي , ک -> ك
+    }
 
   function arNormChar(c) {
     if (c === '\u0623' || c === '\u0625' || c === '\u0622' || c === '\u0671') return '\u0627';
     if (c === '\u0649' || c === '\u06CC') return '\u064A';
+    if (c === '\u0624') return '\u0648';
+    if (c === '\u0626') return '\u064A';
     if (c === '\u0629') return '\u0647';
     return c;
   }
@@ -3397,7 +3414,7 @@
         if (daggerAsAlef) { s += '\u0627'; map.push(k); }
         continue;
       }
-      if (AR_MARKS.test(c)) continue;
+      if (AR_MARKS.test(c) || c === '\u0621') continue;
       s += arNormChar(c);
       map.push(k);
     }
@@ -3499,21 +3516,60 @@
     updateMatchFocus();
   }
 
+  // Pasted text often carries things that are not part of the word: invisible direction marks,
+  // an ayah number like "96:7", ayah-end signs, brackets. Remove them when the text is Arabic.
+  var AR_LETTER = /[\u0621-\u064A\u0671-\u06D3]/;
+  function cleanPasted(raw) {
+    var q = String(raw || '')
+      .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF\u061C]/g, '')
+      .replace(/[\s\u00A0]+/g, ' ');
+    if (AR_LETTER.test(q)) {
+      q = q.replace(/[0-9\u0660-\u0669\u06F0-\u06F9]+/g, ' ')
+           .replace(/[:\uFF1A()\[\]{}\u00AB\u00BB\uFD3E\uFD3F\u06DD\u06DE\u06E9,\u060C;\u061B.\-\u2013\u2014_*#]/g, ' ');
+    }
+    return q.replace(/\s+/g, ' ').trim();
+  }
+
   function performWordSearch(rawQuery) {
-    var q = (rawQuery || '').trim().toLowerCase();
-    if (wordSearchClear) wordSearchClear.hidden = !q;
-    var nq = q ? arNormalize(q, false).s : '';
-    if (!nq) { clearWordSearch(); return; }
+    var q = cleanPasted(rawQuery).toLowerCase();
+    if (wordSearchClear) wordSearchClear.hidden = !String(rawQuery || '').trim();
+    var isAr = AR_LETTER.test(q);
+    var toks = isAr ? tqNormAr(q).split(/\s+/).filter(Boolean) : [];
+    var nq = q ? arNormalize(q, false).s.replace(/\s+/g, ' ').trim() : '';
+    if (!nq || (isAr && !toks.length)) { clearWordSearch(); return; }
 
     clearVerseHighlights();
 
     var container = getVisibleContainer();
     var blocks = container.querySelectorAll('.word-block');
+
+    // Arabic: same rule as Advanced Search. One word = every word that contains these letters.
+    // Several words = they must follow one another inside an ayah (so a pasted phrase works too).
+    var arHits = new Set();
+    if (isAr) {
+      var groups = Array.prototype.slice.call(container.querySelectorAll('.ayah'));
+      if (!groups.length) groups = [container];
+      groups.forEach(function (ay) {
+        var words = [];
+        Array.prototype.forEach.call(ay.querySelectorAll('.word-block'), function (b) {
+          var ar = b.querySelector('.word-arabic');
+          tqNormAr(ar ? ar.textContent : '').split(/\s+/).filter(Boolean).forEach(function (t) {
+            words.push({ t: t, b: b });
+          });
+        });
+        for (var i = 0; i + toks.length <= words.length; i++) {
+          var j = 0;
+          while (j < toks.length && words[i + j].t.indexOf(toks[j]) !== -1) j++;
+          if (j === toks.length) for (j = 0; j < toks.length; j++) arHits.add(words[i + j].b);
+        }
+      });
+    }
+
     var blockMatches = [];
     blocks.forEach(function (b) {
       var s = b.getAttribute('data-search') || '';
-      var hit = s.indexOf(q) !== -1;
-      if (!hit) {
+      var hit = arHits.has(b) || s.indexOf(q) !== -1;
+      if (!hit && !isAr) {
         if (b._ns1 === undefined) {
           var low = s.toLowerCase();
           b._ns1 = arNormalize(low, false).s;
@@ -3552,6 +3608,20 @@
   if (wordSearchPrevBtn) wordSearchPrevBtn.addEventListener('click', function () { goToMatch(-1); });
   if (wordSearchNextBtn) wordSearchNextBtn.addEventListener('click', function () { goToMatch(1); });
 
+  if (wordSearchInput) {
+    wordSearchInput.addEventListener('paste', function (e) {
+      var cd = e.clipboardData;
+      var txt = cd && cd.getData ? cd.getData('text') : '';
+      if (!txt) return;
+      var cleaned = cleanPasted(txt);
+      if (cleaned === txt) return;                 // nothing to clean: normal paste
+      e.preventDefault();
+      var el = this, st = el.selectionStart, en = el.selectionEnd;
+      if (typeof el.setRangeText === 'function' && st != null) el.setRangeText(cleaned, st, en, 'end');
+      else el.value = el.value + cleaned;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
   if (wordSearchInput) {
     var wordSearchDebounce = null;
     wordSearchInput.addEventListener('input', function () {
@@ -3687,16 +3757,7 @@
     var loading = null;
 
     // Same spelling for what the Quran text has and what the user types: no marks, alef / hamza / ya forms unified.
-    function norm(str) {
-      return String(str || '')
-        .replace(/\u0648\u0670/g, '\u0627')                                   // صلوٰة -> صلاة
-        .replace(/[\u0649\u06CC][\u064B-\u065F]*\u0670(?=[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]*[\u0621-\u063A\u0641-\u064A\u0671\u06A9\u06CC])/g, '\u0627')   // يلقىٰها -> يلقاها (ى with small alef inside a word is written ا today; at the end of a word it stays ى)
-        .replace(/[\u0640\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF\u061C]/g, '')
-        .replace(/[\u0671\u0622\u0623\u0625]/g, '\u0627')                     // ٱ آ أ إ -> ا
-        .replace(/\u0624/g, '\u0648').replace(/\u0626/g, '\u064A')            // ؤ -> و , ئ -> ي
-        .replace(/\u0621/g, '')                                               // ء
-        .replace(/[\u0649\u06CC]/g, '\u064A').replace(/\u06A9/g, '\u0643');   // ى ی -> ي , ک -> ك
-    }
+    function norm(str) { return tqNormAr(str); }   // same rules are shared with the Settings search box
     function tokens(str) { return norm(str).split(/\s+/).filter(Boolean); }
 
     function buildCorpus(rows) {          // rows: [surah, ayah, text]

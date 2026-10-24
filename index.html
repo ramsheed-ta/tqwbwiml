@@ -977,6 +977,7 @@
   .adv-xlist { border-top-color: #cddff2; }
   .adv-more[hidden], .adv-xlist[hidden] { display: none; }   /* the "Show more" box is only visible when there is more to show */
   .adv-row-name { margin-left: auto; text-align: right; color: #57606a; font-size: 13px; }
+  .adv-row-rev { flex: 0 0 34px; text-align: right; color: #2f5d8a; font-size: 13px; }   /* revelation order number, only in Revelation order view */
   .howto-foot { display: flex; justify-content: flex-end; margin-top: 6px; }   /* same close button again at the bottom */
   .howto-pane { font-size: 14px; line-height: 1.55; color: var(--ink); }
   .howto-pane[lang="ml"] { font-family: 'Noto Serif Malayalam', serif; }
@@ -3969,6 +3970,7 @@
     }
 
     var PAGE = 200;
+    var advRevRank = null;   // set (surah -> revelation number) while the Revelation order view is on, otherwise null
     function showRows(rows, from, listEl, moreBtn, plus) {
       var to = Math.min(rows.length, from + PAGE);
       var frag = document.createDocumentFragment();
@@ -3981,6 +3983,7 @@
         d.appendChild(n); d.appendChild(ref);
         var nm = surahName(r.s);
         if (nm) { var nmEl = document.createElement('span'); nmEl.className = 'adv-row-name'; nmEl.textContent = nm; d.appendChild(nmEl); }
+        if (advRevRank && advRevRank[r.s]) { var rvEl = document.createElement('span'); rvEl.className = 'adv-row-rev'; rvEl.textContent = '#' + advRevRank[r.s]; d.appendChild(rvEl); }
         frag.appendChild(d);
       }
       listEl.appendChild(frag);
@@ -4008,6 +4011,7 @@
         statusEl.textContent = '';
         // Results can be shown in Surah order (default) or in the order the surahs were revealed.
         var revMode = false;
+        advRevRank = null;
         var REV_FIRST = [96, 68, 73, 74, 1, 111, 81, 87, 92, 89, 93, 94, 103, 100];    // revelation orders 1-14; 15-114 come from REVELATION_ORDER_REST
         var revRank = {};
         REV_FIRST.concat(typeof REVELATION_ORDER_REST !== 'undefined' ? REVELATION_ORDER_REST : []).forEach(function (n, i) { revRank[n] = i + 1; });
@@ -4049,6 +4053,7 @@
         revBtn.textContent = 'Show in Revelation order';
         revBtn.onclick = function () {
           revMode = !revMode;
+          advRevRank = revMode ? revRank : null;      // numbers appear in Revelation order view and disappear again in Surah order
           revBtn.textContent = revMode ? 'Show in Surah order' : 'Show in Revelation order';
           list.textContent = ''; showRows(ordered(r.rows), 0, list, more);
           if (xl && xl.childNodes.length) { xl.textContent = ''; showRows(ordered(r.extra), 0, xl, xm, true); }

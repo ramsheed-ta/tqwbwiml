@@ -1438,6 +1438,12 @@
   .verse-nav-btn:active svg { opacity: 1; }
   .verse-nav-btn:active svg path:not(.halo) { stroke: #888; }
 
+  /* Second pair of arrows: straight from ayah to ayah. Same rows as the first pair, just inside it.
+     (Narrower tap area, so it never covers the first pair's triangle.) */
+  .verse-nav-ayah { left: 45px; }
+  .verse-nav-ayah.verse-nav-right { left: auto; right: 45px; }
+  .verse-nav-ayah .verse-nav-btn { width: 34px; }
+
   /* Last read pill (top right, same row as the surah buttons) */
   .last-read-pill {
     position: fixed;
@@ -2071,6 +2077,25 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 5L4.5 18h15z"/><path d="M12 5L4.5 18h15z"/></svg>
     </button>
     <button type="button" id="verseDownRight" class="verse-nav-btn verse-down" aria-label="Go to the end of this ayah (or the next ayah)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 19L4.5 6h15z"/><path d="M12 19L4.5 6h15z"/></svg>
+    </button>
+  </div>
+
+  <!-- Second pair of floating arrows: previous / next ayah -->
+  <div id="ayahNav" class="verse-nav verse-nav-ayah">
+    <button type="button" id="ayahPrev" class="verse-nav-btn ayah-prev" aria-label="Go to the previous ayah">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 5L4.5 18h15z"/><path d="M12 5L4.5 18h15z"/></svg>
+    </button>
+    <button type="button" id="ayahNext" class="verse-nav-btn ayah-next" aria-label="Go to the next ayah">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 19L4.5 6h15z"/><path d="M12 19L4.5 6h15z"/></svg>
+    </button>
+  </div>
+
+  <div id="ayahNavRight" class="verse-nav verse-nav-ayah verse-nav-right">
+    <button type="button" id="ayahPrevRight" class="verse-nav-btn ayah-prev" aria-label="Go to the previous ayah">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 5L4.5 18h15z"/><path d="M12 5L4.5 18h15z"/></svg>
+    </button>
+    <button type="button" id="ayahNextRight" class="verse-nav-btn ayah-next" aria-label="Go to the next ayah">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path class="halo" d="M12 19L4.5 6h15z"/><path d="M12 19L4.5 6h15z"/></svg>
     </button>
   </div>
@@ -2768,6 +2793,50 @@
     }
     upBtns.forEach(function (b) { b.addEventListener('click', goUp); });
     downBtns.forEach(function (b) { b.addEventListener('click', goDown); });
+  })();
+
+  // Second pair of arrows: straight from ayah to ayah.
+  // Down = start of the next ayah, Up = start of the previous ayah (no page-by-page scrolling inside a long ayah;
+  // the first pair of arrows does that). Quick repeated taps keep counting from the ayah you are heading to.
+  (function () {
+    var prevBtns = document.querySelectorAll('.ayah-prev');
+    var nextBtns = document.querySelectorAll('.ayah-next');
+    if (!prevBtns.length || !nextBtns.length) return;
+    var pending = null;     // { i: ayah index we are scrolling to, t: when }
+
+    function offset() { return window.topCoverH() + 6; }      // same place as "Go to Ayah": head sits just under the round buttons
+    function visibleVerses() {
+      return Array.prototype.filter.call(document.querySelectorAll('.ayah'), function (el) { return el.offsetParent !== null; });
+    }
+    function currentIndex(list) {
+      if (pending && Date.now() - pending.t < 900 && pending.i < list.length) return pending.i;
+      var line = offset() + 40, idx = 0;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].getBoundingClientRect().top <= line) idx = i; else break;
+      }
+      return idx;
+    }
+    function goToAyah(list, i) {
+      pending = { i: i, t: Date.now() };
+      var y = list[i].getBoundingClientRect().top + window.pageYOffset - offset();
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
+    function nextAyah() {
+      var list = visibleVerses();
+      if (!list.length) return;
+      var i = currentIndex(list);
+      if (i < list.length - 1) goToAyah(list, i + 1);
+      else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    }
+    function prevAyah() {
+      var list = visibleVerses();
+      if (!list.length) return;
+      var i = currentIndex(list);
+      if (i > 0) goToAyah(list, i - 1);
+      else { pending = { i: 0, t: Date.now() }; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    }
+    prevBtns.forEach(function (b) { b.addEventListener('click', prevAyah); });
+    nextBtns.forEach(function (b) { b.addEventListener('click', nextAyah); });
   })();
 
   // Last read: remembers the chapter:verse you were reading. The pill at the top right shows where you were

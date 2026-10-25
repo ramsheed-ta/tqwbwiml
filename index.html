@@ -942,8 +942,10 @@
   /* Same size, spacing and look as the "How to use Quran website" box (it shares the .howto-box rules) */
   #advSearchOverlay { padding: 20px 34px; }   /* a bit more space around the box on all four sides, so it is smaller */
   .adv-box { min-height: min(76vh, 600px); max-height: 80vh; display: flex; flex-direction: column; }
-  .sources-box.adv-box { padding-top: 6px; padding-bottom: 10px; }                 /* less space above the title */
-  .adv-box .sticky-top { top: -6px; }                                              /* = the box's top padding */
+  /* Space above the title and the close button: these 4 numbers must stay equal (box padding, sticky offset,
+     negative margin, head padding), otherwise the top gap does not change. Smaller number = less space. */
+  .sources-box.adv-box { padding-top: 4px; padding-bottom: 10px; }
+  .adv-box .sticky-top { top: -4px; margin-top: -4px; padding-top: 4px; }
   .adv-box .sources-head { margin-bottom: 0; }
   .adv-box .sources-head.sticky-top { padding-bottom: 4px; }
   .adv-box .howto-foot { margin-top: auto; padding-top: 4px; }   /* the bottom ✕ sits in the bottom corner of the box */

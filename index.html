@@ -942,17 +942,21 @@
   /* Same size, spacing and look as the "How to use Quran website" box (it shares the .howto-box rules) */
   #advSearchOverlay { padding: 20px 34px; }   /* a bit more space around the box on all four sides, so it is smaller */
   .adv-box { min-height: min(76vh, 600px); max-height: 80vh; display: flex; flex-direction: column; }
-  .adv-box .howto-foot { margin-top: auto; padding-top: 8px; }   /* the bottom ✕ sits in the bottom corner of the box */
-  .adv-bar { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; margin-top: 6px; }   /* box on the first row, the two buttons on the second */
+  .sources-box.adv-box { padding-top: 6px; padding-bottom: 10px; }                 /* less space above the title */
+  .adv-box .sticky-top { top: -6px; }                                              /* = the box's top padding */
+  .adv-box .sources-head { margin-bottom: 0; }
+  .adv-box .sources-head.sticky-top { padding-bottom: 4px; }
+  .adv-box .howto-foot { margin-top: auto; padding-top: 4px; }   /* the bottom ✕ sits in the bottom corner of the box */
+  .adv-bar { display: flex; flex-wrap: wrap; gap: 4px; width: 100%; margin-top: 2px; }   /* box on the first row, the two buttons on the second */
   .adv-input {
-    flex: 1 1 100%; min-width: 0; height: 40px; border: 1px solid #b9e0a5; border-radius: 8px; padding: 0 8px;
+    flex: 1 1 100%; min-width: 0; height: 36px; border: 1px solid #b9e0a5; border-radius: 8px; padding: 0 8px;
     font-size: 19px; line-height: 24px;   /* 16px or more stops iPhone zooming in; the text line (and so the cursor) is 24px tall, the box 38px so letters and marks are not cut */
     font-family: 'Geeza Pro', 'Noto Naskh Arabic', 'Amiri Quran', 'Lora', serif;   /* compact Arabic font: the Quran fonts are taller than the line and got cut at the bottom */
     background: #fff; color: #111; outline: none; -webkit-appearance: none; appearance: none;
   }
   .adv-input:focus { border-color: #7fc25f; }
   .adv-go {
-    flex: 1 1 0; min-width: 0; height: 38px; padding: 0 12px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa;
+    flex: 1 1 0; min-width: 0; height: 34px; padding: 0 12px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa;
     font: inherit; font-size: 13px; font-weight: 600; color: #24292f; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
   .adv-go:active { background: #e9edf1; }
@@ -960,10 +964,10 @@
   .adv-status { margin-top: 6px; font-size: 14px; line-height: 1.5; color: #57606a; }
   .adv-status:empty { display: none; }
   .adv-result { margin-top: 2px; }
-  .adv-word { text-align: center; font-size: 26px; line-height: 1.2; margin: 0 0 0; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
+  .adv-word { text-align: center; font-size: 19px; line-height: 1.15; margin: 0 0 0; font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; }
   .adv-result-head { width: 100%; }
   .adv-result-head:empty { display: none; }
-  .adv-sum { text-align: center; font-size: 14px; line-height: 1.3; color: #57606a; margin-bottom: 2px; }
+  .adv-sum { text-align: center; font-size: 14px; line-height: 1.3; color: #57606a; margin-bottom: 0; }
   .adv-list { border-top: 1px solid #e3e7eb; }
   .adv-row { display: flex; align-items: baseline; gap: 10px; padding: 2px 4px; border-bottom: 1px solid #e3e7eb; font-size: 15px; line-height: 1.25; direction: ltr; }
   .adv-row-n { flex: 0 0 32px; color: #57606a; }
@@ -974,7 +978,7 @@
   }
   .adv-more:active { background: #e9edf1; }
   .adv-sum2 { margin-top: -2px; color: #3a6ea5; }
-  .adv-tgl { margin: 4px 0 6px; padding: 7px; }
+  .adv-tgl { margin: 2px 0 4px; padding: 5px; }
   .adv-xlist { border-top-color: #cddff2; }
   .adv-more[hidden], .adv-xlist[hidden] { display: none; }   /* the "Show more" box is only visible when there is more to show */
   .adv-row-name { margin-left: auto; text-align: right; color: #57606a; font-size: 13px; }

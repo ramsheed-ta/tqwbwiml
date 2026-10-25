@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mushaf view test</title>
+<style>
+  @font-face {
+    font-family: 'UthmanicHafs';
+    src: url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2') format('woff2'),
+         url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf') format('truetype');
+    font-display: swap;
+  }
+  :root { --ink: #1a1a1a; --paper: #fffdf7; --accent: #b9e0a5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f1efe8; color: var(--ink); font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+
+  .bar {
+    position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 8px 10px; background: #fff; border-bottom: 1px solid var(--accent);
+  }
+  .btn {
+    min-width: 44px; height: 38px; padding: 0 12px; border: 1px solid #c9d3c0; border-radius: 8px;
+    background: #f6f8fa; font-size: 15px; cursor: pointer; color: var(--ink);
+  }
+  .btn:disabled { opacity: .35; cursor: default; }
+  .jump { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+  .jump input { width: 56px; height: 38px; text-align: center; border: 1px solid #c9d3c0; border-radius: 8px; font-size: 16px; }
+
+  #stage { max-width: 560px; margin: 10px auto 24px; padding: 0 8px; touch-action: pan-y; }
+  #page {
+    direction: rtl; background: var(--paper); border: 1px solid #d9d2bd; border-radius: 6px; padding: 10px 10px 6px;
+    font-family: 'UthmanicHafs', 'Amiri Quran', 'Amiri', serif; font-size: 20px; min-height: 300px;
+  }
+  .line { display: flex; justify-content: space-between; gap: .22em; white-space: nowrap; line-height: 2.1; }
+  .line.center { justify-content: center; gap: .3em; }
+  .line.spacer { min-height: 2.1em; }
+  .w.end { font-size: .9em; }
+  .surah-head {
+    text-align: center; line-height: 1.9; margin: 3px 0; border: 1.5px solid #c9b97a; border-radius: 5px;
+    background: #f5eed3; white-space: nowrap;
+  }
+  .bism { text-align: center; line-height: 2.1; white-space: nowrap; }
+  #page.short .line, #page.short .surah-head, #page.short .bism { line-height: 2.7; }
+  #page.short { padding-top: 40px; padding-bottom: 40px; }
+
+  .foot { text-align: center; color: #777; font-size: 13px; margin: 6px 0 2px; }
+  .msg { direction: ltr; text-align: center; padding: 30px 14px; font-family: system-ui, sans-serif; font-size: 15px; line-height: 1.5; }
+  .msg button { margin-top: 10px; }
+  .dbg { max-width: 560px; margin: 0 auto 20px; padding: 0 10px; color: #888; font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <button class="btn" id="prevBtn">&larr; Prev</button>
+  <div class="jump">Page <input id="pageInput" type="number" inputmode="numeric" min="1" max="49"> <span id="ofTotal">/ 49</span></div>
+  <button class="btn" id="nextBtn">Next &rarr;</button>
+</div>
+
+<div id="stage"><div id="page" class="msg">Loading…</div></div>
+<div class="foot" id="foot"></div>
+<div class="dbg" id="dbg"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var WORKER = 'https://quran-api.ramsheedabdul1404-bab.workers.dev';   // same Worker the main site uses
+  var MUSHAF = new URLSearchParams(location.search).get('mushaf') || '1';  // 1 = Madani 604 pages (QCF V2 layout)
+  var FIRST = 1, LAST = 49;                                              // test range: Al-Fatiha (1) + all of Al-Baqarah (2-49)
+
+  var SURAH_NAMES = { 1: 'سُورَةُ ٱلْفَاتِحَةِ', 2: 'سُورَةُ ٱلْبَقَرَةِ' };
+  var BISMILLAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+
+  var pageEl = document.getElementById('page');
+  var stageEl = document.getElementById('stage');
+  var footEl = document.getElementById('foot');
+  var dbgEl = document.getElementById('dbg');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var pageInput = document.getElementById('pageInput');
+  document.getElementById('ofTotal').textContent = '/ ' + LAST;
+  pageInput.max = LAST;
+
+  var cache = {};          // page number -> promise of word list
+  var current = 1;
+  var renderToken = 0;
+
+  function toArabicDigits(n) {
+    return String(n).replace(/\d/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.charAt(+d); });
+  }
+  // A Quranic mark must stay attached to its letter: remove spaces the API may put before marks.
+  function fixMarks(t) {
+    return t.replace(/[\s\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF\u061C]+(?=[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED])/g, '');
+  }
+
+  function fetchPage(n) {
+    if (cache[n]) return cache[n];
+    var url = WORKER + '/content/api/v4/verses/by_page/' + n + '?mushaf=' + encodeURIComponent(MUSHAF)
+      + '&words=true&word_fields=text_qpc_hafs,text_uthmani,page_number,line_number&per_page=50';
+    var p = new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { reject(new Error('timeout')); }, 20000);
+      fetch(url).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function (d) {
+        clearTimeout(timer);
+        var words = [];
+        (d.verses || []).forEach(function (v) {
+          (v.words || []).forEach(function (w) {
+            if (w.page_number != null && Number(w.page_number) !== n) return;   // a verse can continue on the next page
+            var isEnd = w.char_type_name === 'end';
+            var txt = isEnd ? '﴿' + toArabicDigits(v.verse_number) + '﴾'
+                            : fixMarks(w.text_qpc_hafs || w.text_uthmani || w.text || '');
+            words.push({ line: w.line_number, text: txt, end: isEnd, key: v.verse_key, pos: w.position });
+          });
+        });
+        resolve(words);
+      }).catch(function (e) { clearTimeout(timer); reject(e); });
+    });
+    cache[n] = p;
+    p.catch(function () { delete cache[n]; });   // allow retry after a failure
+    return p;
+  }
+
+  // Words -> list of rows: {type:'line', words}, {type:'head', chapter}, {type:'bism'}, {type:'spacer'}
+  function buildRows(words) {
+    var byLine = {}, maxLine = 0;
+    words.forEach(function (w) {
+      if (!w.line) return;
+      (byLine[w.line] = byLine[w.line] || []).push(w);
+      if (w.line > maxLine) maxLine = w.line;
+    });
+    var rows = [], gap = 0;
+    for (var n = 1; n <= maxLine; n++) {
+      var ws = byLine[n];
+      if (!ws) { gap++; continue; }
+      if (gap) {
+        var first = ws[0], chapter = Number(String(first.key).split(':')[0]);
+        var startsSurah = first.pos === 1 && /:1$/.test(first.key);
+        if (startsSurah) {
+          rows.push({ type: 'head', chapter: chapter });
+          if (gap >= 2 && chapter !== 9 && chapter !== 1) rows.push({ type: 'bism' });
+          for (var k = (chapter !== 9 && chapter !== 1 ? 2 : 1); k < gap; k++) rows.push({ type: 'spacer' });
+        } else {
+          for (var s = 0; s < gap; s++) rows.push({ type: 'spacer' });
+        }
+        gap = 0;
+      }
+      rows.push({ type: 'line', words: ws });
+    }
+    return { rows: rows, lineCount: Object.keys(byLine).length, maxLine: maxLine };
+  }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function render(n, words) {
+    var built = buildRows(words);
+    pageEl.className = n <= 2 ? 'short' : '';
+    pageEl.style.fontSize = '20px';
+    pageEl.textContent = '';
+    built.rows.forEach(function (r) {
+      if (r.type === 'line') {
+        var line = el('div', 'line');
+        r.words.forEach(function (w) { line.appendChild(el('span', 'w' + (w.end ? ' end' : ''), w.text)); });
+        pageEl.appendChild(line);
+      } else if (r.type === 'head') {
+        pageEl.appendChild(el('div', 'surah-head', SURAH_NAMES[r.chapter] || ('سورة ' + toArabicDigits(r.chapter))));
+      } else if (r.type === 'bism') {
+        pageEl.appendChild(el('div', 'bism', BISMILLAH));
+      } else {
+        pageEl.appendChild(el('div', 'line spacer'));
+      }
+    });
+    fitToWidth();
+    dbgEl.textContent = 'page ' + n + ' · mushaf=' + MUSHAF + ' · ' + words.length + ' words · '
+      + built.lineCount + ' text lines (highest line number: ' + built.maxLine + ')';
+    footEl.textContent = toArabicDigits(n);
+  }
+
+  // One font size for the whole page: the longest line fills the width exactly; shorter lines are spread
+  // across the width, except very short ones (end of a surah) which stay centred.
+  function fitToWidth() {
+    var cs = getComputedStyle(pageEl);
+    var avail = pageEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var lines = Array.prototype.slice.call(pageEl.querySelectorAll('.line:not(.spacer)'));
+    if (!lines.length || avail <= 0) return;
+    var base = 20, maxNat = 0;
+    lines.forEach(function (l) {
+      l.style.width = 'max-content'; l.style.justifyContent = 'flex-start';
+      if (l.offsetWidth > maxNat) maxNat = l.offsetWidth;
+    });
+    var size = Math.max(10, Math.min(44, base * avail / maxNat * 0.99));
+    pageEl.style.fontSize = size + 'px';
+    for (var tries = 0; tries < 5; tries++) {   // text does not scale perfectly linearly: re-check and shrink if a line is still too wide
+      var widest = 0;
+      lines.forEach(function (l) { if (l.offsetWidth > widest) widest = l.offsetWidth; });
+      if (widest <= avail) break;
+      size = Math.max(10, size * avail / widest * 0.985);
+      pageEl.style.fontSize = size + 'px';
+    }
+    var natural = [];
+    lines.forEach(function (l) { natural.push(l.offsetWidth); });
+    lines.forEach(function (l, i) {
+      l.style.width = ''; l.style.justifyContent = '';
+      l.classList.toggle('center', natural[i] < avail * 0.7);
+    });
+    pageEl.querySelectorAll('.surah-head, .bism').forEach(function (h) { h.style.fontSize = '1em'; });
+  }
+
+  function showMessage(html, retryFn) {
+    pageEl.className = 'msg';
+    pageEl.style.fontSize = '';
+    pageEl.innerHTML = html;
+    if (retryFn) {
+      var b = el('button', 'btn', 'Retry');
+      b.onclick = retryFn;
+      pageEl.appendChild(document.createElement('br'));
+      pageEl.appendChild(b);
+    }
+  }
+
+  function go(n, pushHash) {
+    n = Math.max(FIRST, Math.min(LAST, Number(n) || FIRST));
+    current = n;
+    var token = ++renderToken;
+    pageInput.value = n;
+    prevBtn.disabled = n <= FIRST;
+    nextBtn.disabled = n >= LAST;
+    if (pushHash !== false) { try { history.replaceState(null, '', location.pathname + location.search + '#p=' + n); } catch (e) {} }
+    showMessage('Loading page ' + n + '…');
+    dbgEl.textContent = '';
+    footEl.textContent = '';
+    fetchPage(n).then(function (words) {
+      if (token !== renderToken) return;
+      if (!words.length || !words.some(function (w) { return w.line; })) {
+        showMessage('The API answered, but the words have no <b>line_number</b>.<br>Try <code>?mushaf=5</code> or <code>?mushaf=2</code> at the end of the address.');
+        return;
+      }
+      render(n, words);
+      window.scrollTo(0, 0);
+      if (n < LAST) fetchPage(n + 1).catch(function () {});   // prefetch neighbours quietly
+      if (n > FIRST) fetchPage(n - 1).catch(function () {});
+    }).catch(function (e) {
+      if (token !== renderToken) return;
+      showMessage('Could not load page ' + n + '.<br><small>' + String(e && e.message || e) + '</small>', function () { go(n); });
+    });
+  }
+
+  prevBtn.onclick = function () { go(current - 1); };
+  nextBtn.onclick = function () { go(current + 1); };
+  pageInput.addEventListener('change', function () { go(pageInput.value); });
+
+  // Arabic books turn right-to-left: the next page is on the LEFT.
+  document.addEventListener('keydown', function (e) {
+    if (e.target && e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowLeft') go(current + 1);
+    if (e.key === 'ArrowRight') go(current - 1);
+  });
+  var sx = null, sy = null;
+  stageEl.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  stageEl.addEventListener('touchend', function (e) {
+    if (sx == null) return;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    sx = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    go(dx > 0 ? current + 1 : current - 1);   // swipe to the right = next page, like turning an Arabic book
+  }, { passive: true });
+
+  var refit = null;
+  window.addEventListener('resize', function () { clearTimeout(refit); refit = setTimeout(function () { if (pageEl.querySelector('.line')) fitToWidth(); }, 150); });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { if (pageEl.querySelector('.line')) fitToWidth(); });   // re-measure once the font has loaded
+  }
+
+  window.addEventListener('hashchange', function () {
+    var h = /#p=(\d+)/.exec(location.hash);
+    if (h && Number(h[1]) !== current) go(Number(h[1]), false);
+  });
+
+  var m = /#p=(\d+)/.exec(location.hash);
+  go(m ? Number(m[1]) : 1, false);
+})();
+</script>
+</body>
+</html>

@@ -943,16 +943,16 @@
   #advSearchOverlay { padding: 20px 34px; }   /* a bit more space around the box on all four sides, so it is smaller */
   .adv-box { min-height: min(76vh, 600px); max-height: 80vh; display: flex; flex-direction: column; }
   .adv-box .howto-foot { margin-top: auto; padding-top: 8px; }   /* the bottom ✕ sits in the bottom corner of the box */
-  .adv-bar { display: flex; gap: 6px; width: 100%; margin-top: 6px; }
+  .adv-bar { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; margin-top: 6px; }   /* box on the first row, the two buttons on the second */
   .adv-input {
-    flex: 1; min-width: 0; height: 38px; border: 1px solid #b9e0a5; border-radius: 8px; padding: 0 8px;
+    flex: 1 1 100%; min-width: 0; height: 40px; border: 1px solid #b9e0a5; border-radius: 8px; padding: 0 8px;
     font-size: 19px; line-height: 24px;   /* 16px or more stops iPhone zooming in; the text line (and so the cursor) is 24px tall, the box 38px so letters and marks are not cut */
     font-family: 'Geeza Pro', 'Noto Naskh Arabic', 'Amiri Quran', 'Lora', serif;   /* compact Arabic font: the Quran fonts are taller than the line and got cut at the bottom */
     background: #fff; color: #111; outline: none; -webkit-appearance: none; appearance: none;
   }
   .adv-input:focus { border-color: #7fc25f; }
   .adv-go {
-    flex: none; height: 38px; padding: 0 12px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa;
+    flex: 1 1 0; min-width: 0; height: 38px; padding: 0 12px; border: 1px solid #d0d7de; border-radius: 8px; background: #f6f8fa;
     font: inherit; font-size: 13px; font-weight: 600; color: #24292f; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
   .adv-go:active { background: #e9edf1; }
@@ -967,6 +967,7 @@
   .adv-list { border-top: 1px solid #e3e7eb; }
   .adv-row { display: flex; align-items: baseline; gap: 10px; padding: 2px 4px; border-bottom: 1px solid #e3e7eb; font-size: 15px; line-height: 1.25; direction: ltr; }
   .adv-row-n { flex: 0 0 32px; color: #57606a; }
+  .adv-row-ref { flex: none; white-space: nowrap; }   /* 3-144 stays on one line on narrow phones */
   .adv-more {
     display: block; width: 100%; margin: 12px 0 4px; padding: 10px; border: 1px solid #d0d7de; border-radius: 10px;
     background: #f6f8fa; font: inherit; font-size: 14px; font-weight: 600; color: #24292f; cursor: pointer;
@@ -1444,6 +1445,17 @@
   .verse-nav-ayah { left: 45px; }
   .verse-nav-ayah.verse-nav-right { left: auto; right: 45px; }
   .verse-nav-ayah .verse-nav-btn { width: 34px; }
+
+  /* ===== "Website under construction" banner =====
+     Its HTML is switched OFF (see the comment just above the Bismillah line).
+     Colours / size can be changed here. */
+  .uc-banner { display: flex; align-items: center; gap: 10px; margin: 8px 0; padding: 8px 12px;
+               background: #fff8e1; border: 1px solid #f0d78c; border-radius: 8px;
+               color: #6b5200; font-size: 14px; line-height: 1.35; }
+  .uc-banner[hidden] { display: none; }
+  .uc-banner .uc-text { flex: 1; }
+  .uc-banner .uc-close { flex: none; width: 28px; height: 28px; border: 1px solid #d0d7de;
+                         border-radius: 8px; background: #f6f8fa; font-size: 14px; cursor: pointer; }
 
   /* Last read pill (top right, same row as the surah buttons) */
   .last-read-pill {
@@ -2337,6 +2349,17 @@
     <button type="button" id="wordSearchFabNext" class="word-search-fabbtn" aria-label="Next match"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
   </div>
 
+  <!-- ===== "WEBSITE UNDER CONSTRUCTION" BANNER  (now: OFF) =====
+       TO TURN IT ON: delete the line that has only the opening comment marker and the line
+       that has only the closing comment marker, just around the <div> below.
+       The words can be changed freely (inside uc-text). -->
+  <!--
+  <div id="ucBanner" class="uc-banner" role="status">
+    <span class="uc-text">⚠ Website under construction – new features are being added.</span>
+    <button type="button" id="ucClose" class="uc-close" aria-label="Hide this message">✕</button>
+  </div>
+  -->
+
   <p class="bismillah-line" id="bismillahLine">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِيمِ</p>
 
   <main id="ayahList" style="display:none;"></main>
@@ -2794,6 +2817,16 @@
     }
     upBtns.forEach(function (b) { b.addEventListener('click', goUp); });
     downBtns.forEach(function (b) { b.addEventListener('click', goDown); });
+  })();
+
+  // ===== "Website under construction" banner: the ✕ button hides it =====
+  // Nothing happens while the banner HTML is switched off (see the comment above the Bismillah line).
+  (function () {
+    var banner = document.getElementById('ucBanner');
+    var closeBtn = document.getElementById('ucClose');
+    if (!banner || !closeBtn) return;           // banner is OFF -> nothing to do
+    closeBtn.addEventListener('click', function () { banner.hidden = true; });
+    // To hide it only until the page is reloaded: nothing more needed.
   })();
 
   // Second pair of arrows: straight from ayah to ayah.
@@ -3979,7 +4012,7 @@
         var d = document.createElement('div');
         d.className = 'adv-row';
         var n = document.createElement('span'); n.className = 'adv-row-n'; n.textContent = (i + 1) + '.';
-        var ref = document.createElement('span'); ref.textContent = r.s + '-' + r.a + (plus ? '  (+' + r.c + ')' : (r.c > 1 ? '  (\u00D7' + r.c + ')' : ''));
+        var ref = document.createElement('span'); ref.className = 'adv-row-ref'; ref.textContent = r.s + '-' + r.a + (plus ? '  (+' + r.c + ')' : (r.c > 1 ? '  (\u00D7' + r.c + ')' : ''));
         d.appendChild(n); d.appendChild(ref);
         var nm = surahName(r.s);
         if (nm) { var nmEl = document.createElement('span'); nmEl.className = 'adv-row-name'; nmEl.textContent = nm; d.appendChild(nmEl); }

@@ -110,6 +110,7 @@
   }
 
   .chapter-sheet-overlay {
+    font-size: 17px;   /* fixed: does not follow the Font size stepper */
     position: fixed;
     left: 0;
     right: 0;
@@ -862,6 +863,7 @@
   .settings-overlay[hidden] { display: none; }
 
   .settings-modal {
+    font-size: 17px;   /* fixed: the Font size stepper changes the page text only, never the Settings panel or the surah list */
     background: #f6f8fa;   /* light grey like the GitHub header bar; the boxes inside are white (below) */
     width: 100%;
     max-width: 440px;
@@ -1061,7 +1063,7 @@
   .settings-controls .chapter-row .chapter-sheet-btn > span:first-child {
     flex: 1; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .settings-controls .chapter-sheet-btn { padding: 6px 12px; line-height: 1.3; font-size: 1rem; border-radius: 8px; }
+  .settings-controls .chapter-sheet-btn { padding: 6px 12px; line-height: 1.3; font-size: 17px; border-radius: 8px; }
   .settings-controls .toggle-label { margin-bottom: 0; }
   .settings-controls .lang-toggles { gap: 12px; }
   /* Keep "Font size - 4 +  Translator  Ayah" on ONE line, even on small phones */

@@ -788,7 +788,8 @@
   .logo-confirm-btns button.lc-open { background: #d0d3cd; }
 
   /* Logos of the services this website is built with (each one links to that service) */
-  .partner-logos { margin: calc(8.5em + 90px) auto 0; }   /* about 5 empty lines under "Privacy & Terms" */
+  .partner-logos { margin: 179px auto 0; padding-bottom: 28px; }   /* 179px under "Privacy & Terms" down to the line; 28px of space under the logos so they do not touch the very bottom */
+  .partner-logos::before { content: ''; display: block; width: 73%; height: 1px; margin: 0 auto 24px; background: #d0d7de; }   /* short centred line, 24px above the logos */
   .partner-logos .pl-row { display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; }
   .partner-logos .pl-row-quran { gap: 22px; margin-bottom: 16px; }  /* first row: the 3 Quran logos */
   .partner-logos .pl-row-tools { gap: 15px; }                          /* second row: everything else, one row */
@@ -803,6 +804,8 @@
   .partner-logos .pl-vercel { height: 9px; }
   .partner-logos .pl-cloudflare { height: 17px; }
   .partner-logos .pl-claude { height: 11px; }
+
+  .footer-gap { display: block; height: 8px; }   /* small space under "...please check a scholarly translation." */
 
   footer {
     text-align: center;
@@ -2383,6 +2386,7 @@
     <div class="fa-ref" lang="ar" dir="rtl"><span style="white-space:nowrap">(القمر 54:17)</span>&nbsp;<span style="white-space:nowrap">(القمر 54:22)</span>&nbsp;<span style="white-space:nowrap">(القمر 54:32)</span>&nbsp;<span style="white-space:nowrap">(القمر 54:40)</span></div>
   </div>
     Word-by-word meanings are simple glosses for study, not an authoritative translation. For formal reference, please check a scholarly translation.<br>
+    <span class="footer-gap"></span>
     <button type="button" id="sourcesFooterBtn" class="sources-link">Sources &amp; credits</button>, <button type="button" id="feedbackFooterBtn" class="sources-link">Feedback</button>, <button type="button" id="lastUpdatedFooterBtn" class="sources-link">Last updated</button>, <button type="button" id="privacyFooterBtn" class="sources-link">Privacy &amp; Terms</button>
     <div class="partner-logos">
       <div class="pl-row pl-row-quran">

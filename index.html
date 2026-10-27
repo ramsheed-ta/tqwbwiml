@@ -1521,6 +1521,8 @@
     background: #d0d7de;
   }
   /* Welcome box shown when the page opens (compact: little empty space) */
+  #welcomeOverlay { padding-left: 34px; padding-right: 34px; }   /* narrower welcome box: a little cut from the left and right (was 16px each side) */
+  #welcomeOverlay .welcome-box { background: #999999; }   /* the same grey the page itself shows behind the dim layer (white page under rgba(0,0,0,.4)) */
   .welcome-box { text-align: center; padding: 16px 14px 8px; }
   .welcome-box .sources-head { justify-content: flex-end; margin-bottom: -12px; position: relative; z-index: 1; }
   .welcome-ayah { padding: 0 8px 2px; color: var(--ink); }

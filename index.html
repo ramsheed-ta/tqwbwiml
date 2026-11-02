@@ -1383,6 +1383,13 @@
     -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
   }
   .vw-grip svg { width: 20px; height: 20px; display: block; }
+  /* search icon at the right end of the box header: opens Settings with the search box ready to type */
+  .vw-search {
+    margin-left: auto; margin-right: 2px; width: 40px; height: 30px; padding: 0; border: 0; background: transparent;
+    display: flex; align-items: center; justify-content: center; color: #57606a; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vw-search svg { width: 19px; height: 19px; display: block; }
   .vw-card.dragging { box-shadow: 0 8px 22px rgba(0,0,0,0.28); }
   .vw-card.dragging .vw-grip { cursor: grabbing; }
 
@@ -2489,7 +2496,9 @@
     card.innerHTML =
       '<div class="vw-grip" title="Drag to move">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-        '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg></div>' +
+        '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>' +
+        '<button type="button" class="vw-search" aria-label="Search" title="Search">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button></div>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="ml"> മലയാളം</label>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="en"> English</label>' +
       '<label><input type="checkbox" class="vw-switch" data-lang="hi"> हिन्दी</label>';
@@ -2545,6 +2554,7 @@
       var grip = card.querySelector('.vw-grip');
       var drag = null;
       grip.addEventListener('pointerdown', function (e) {
+        if (e.target.closest && e.target.closest('.vw-search')) return;   // the search icon is a button, not part of the move handle
         if (!currentSec) return;
         e.preventDefault();
         try { grip.setPointerCapture(e.pointerId); } catch (err) {}
@@ -2573,6 +2583,11 @@
       grip.addEventListener('pointerup', endDrag);
       grip.addEventListener('pointercancel', endDrag);
     })();
+
+    card.querySelector('.vw-search').addEventListener('click', function () {
+      closeCard();
+      if (window.openSettingsForSearch) window.openSettingsForSearch();
+    });
 
     boxes.forEach(function (b) {
       b.addEventListener('change', function () {
@@ -4418,6 +4433,15 @@
       if (sc) sc.classList.remove('search-focused');
     }
     function closeSettings() { overlay.hidden = true; document.body.style.overflow = ''; document.body.classList.remove('settings-open'); }
+
+    // Used by the search icon in the verse language box: Settings opens straight into the search view
+    // (only the search box visible) and the box is focused, so the keyboard comes up at once.
+    window.openSettingsForSearch = function () {
+      openSettings();
+      var sc = document.querySelector('.settings-controls');
+      if (sc) sc.classList.add('search-focused');
+      if (wordSearchInput) wordSearchInput.focus();
+    };
 
     // Go button inside the modal: closes settings so the highlighted match
     // (and the floating up/down nav) are visible on the page.

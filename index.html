@@ -981,6 +981,10 @@
   .adv-row { display: flex; align-items: baseline; gap: 10px; padding: 2px 4px; border-bottom: 1px solid #e3e7eb; font-size: 15px; line-height: 1.25; direction: ltr; }
   .adv-row { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .adv-row:active { background: #eef4fb; }
+  .adv-row-ref { color: #1a5fb4; text-decoration: underline; text-underline-offset: 3px; }   /* looks like a link: tapping opens that ayah */
+  /* the searched word, after opening an ayah from the Advanced Search list */
+  .word-block.adv-hit { background: #fff7ab; box-shadow: 0 0 0 2px #ecdb6b inset; }
+  mark.ar-hit.adv-mark { background: #fff7ab; color: inherit; border-radius: 3px; box-shadow: 0 0 0 2px #fff7ab; }
   .adv-row-n { flex: 0 0 32px; color: #57606a; }
   .adv-row-ref { flex: none; white-space: nowrap; }   /* 3-144 stays on one line on narrow phones */
   .adv-more {
@@ -4038,6 +4042,7 @@
     }
 
     var PAGE = 200;
+    var advQ = [];           // the searched word(s), normalized
     var advRevRank = null;   // set (surah -> revelation number) while the Revelation order view is on, otherwise null
     function showRows(rows, from, listEl, moreBtn, plus) {
       var to = Math.min(rows.length, from + PAGE);
@@ -4051,6 +4056,7 @@
         d.appendChild(n); d.appendChild(ref);
         d.setAttribute('data-s', r.s); d.setAttribute('data-a', r.a);   // tap a row -> go to that ayah
         d.setAttribute('role', 'button');
+        if (plus) d.setAttribute('data-plus', '1');   // row of the "other forms" list
         var nm = surahName(r.s);
         if (nm) { var nmEl = document.createElement('span'); nmEl.className = 'adv-row-name'; nmEl.textContent = nm; d.appendChild(nmEl); }
         if (advRevRank && advRevRank[r.s]) { var rvEl = document.createElement('span'); rvEl.className = 'adv-row-rev'; rvEl.textContent = '#' + advRevRank[r.s]; d.appendChild(rvEl); }
@@ -4072,6 +4078,7 @@
       resultEl.textContent = '';
       headEl.textContent = '';
       var q = tokens(raw);
+      advQ = q;   // remembered so the word can be highlighted after a result row is opened
       if (!q.length) { statusEl.textContent = 'Type an Arabic word above.'; return; }
       if (!/[\u0621-\u064A]/.test(q.join(''))) { statusEl.textContent = 'Please type the word in Arabic letters.'; return; }
       statusEl.textContent = corpus ? 'Counting…' : 'Preparing the Quran text (first time only)…';
@@ -4159,7 +4166,69 @@
       document.body.style.overflow = '';
       document.body.classList.remove('settings-open');
     }
-    function goToResult(sNum, aNum) {
+    // ---- yellow highlight of the searched word inside the opened ayah ----
+    var advHlAt = 0, advSession = 0;   // advSession: a newer open, or a tap that cleared the yellow, stops the old re-apply timer
+    function clearAdvHL() {
+      document.querySelectorAll('.word-block.adv-hit').forEach(function (b) { b.classList.remove('adv-hit'); });
+      document.querySelectorAll('.arabic-live').forEach(function (el) {
+        if (el.querySelector('mark.adv-mark')) el.textContent = el.textContent;
+      });
+    }
+    function matchedIdx(words, q, plus) {      // words: [{t: normalized word}]; returns the indexes that belong to a match
+      var hit = {}, i, j;
+      if (q.length === 1) {
+        for (i = 0; i < words.length; i++) if (words[i].t.indexOf(q[0]) !== -1 || (plus && looseMatch(words[i].t, q[0]))) hit[i] = true;
+      } else {
+        for (i = 0; i + q.length <= words.length; i++) {
+          for (j = 0; j < q.length && words[i + j].t.indexOf(q[j]) !== -1; j++) {}
+          if (j === q.length) for (j = 0; j < q.length; j++) hit[i + j] = true;
+        }
+      }
+      return hit;
+    }
+    function applyAdvHL(aNum, plus) {
+      var ay = ayahEl(aNum);
+      if (!ay || !advQ.length) return false;
+      clearAdvHL();
+      // 1) word-by-word blocks
+      var words = [];
+      Array.prototype.forEach.call(ay.querySelectorAll('.word-block'), function (b) {
+        var ar = b.querySelector('.word-arabic');
+        tqNormAr(ar ? ar.textContent : '').split(/\s+/).filter(Boolean).forEach(function (t) { words.push({ t: t, b: b }); });
+      });
+      var hit = matchedIdx(words, advQ, plus);
+      Object.keys(hit).forEach(function (k) { words[k].b.classList.add('adv-hit'); });
+      // 2) the full Arabic verse (when it is shown)
+      var el = ay.querySelector('.arabic-live');
+      if (el) {
+        var text = el.textContent, vw = [], m, re = /\S+/g;
+        while ((m = re.exec(text))) {
+          var t = tqNormAr(m[0]);
+          if (t) vw.push({ t: t, a: m.index, b: m.index + m[0].length });
+        }
+        var vh = matchedIdx(vw, advQ, plus);
+        if (Object.keys(vh).length) {
+          var out = '', pos = 0;
+          vw.forEach(function (w, i) {
+            if (!vh[i]) return;
+            out += escHtml(text.slice(pos, w.a)) + '<mark class="ar-hit adv-mark">' + escHtml(text.slice(w.a, w.b)) + '</mark>';
+            pos = w.b;
+          });
+          el.innerHTML = out + escHtml(text.slice(pos));
+        }
+      }
+      advHlAt = Date.now();
+      return true;
+    }
+    // a tap on the page (outside the boxes) removes the yellow again
+    document.addEventListener('click', function (e) {
+      if (Date.now() - advHlAt < 800) return;
+      if (e.target && e.target.closest && e.target.closest('#advSearchOverlay, #settingsOverlay, .chapter-sheet-overlay, #verseSheetOverlay')) return;
+      advSession++;
+      if (document.querySelector('.word-block.adv-hit, mark.adv-mark')) clearAdvHL();
+    });
+
+    function goToResult(sNum, aNum, plus) {
       closeIt();
       closeSettingsBox();
       var sameSurah = String(activeChapter) === String(sNum);
@@ -4167,12 +4236,24 @@
         if (typeof window.__setOrderMode === 'function') window.__setOrderMode(advRevRank ? 'rev' : 'normal', sNum);   // keep the Mushaf / Revelation button in the order that is in use
         window.switchToChapter(String(sNum));
       }
-      var tries = 0;
+      var tries = 0, mySession = ++advSession;
       var iv = setInterval(function () {
         var el = ayahEl(aNum);
+        if (mySession !== advSession) { clearInterval(iv); return; }
         if (el && String(activeChapter) === String(sNum)) {
           clearInterval(iv);
-          setTimeout(function () { var e2 = ayahEl(aNum) || el; scrollToAyahEl(e2, sameSurah); }, sameSurah ? 0 : 150);
+          setTimeout(function () {
+            var e2 = ayahEl(aNum) || el;
+            scrollToAyahEl(e2, sameSurah);
+            applyAdvHL(aNum, plus);
+            // the surah text is painted again once all translations have arrived: put the yellow back if it was wiped
+            var n2 = 0, iv2 = setInterval(function () {
+              var cur = ayahEl(aNum);
+              if (mySession !== advSession) { clearInterval(iv2); return; }
+              if (cur && !cur.querySelector('.word-block.adv-hit, mark.adv-mark')) applyAdvHL(aNum, plus);
+              if (++n2 > 12) clearInterval(iv2);
+            }, 300);
+          }, sameSurah ? 0 : 150);
         } else if (++tries > 60) clearInterval(iv);
       }, 100);
     }
@@ -4180,7 +4261,7 @@
       var row = e.target.closest ? e.target.closest('.adv-row') : null;
       if (!row) return;
       var sNum = parseInt(row.getAttribute('data-s'), 10), aNum = parseInt(row.getAttribute('data-a'), 10);
-      if (sNum && aNum) goToResult(sNum, aNum);
+      if (sNum && aNum) goToResult(sNum, aNum, row.getAttribute('data-plus') === '1');
     });
     openBtn.addEventListener('click', openIt);
     closeBtn.addEventListener('click', closeIt);

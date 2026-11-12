@@ -4149,12 +4149,19 @@
       var c = (typeof getVisibleContainer === 'function') ? getVisibleContainer() : document;
       return c ? c.querySelector('.ayah[data-ayah="' + a + '"]') : null;
     }
-    function scrollToAyahEl(el) {
+    function scrollToAyahEl(el, smooth) {
       var off = (typeof window.topCoverH === 'function' ? window.topCoverH() : 68) + 6;
-      window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - off), behavior: 'smooth' });
+      window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - off), behavior: smooth ? 'smooth' : 'auto' });
+    }
+    function closeSettingsBox() {   // the Settings box (behind this one) must close too, so the ayah is visible
+      var so = document.getElementById('settingsOverlay');
+      if (so) so.hidden = true;
+      document.body.style.overflow = '';
+      document.body.classList.remove('settings-open');
     }
     function goToResult(sNum, aNum) {
       closeIt();
+      closeSettingsBox();
       var sameSurah = String(activeChapter) === String(sNum);
       if (!sameSurah) {
         if (typeof window.__setOrderMode === 'function') window.__setOrderMode(advRevRank ? 'rev' : 'normal', sNum);   // keep the Mushaf / Revelation button in the order that is in use
@@ -4165,7 +4172,7 @@
         var el = ayahEl(aNum);
         if (el && String(activeChapter) === String(sNum)) {
           clearInterval(iv);
-          setTimeout(function () { var e2 = ayahEl(aNum) || el; scrollToAyahEl(e2); }, sameSurah ? 0 : 150);
+          setTimeout(function () { var e2 = ayahEl(aNum) || el; scrollToAyahEl(e2, sameSurah); }, sameSurah ? 0 : 150);
         } else if (++tries > 60) clearInterval(iv);
       }, 100);
     }
@@ -4422,7 +4429,13 @@
     function paint(final) {
       if (!data.verses) return;
       var html = buildChapterHtml(surahNum, data, final);
-      if (final) loadedChapters[surahNum] = html;
+      if (final) {
+        loadedChapters[surahNum] = html;
+        // keep only the last 3 opened surahs in memory; a phone tab with many long surahs can run out of memory and reload
+        loadedChapters.__order = (loadedChapters.__order || []).filter(function (k) { return k !== String(surahNum); });
+        loadedChapters.__order.push(String(surahNum));
+        while (loadedChapters.__order.length > 3) { delete loadedChapters[loadedChapters.__order.shift()]; }
+      }
       if (String(activeChapter) !== String(surahNum)) return; // user already moved to another surah
       pendingHtml = html;                                      // the newest version always wins
       if (!pendingTimer) pendingTimer = setTimeout(applyPending, 0);

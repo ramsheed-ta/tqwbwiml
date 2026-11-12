@@ -47,6 +47,8 @@
 
   html {
     font-size: 16px;
+    -webkit-text-size-adjust: 100%;   /* phone landscape must not auto-enlarge the translation text */
+    text-size-adjust: 100%;
     overflow-x: hidden;          /* the page must never slide sideways */
     overscroll-behavior-x: none; /* no sideways rubber-band on iPhone */
   }

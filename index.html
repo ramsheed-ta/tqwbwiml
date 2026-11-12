@@ -4239,10 +4239,10 @@
       closeIt();
       closeSettingsBox();
       var sameSurah = String(activeChapter) === String(sNum);
-      if (!sameSurah) {
-        if (typeof window.__setOrderMode === 'function') window.__setOrderMode(advRevRank ? 'rev' : 'normal', sNum);   // keep the Mushaf / Revelation button in the order that is in use
-        window.switchToChapter(String(sNum));
-      }
+      // The top bar (number + "Surah order" / "Revelation order") follows the view chosen in this box, also when
+      // the ayah is in the surah that is already open.
+      if (typeof window.__setOrderMode === 'function') window.__setOrderMode(advRevRank ? 'rev' : 'normal', sNum);
+      if (!sameSurah) window.switchToChapter(String(sNum));
       var tries = 0, mySession = ++advSession;
       var iv = setInterval(function () {
         var el = ayahEl(aNum);
@@ -4737,6 +4737,7 @@
         if (rev) chapterSheetLabel.innerHTML = html; else chapterSheetLabelNormal.innerHTML = html;
       }
       updateSurahTitle(value);
+      savePrefs({ chapter: value, chapterList: rev ? 'rev' : 'normal' });   // remembered also when the surah itself does not change
     };
     updateSurahTitle('96', true);   // at the start Al-'Alaq is shown as revelation no. 1
     // (no syncChapterLabels here: the two buttons keep their own defaults - Mushaf = Al-Fatiha, Revelation = Al-'Alaq)

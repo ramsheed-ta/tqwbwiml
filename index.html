@@ -979,6 +979,8 @@
   .adv-sum { text-align: center; font-size: 14px; line-height: 1.3; color: #57606a; margin-bottom: 0; }
   .adv-list { border-top: 1px solid #e3e7eb; }
   .adv-row { display: flex; align-items: baseline; gap: 10px; padding: 2px 4px; border-bottom: 1px solid #e3e7eb; font-size: 15px; line-height: 1.25; direction: ltr; }
+  .adv-row { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .adv-row:active { background: #eef4fb; }
   .adv-row-n { flex: 0 0 32px; color: #57606a; }
   .adv-row-ref { flex: none; white-space: nowrap; }   /* 3-144 stays on one line on narrow phones */
   .adv-more {
@@ -4047,6 +4049,8 @@
         var n = document.createElement('span'); n.className = 'adv-row-n'; n.textContent = (i + 1) + '.';
         var ref = document.createElement('span'); ref.className = 'adv-row-ref'; ref.textContent = r.s + '-' + r.a + (plus ? '  (+' + r.c + ')' : (r.c > 1 ? '  (\u00D7' + r.c + ')' : ''));
         d.appendChild(n); d.appendChild(ref);
+        d.setAttribute('data-s', r.s); d.setAttribute('data-a', r.a);   // tap a row -> go to that ayah
+        d.setAttribute('role', 'button');
         var nm = surahName(r.s);
         if (nm) { var nmEl = document.createElement('span'); nmEl.className = 'adv-row-name'; nmEl.textContent = nm; d.appendChild(nmEl); }
         if (advRevRank && advRevRank[r.s]) { var rvEl = document.createElement('span'); rvEl.className = 'adv-row-rev'; rvEl.textContent = '#' + advRevRank[r.s]; d.appendChild(rvEl); }
@@ -4138,6 +4142,39 @@
       setTimeout(function () { try { input.focus(); } catch (e) {} }, 60);
     }
     function closeIt() { overlay.hidden = true; input.blur(); }
+
+    // Tap a result row (e.g. 3-144): close this box (the list stays as it is, so it is still here when it is
+    // opened again), open that surah if it is not the one on screen, and scroll to that ayah.
+    function ayahEl(a) {
+      var c = (typeof getVisibleContainer === 'function') ? getVisibleContainer() : document;
+      return c ? c.querySelector('.ayah[data-ayah="' + a + '"]') : null;
+    }
+    function scrollToAyahEl(el) {
+      var off = (typeof window.topCoverH === 'function' ? window.topCoverH() : 68) + 6;
+      window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - off), behavior: 'smooth' });
+    }
+    function goToResult(sNum, aNum) {
+      closeIt();
+      var sameSurah = String(activeChapter) === String(sNum);
+      if (!sameSurah) {
+        if (typeof window.__setOrderMode === 'function') window.__setOrderMode(advRevRank ? 'rev' : 'normal', sNum);   // keep the Mushaf / Revelation button in the order that is in use
+        window.switchToChapter(String(sNum));
+      }
+      var tries = 0;
+      var iv = setInterval(function () {
+        var el = ayahEl(aNum);
+        if (el && String(activeChapter) === String(sNum)) {
+          clearInterval(iv);
+          setTimeout(function () { var e2 = ayahEl(aNum) || el; scrollToAyahEl(e2); }, sameSurah ? 0 : 150);
+        } else if (++tries > 60) clearInterval(iv);
+      }, 100);
+    }
+    resultEl.addEventListener('click', function (e) {
+      var row = e.target.closest ? e.target.closest('.adv-row') : null;
+      if (!row) return;
+      var sNum = parseInt(row.getAttribute('data-s'), 10), aNum = parseInt(row.getAttribute('data-a'), 10);
+      if (sNum && aNum) goToResult(sNum, aNum);
+    });
     openBtn.addEventListener('click', openIt);
     closeBtn.addEventListener('click', closeIt);
     var closeBottom = document.getElementById('advCloseBottom');

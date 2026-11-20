@@ -1035,9 +1035,11 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #24292f;
     white-space: nowrap;
+    opacity: 0; transition: opacity 0.35s ease;   /* only visible while scrolling (class "show"), fades out 2 s after the scrolling stops */
   }
+  .page-label.show { opacity: 1; }
   .page-label[hidden] { display: none; }
-  @media (pointer: coarse) { .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); } }   /* phones: above the browser's bottom bar */
+  @media (pointer: coarse) { .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); } }   /* phones */
   body.settings-open .page-label { visibility: hidden; }
 
   /* keep the search arrows underneath the settings modal, never on top of it */
@@ -5099,7 +5101,13 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
     label.hidden = false;
   }
   function schedule() { if (!queued) { queued = true; requestAnimationFrame(update); } }
-  window.addEventListener('scroll', schedule, { passive: true });
+  var hideTimer = null;
+  function flash() {   // visible while the page is moving, gone 2 seconds after it stops
+    label.classList.add('show');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function () { label.classList.remove('show'); }, 2000);
+  }
+  window.addEventListener('scroll', function () { schedule(); flash(); }, { passive: true });
   window.addEventListener('resize', schedule);
   [staticC, dynC].forEach(function (c) { if (c && window.MutationObserver) new MutationObserver(schedule).observe(c, { childList: true }); });
   schedule();

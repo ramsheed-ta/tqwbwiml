@@ -1025,6 +1025,21 @@
     cursor: pointer;
   }
 
+  /* floating mushaf page label, bottom centre: "P 597-R" (odd page = right-hand page, even = left) */
+  .page-label {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    z-index: 40; pointer-events: none;
+    padding: 5px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.92); border: 1px solid #d0d7de;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #24292f;
+    white-space: nowrap;
+  }
+  .page-label[hidden] { display: none; }
+  @media (pointer: coarse) { .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); } }   /* phones: above the browser's bottom bar */
+  body.settings-open .page-label { visibility: hidden; }
+
   /* keep the search arrows underneath the settings modal, never on top of it */
   .word-search-fab { z-index: 70; }
 
@@ -2382,6 +2397,7 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
     </div>
   </div>
 
+  <div class="page-label" id="pageLabel" hidden aria-live="polite"></div>
   <div class="word-search-fab" id="wordSearchFab" hidden>
     <button type="button" id="wordSearchFabPrev" class="word-search-fabbtn" aria-label="Previous match"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
     <div class="word-search-fabcount" id="wordSearchFabCount" aria-live="polite"></div>
@@ -4440,7 +4456,10 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
 
       if (!wordsHtml) wordsHtml = '<p class="translation-loading">Word-by-word not available</p>';
 
-      html += '<section class="ayah" data-ayah="' + n + '">'
+      // mushaf page of this ayah (Quran Foundation: page_number; fall back to the word / font page fields)
+      var w0 = (verse.words && verse.words[0]) || {};
+      var mushafPage = verse.page_number || verse.v1_page || w0.page_number || w0.v1_page || '';
+      html += '<section class="ayah" data-ayah="' + n + '" data-page="' + mushafPage + '">'
         + '<div class="ayah-head"><span class="ayah-number">' + surahNum + ':' + n + '</span>'
         + '<button type="button" class="share-btn" aria-label="Share this ayah">' + shareIconSvgGeneric + '</button></div>'
         + '<p class="ayah-full-arabic"><span class="arabic-live" data-ayah="' + n + '">' + arabicText + '</span> <span class="ayah-end-num">(' + toArabicDigitsGeneric(n) + ')</span></p>'
@@ -5049,6 +5068,42 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
     box.addEventListener('click', function (e) { if (e.target === box) closeIt(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !box.hidden) closeIt(); });
   })();
+</script>
+<script>
+// Floating mushaf page label ("P 597-R"): shows the page of the ayah being read, updates while scrolling.
+(function () {
+  var label = document.getElementById('pageLabel');
+  if (!label) return;
+  var staticC = document.getElementById('ayahList'), dynC = document.getElementById('dynamicChapterContent');
+  var queued = false, lastText = '';
+  function container() { return (staticC && staticC.style.display !== 'none') ? staticC : dynC; }
+  function currentPage() {
+    var c = container();
+    if (!c) return 0;
+    var list = c.querySelectorAll('.ayah[data-page]');
+    if (!list.length) return 0;
+    var head = (typeof window.topCoverH === 'function') ? window.topCoverH() : 68;
+    var y = head + 12, lo = 0, hi = list.length - 1, best = 0;   // last ayah that has reached the line under the top bar
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (list[mid].getBoundingClientRect().top <= y) { best = mid; lo = mid + 1; } else hi = mid - 1;
+    }
+    return parseInt(list[best].getAttribute('data-page'), 10) || 0;
+  }
+  function update() {
+    queued = false;
+    var p = currentPage();
+    if (!p) { label.hidden = true; return; }
+    var t = 'P ' + p + '-' + (p % 2 ? 'R' : 'L');
+    if (t !== lastText) { label.textContent = t; lastText = t; }
+    label.hidden = false;
+  }
+  function schedule() { if (!queued) { queued = true; requestAnimationFrame(update); } }
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+  [staticC, dynC].forEach(function (c) { if (c && window.MutationObserver) new MutationObserver(schedule).observe(c, { childList: true }); });
+  schedule();
+})();
 </script>
 </body>
 </html>

@@ -1039,7 +1039,7 @@
   }
   .page-label.show { opacity: 1; }
   .page-label[hidden] { display: none; }
-  @media (pointer: coarse) { .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); } }   /* phones */
+  @media (pointer: coarse) { .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); } }   /* phones */
   body.settings-open .page-label { visibility: hidden; }
 
   /* keep the search arrows underneath the settings modal, never on top of it */
@@ -1960,7 +1960,7 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
         </div>
 
         <div class="sources-item">
-          <b>Last updated: 13 November 2026</b><br>
+          <b>Last updated: 20 November 2026</b><br>
           Website created on 03 September 2026<br>
           <span class="sources-what" style="font-size:14px;">The site regularly makes improvements to provide you with a better experience. Check below for the latest changes.</span>
         </div>
@@ -1969,6 +1969,7 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
+          <li>A small label at the bottom of the screen shows the Mushaf page number of the ayah being read, for example P 597-R. R means a right-hand page and L a left-hand page of the 15-line Mushaf. It appears while you scroll and fades away when you stop.</li>
           <li>Advanced Search: the ayah numbers in the results (for example 3-144) are now links. Tap one to open that ayah directly, and the word the user searched is shown in yellow.</li>
           <li>The surah lists (Surah Order and Revelation order) now also show the Hindi meaning of each surah name, taken from quran.is.</li>
           <li>Advanced Search: the "other forms" matching is now stricter, so unrelated words are no longer included.</li>
@@ -2005,6 +2006,12 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
           <table class="lu-table">
             <thead><tr><th>Date</th><th>Section</th><th>Changes made</th></tr></thead>
             <tbody>
+              <tr>
+                <td>20 Nov 2026</td><td>Page number</td>
+                <td><ul>
+                  <li>A small label at the bottom of the screen shows the Mushaf page number of the ayah being read, for example P 597-R. R means a right-hand page and L a left-hand page of the 15-line Mushaf. It appears while you scroll and fades away when you stop.</li>
+                </ul></td>
+              </tr>
               <tr>
                 <td>13 Nov 2026</td><td>Search</td>
                 <td><ul>

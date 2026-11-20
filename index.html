@@ -1969,7 +1969,7 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
       <div class="sources-item">
         <b>Recent changes</b>
         <ul class="lu-list">
-          <li>A small label at the bottom of the screen shows the Mushaf page number of the ayah being read, for example P 597-R. R means a right-hand page and L a left-hand page of the 15-line Mushaf. It appears while you scroll and fades away when you stop.</li>
+          <li>A small label at the bottom of the screen shows the Mushaf page number of the ayah being read, for example P 597-R. R means a right-hand page and L a left-hand page of the 15-line Mushaf. It appears while the user scrolls and fades away when the user stops.</li>
           <li>Advanced Search: the ayah numbers in the results (for example 3-144) are now links. Tap one to open that ayah directly, and the word the user searched is shown in yellow.</li>
           <li>The surah lists (Surah Order and Revelation order) now also show the Hindi meaning of each surah name, taken from quran.is.</li>
           <li>Advanced Search: the "other forms" matching is now stricter, so unrelated words are no longer included.</li>
@@ -2009,7 +2009,7 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
               <tr>
                 <td>20 Nov 2026</td><td>Page number</td>
                 <td><ul>
-                  <li>A small label at the bottom of the screen shows the Mushaf page number of the ayah being read, for example P 597-R. R means a right-hand page and L a left-hand page of the 15-line Mushaf. It appears while you scroll and fades away when you stop.</li>
+                  <li>A small label at the bottom of the screen shows the Mushaf page number of the ayah being read, for example P 597-R. R means a right-hand page and L a left-hand page of the 15-line Mushaf. It appears while the user scrolls and fades away when the user stops.</li>
                 </ul></td>
               </tr>
               <tr>
@@ -5097,6 +5097,8 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
       var mid = (lo + hi) >> 1;
       if (list[mid].getBoundingClientRect().top <= y) { best = mid; lo = mid + 1; } else hi = mid - 1;
     }
+    // below the last ayah (closing note, disclaimer, credits at the very end): no page number
+    if (best === list.length - 1 && list[best].getBoundingClientRect().bottom <= y) return 0;
     return parseInt(list[best].getAttribute('data-page'), 10) || 0;
   }
   function update() {

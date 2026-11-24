@@ -5199,49 +5199,67 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
   var closeBtn = document.getElementById('asClose');
   if (!openBtn || !bar) return;
 
-  var SPEEDS = [10, 15, 20, 25, 35, 45, 60, 80, 110, 150];   // pixels per second, slowest to fastest
-  var speedIdx = 4;                                          // default = 35
+  // Speeds as "px per frames" at 60 fps (num px every den frames), slowest to fastest:
+  // 10, 15, 20, 30, 40, 60, 90, 120, 180, 240 px/s. Moving on an exact frame pattern keeps the
+  // scrolling even (iPhone scrolls in whole 1px steps, so uneven timing was felt as vibration).
+  var SPEEDS = [[1, 6], [1, 4], [1, 3], [1, 2], [2, 3], [1, 1], [3, 2], [2, 1], [3, 1], [4, 1]];
+  var speedIdx = 4;                                          // default = 40 px/s
   try {
-    var saved = parseInt(localStorage.getItem('autoScrollSpeedIdx'), 10);
+    var saved = parseInt(localStorage.getItem('autoScrollSpeedIdx2'), 10);
     if (saved >= 0 && saved < SPEEDS.length) speedIdx = saved;
   } catch (e) {}
 
-  var running = false, rafId = 0, lastT = 0, acc = 0;
+  var running = false, rafId = 0, counter = 0;
+  var hzScale2 = 0;           // 2 x (screen refresh rate / 60): 1 = 30 Hz, 2 = 60 Hz, 3 = 90 Hz, 4 = 120 Hz; 0 = not measured yet
+  var probe = null;           // frame-time samples while the refresh rate is being measured
 
   function atBottom() {
     return window.pageYOffset + window.innerHeight >= document.documentElement.scrollHeight - 2;
   }
-  function step(t) {
+  function measure(t) {       // runs for ~12 frames when auto scroll starts the first time
     if (!running) return;
-    var dt = lastT ? Math.min(t - lastT, 100) : 16;   // ms; capped so a stall never causes a jump
-    lastT = t;
-    acc += SPEEDS[speedIdx] * dt / 1000;
-    var whole = Math.floor(acc);                      // iOS ignores fractional scroll amounts, so collect them
-    if (whole >= 1) {
-      acc -= whole;
+    if (probe.last) probe.dts.push(t - probe.last);
+    probe.last = t;
+    if (probe.dts.length < 12) { rafId = requestAnimationFrame(measure); return; }
+    probe.dts.sort(function (x, y) { return x - y; });
+    var dt = probe.dts[probe.dts.length >> 1];                 // median frame time in ms
+    hzScale2 = dt < 10 ? 4 : dt < 13.9 ? 3 : dt < 25 ? 2 : 1;
+    probe = null; counter = 0;
+    rafId = requestAnimationFrame(step);
+  }
+  function step() {
+    if (!running) return;
+    var sp = SPEEDS[speedIdx];
+    var num = sp[0] * 2, den = sp[1] * hzScale2;               // exact whole numbers, no rounding drift
+    counter += num;
+    var px = Math.floor(counter / den);
+    if (px >= 1) {
+      counter -= px * den;
       var before = window.pageYOffset;
-      window.scrollBy(0, whole);
+      window.scrollBy(0, px);
       if (atBottom() || window.pageYOffset === before) { stop(); return; }
     }
     rafId = requestAnimationFrame(step);
   }
   function start() {
     if (running) return;
-    running = true; lastT = 0; acc = 0;
+    running = true; counter = 0;
     playBtn.classList.add('running');
-    rafId = requestAnimationFrame(step);
+    if (hzScale2) { rafId = requestAnimationFrame(step); }
+    else { probe = { last: 0, dts: [] }; rafId = requestAnimationFrame(measure); }
   }
   function stop() {
     if (!running) return;
     running = false;
     cancelAnimationFrame(rafId);
+    probe = null;
     playBtn.classList.remove('running');
   }
   function openBar() { bar.hidden = false; document.body.classList.add('autoscroll-open'); }
   function closeBar() { stop(); bar.hidden = true; document.body.classList.remove('autoscroll-open'); }
   function setSpeed(d) {
     speedIdx = Math.max(0, Math.min(SPEEDS.length - 1, speedIdx + d));
-    try { localStorage.setItem('autoScrollSpeedIdx', String(speedIdx)); } catch (e) {}
+    try { localStorage.setItem('autoScrollSpeedIdx2', String(speedIdx)); } catch (e) {}
   }
 
   openBtn.addEventListener('click', openBar);

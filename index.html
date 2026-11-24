@@ -1090,6 +1090,13 @@
   .as-speed button { width: 44px; height: 30px; }
   .as-speed button + button { border-left: 1px solid #d0d7de; }
   .as-speed button:active { background: #e6e6e6; }
+  .as-val {
+    position: absolute; right: 70px; top: 4px; line-height: 36px;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: #24292f;
+    font-variant-numeric: tabular-nums; pointer-events: none;
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  .as-val.show { opacity: 1; }
   body.autoscroll-open .page-label { bottom: calc(var(--as-bar-h) + 6px); }   /* label sits just above the bar */
   body.autoscroll-open { padding-bottom: var(--as-bar-h); }
   body.settings-open .autoscroll-bar { visibility: hidden; }
@@ -2471,6 +2478,7 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
       <button type="button" id="asSlower" aria-label="Slower"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="12" x2="18" y2="12"/></svg></button>
       <button type="button" id="asFaster" aria-label="Faster"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="12" x2="18" y2="12"/><line x1="12" y1="6" x2="12" y2="18"/></svg></button>
     </div>
+    <span class="as-val" id="asVal" aria-live="polite"></span>
     <button type="button" id="asClose" class="as-close" aria-label="Close auto scroll"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></button>
   </div>
   <div class="word-search-fab" id="wordSearchFab" hidden>
@@ -5257,8 +5265,18 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
   }
   function openBar() { bar.hidden = false; document.body.classList.add('autoscroll-open'); }
   function closeBar() { stop(); bar.hidden = true; document.body.classList.remove('autoscroll-open'); }
+  var VALUES = [10, 15, 20, 30, 35, 40, 60, 90, 120, 180, 240];   // px/s shown for each speed step
+  var valEl = document.getElementById('asVal'), valTimer = 0;
+  function showValue() {
+    if (!valEl) return;
+    valEl.textContent = VALUES[speedIdx];
+    valEl.classList.add('show');
+    clearTimeout(valTimer);
+    valTimer = setTimeout(function () { valEl.classList.remove('show'); }, 1500);
+  }
   function setSpeed(d) {
     speedIdx = Math.max(0, Math.min(SPEEDS.length - 1, speedIdx + d));
+    showValue();
     try { localStorage.setItem('autoScrollSpeedIdx3', String(speedIdx)); } catch (e) {}
   }
 

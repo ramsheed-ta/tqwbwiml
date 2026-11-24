@@ -1059,11 +1059,39 @@
     stroke-linecap: round; stroke-linejoin: round;
     filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff);   /* stays readable over text */
   }
-  .autoscroll-btn .as-pause { display: none; }
-  .autoscroll-btn.running .as-chev { display: none; }
-  .autoscroll-btn.running .as-pause { display: block; }
   @media (pointer: coarse) { .autoscroll-btn { bottom: calc(env(safe-area-inset-bottom, 0px) + 46px); } }   /* phones */
   body.settings-open .autoscroll-btn { visibility: hidden; }
+  body.autoscroll-open .autoscroll-btn { display: none; }
+
+  /* auto scroll bar (opens from the icon): play / pause, - +, close */
+  .autoscroll-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 18px calc(env(safe-area-inset-bottom, 0px) + 8px);
+    background: #f6f8fa; border-top: 1px solid #d0d7de;
+  }
+  .autoscroll-bar[hidden] { display: none; }
+  .autoscroll-bar button {
+    background: none; border: none; margin: 0; padding: 0; color: #24292f;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .autoscroll-bar svg {
+    width: 24px; height: 24px; display: block; fill: none; stroke: currentColor;
+    stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .as-play, .as-close { width: 48px; height: 44px; }
+  .as-play .as-tri { fill: currentColor; stroke-width: 1.5; }
+  .as-play .as-bars { display: none; }
+  .as-play.running .as-tri { display: none; }
+  .as-play.running .as-bars { display: block; }
+  .as-speed { display: flex; align-items: center; border: 1px solid #d0d7de; border-radius: 10px; background: #fff; overflow: hidden; }
+  .as-speed button { width: 60px; height: 40px; }
+  .as-speed button + button { border-left: 1px solid #d0d7de; }
+  .as-speed button:active { background: #e6e6e6; }
+  body.autoscroll-open .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 68px); }   /* label sits above the bar */
+  body.autoscroll-open { padding-bottom: 64px; }
+  body.settings-open .autoscroll-bar { visibility: hidden; }
 
   /* keep the search arrows underneath the settings modal, never on top of it */
   .word-search-fab { z-index: 70; }
@@ -2430,10 +2458,20 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
   </div>
 
   <div class="page-label" id="pageLabel" hidden aria-live="polite"></div>
-  <button type="button" id="autoScrollBtn" class="autoscroll-btn" aria-label="Auto scroll" aria-pressed="false">
-    <svg class="as-chev" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 5 12 11 18 5"/><polyline points="6 13 12 19 18 13"/></svg>
-    <svg class="as-pause" viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
+  <button type="button" id="autoScrollBtn" class="autoscroll-btn" aria-label="Auto scroll">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 5 12 11 18 5"/><polyline points="6 13 12 19 18 13"/></svg>
   </button>
+  <div class="autoscroll-bar" id="autoScrollBar" hidden>
+    <button type="button" id="asPlay" class="as-play" aria-label="Play / pause auto scroll">
+      <svg class="as-tri" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7 4 20 12 7 20"/></svg>
+      <svg class="as-bars" viewBox="0 0 24 24" aria-hidden="true"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg>
+    </button>
+    <div class="as-speed">
+      <button type="button" id="asSlower" aria-label="Slower"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="12" x2="18" y2="12"/></svg></button>
+      <button type="button" id="asFaster" aria-label="Faster"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="12" x2="18" y2="12"/><line x1="12" y1="6" x2="12" y2="18"/></svg></button>
+    </div>
+    <button type="button" id="asClose" class="as-close" aria-label="Close auto scroll"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></button>
+  </div>
   <div class="word-search-fab" id="wordSearchFab" hidden>
     <button type="button" id="wordSearchFabPrev" class="word-search-fabbtn" aria-label="Previous match"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
     <div class="word-search-fabcount" id="wordSearchFabCount" aria-live="polite"></div>
@@ -5150,22 +5188,33 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
 })();
 </script>
 <script>
-// Auto scroll: tap the icon above the page label to start, tap it again (or touch the screen) to stop.
+// Auto scroll: tap the icon above the page label -> bar with play/pause, - +, close.
 (function () {
-  var btn = document.getElementById('autoScrollBtn');
-  if (!btn) return;
-  var PX_PER_SEC = 35;          // scrolling speed: raise for faster, lower for slower
+  var openBtn = document.getElementById('autoScrollBtn');
+  var bar = document.getElementById('autoScrollBar');
+  var playBtn = document.getElementById('asPlay');
+  var slowBtn = document.getElementById('asSlower');
+  var fastBtn = document.getElementById('asFaster');
+  var closeBtn = document.getElementById('asClose');
+  if (!openBtn || !bar) return;
+
+  var SPEEDS = [10, 15, 20, 25, 35, 45, 60, 80, 110, 150];   // pixels per second, slowest to fastest
+  var speedIdx = 4;                                          // default = 35
+  try {
+    var saved = parseInt(localStorage.getItem('autoScrollSpeedIdx'), 10);
+    if (saved >= 0 && saved < SPEEDS.length) speedIdx = saved;
+  } catch (e) {}
+
   var running = false, rafId = 0, lastT = 0, acc = 0;
 
   function atBottom() {
-    var doc = document.documentElement;
-    return window.pageYOffset + window.innerHeight >= doc.scrollHeight - 2;
+    return window.pageYOffset + window.innerHeight >= document.documentElement.scrollHeight - 2;
   }
   function step(t) {
     if (!running) return;
     var dt = lastT ? Math.min(t - lastT, 100) : 16;   // ms; capped so a stall never causes a jump
     lastT = t;
-    acc += PX_PER_SEC * dt / 1000;
+    acc += SPEEDS[speedIdx] * dt / 1000;
     var whole = Math.floor(acc);                      // iOS ignores fractional scroll amounts, so collect them
     if (whole >= 1) {
       acc -= whole;
@@ -5178,25 +5227,40 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
   function start() {
     if (running) return;
     running = true; lastT = 0; acc = 0;
-    btn.classList.add('running');
-    btn.setAttribute('aria-pressed', 'true');
+    playBtn.classList.add('running');
     rafId = requestAnimationFrame(step);
   }
   function stop() {
     if (!running) return;
     running = false;
     cancelAnimationFrame(rafId);
-    btn.classList.remove('running');
-    btn.setAttribute('aria-pressed', 'false');
+    playBtn.classList.remove('running');
   }
-  btn.addEventListener('click', function () { running ? stop() : start(); });
+  function openBar() { bar.hidden = false; document.body.classList.add('autoscroll-open'); }
+  function closeBar() { stop(); bar.hidden = true; document.body.classList.remove('autoscroll-open'); }
+  function setSpeed(d) {
+    speedIdx = Math.max(0, Math.min(SPEEDS.length - 1, speedIdx + d));
+    try { localStorage.setItem('autoScrollSpeedIdx', String(speedIdx)); } catch (e) {}
+  }
 
-  // any touch / wheel / key on the page itself stops it (the button handles its own tap)
-  function userTook(e) { if (running && !(e.target && e.target.closest && e.target.closest('#autoScrollBtn'))) stop(); }
+  openBtn.addEventListener('click', openBar);
+  closeBtn.addEventListener('click', closeBar);
+  playBtn.addEventListener('click', function () { running ? stop() : start(); });
+  slowBtn.addEventListener('click', function () { setSpeed(-1); });
+  fastBtn.addEventListener('click', function () { setSpeed(1); });
+
+  // taps on the bar must not trigger the double-tap "go to ayah" box
+  ['touchend', 'dblclick'].forEach(function (n) { bar.addEventListener(n, function (e) { e.stopPropagation(); }); });
+
+  // a touch / wheel / key on the page itself pauses it (the bar and icon handle their own taps)
+  function userTook(e) {
+    if (!running) return;
+    if (e.target && e.target.closest && e.target.closest('#autoScrollBar, #autoScrollBtn')) return;
+    stop();
+  }
   document.addEventListener('touchstart', userTook, { passive: true });
   document.addEventListener('wheel', userTook, { passive: true });
   document.addEventListener('keydown', function (e) { if (e.key !== 'Tab') userTook(e); });
-  // stop when the screen is hidden or a different surah is opened
   document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
   window.addEventListener('hashchange', stop);
 })();

@@ -1063,12 +1063,13 @@
   body.settings-open .autoscroll-btn { visibility: hidden; }
   body.autoscroll-open .autoscroll-btn { display: none; }
 
-  /* auto scroll bar (opens from the icon): play / pause, - +, close */
+  /* auto scroll bar (opens from the icon): play / pause, - +, close. Compact, plain white like the page. */
+  :root { --as-bar-h: calc(40px + max(env(safe-area-inset-bottom, 0px) - 16px, 4px)); }
   .autoscroll-bar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 18px calc(env(safe-area-inset-bottom, 0px) + 8px);
-    background: #f6f8fa; border-top: 1px solid #d0d7de;
+    padding: 4px 22px max(calc(env(safe-area-inset-bottom, 0px) - 16px), 4px);
+    background: #ffffff;
   }
   .autoscroll-bar[hidden] { display: none; }
   .autoscroll-bar button {
@@ -1077,20 +1078,20 @@
     -webkit-tap-highlight-color: transparent;
   }
   .autoscroll-bar svg {
-    width: 24px; height: 24px; display: block; fill: none; stroke: currentColor;
+    width: 20px; height: 20px; display: block; fill: none; stroke: currentColor;
     stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
   }
-  .as-play, .as-close { width: 48px; height: 44px; }
+  .as-play, .as-close { width: 40px; height: 36px; }
   .as-play .as-tri { fill: currentColor; stroke-width: 1.5; }
   .as-play .as-bars { display: none; }
   .as-play.running .as-tri { display: none; }
   .as-play.running .as-bars { display: block; }
-  .as-speed { display: flex; align-items: center; border: 1px solid #d0d7de; border-radius: 10px; background: #fff; overflow: hidden; }
-  .as-speed button { width: 60px; height: 40px; }
+  .as-speed { display: flex; align-items: center; border: 1px solid #d0d7de; border-radius: 9px; background: #fff; overflow: hidden; }
+  .as-speed button { width: 44px; height: 30px; }
   .as-speed button + button { border-left: 1px solid #d0d7de; }
   .as-speed button:active { background: #e6e6e6; }
-  body.autoscroll-open .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 68px); }   /* label sits above the bar */
-  body.autoscroll-open { padding-bottom: 64px; }
+  body.autoscroll-open .page-label { bottom: calc(var(--as-bar-h) + 6px); }   /* label sits just above the bar */
+  body.autoscroll-open { padding-bottom: var(--as-bar-h); }
   body.settings-open .autoscroll-bar { visibility: hidden; }
 
   /* keep the search arrows underneath the settings modal, never on top of it */

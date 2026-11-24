@@ -1042,6 +1042,29 @@
   @media (pointer: coarse) { .page-label { bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); } }   /* phones */
   body.settings-open .page-label { visibility: hidden; }
 
+  /* auto scroll: plain icon (no background) just above the page label, bottom centre */
+  .autoscroll-btn {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 54px);
+    z-index: 41;
+    width: 44px; height: 44px; padding: 0; margin: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; box-shadow: none;
+    color: #24292f; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .autoscroll-btn svg {
+    width: 26px; height: 26px; display: block;
+    fill: none; stroke: currentColor; stroke-width: 2.4;
+    stroke-linecap: round; stroke-linejoin: round;
+    filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff);   /* stays readable over text */
+  }
+  .autoscroll-btn .as-pause { display: none; }
+  .autoscroll-btn.running .as-chev { display: none; }
+  .autoscroll-btn.running .as-pause { display: block; }
+  @media (pointer: coarse) { .autoscroll-btn { bottom: calc(env(safe-area-inset-bottom, 0px) + 46px); } }   /* phones */
+  body.settings-open .autoscroll-btn { visibility: hidden; }
+
   /* keep the search arrows underneath the settings modal, never on top of it */
   .word-search-fab { z-index: 70; }
 
@@ -2407,6 +2430,10 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
   </div>
 
   <div class="page-label" id="pageLabel" hidden aria-live="polite"></div>
+  <button type="button" id="autoScrollBtn" class="autoscroll-btn" aria-label="Auto scroll" aria-pressed="false">
+    <svg class="as-chev" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 5 12 11 18 5"/><polyline points="6 13 12 19 18 13"/></svg>
+    <svg class="as-pause" viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
+  </button>
   <div class="word-search-fab" id="wordSearchFab" hidden>
     <button type="button" id="wordSearchFabPrev" class="word-search-fabbtn" aria-label="Previous match"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
     <div class="word-search-fabcount" id="wordSearchFabCount" aria-live="polite"></div>
@@ -5120,6 +5147,58 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
   window.addEventListener('resize', schedule);
   [staticC, dynC].forEach(function (c) { if (c && window.MutationObserver) new MutationObserver(schedule).observe(c, { childList: true }); });
   schedule();
+})();
+</script>
+<script>
+// Auto scroll: tap the icon above the page label to start, tap it again (or touch the screen) to stop.
+(function () {
+  var btn = document.getElementById('autoScrollBtn');
+  if (!btn) return;
+  var PX_PER_SEC = 35;          // scrolling speed: raise for faster, lower for slower
+  var running = false, rafId = 0, lastT = 0, acc = 0;
+
+  function atBottom() {
+    var doc = document.documentElement;
+    return window.pageYOffset + window.innerHeight >= doc.scrollHeight - 2;
+  }
+  function step(t) {
+    if (!running) return;
+    var dt = lastT ? Math.min(t - lastT, 100) : 16;   // ms; capped so a stall never causes a jump
+    lastT = t;
+    acc += PX_PER_SEC * dt / 1000;
+    var whole = Math.floor(acc);                      // iOS ignores fractional scroll amounts, so collect them
+    if (whole >= 1) {
+      acc -= whole;
+      var before = window.pageYOffset;
+      window.scrollBy(0, whole);
+      if (atBottom() || window.pageYOffset === before) { stop(); return; }
+    }
+    rafId = requestAnimationFrame(step);
+  }
+  function start() {
+    if (running) return;
+    running = true; lastT = 0; acc = 0;
+    btn.classList.add('running');
+    btn.setAttribute('aria-pressed', 'true');
+    rafId = requestAnimationFrame(step);
+  }
+  function stop() {
+    if (!running) return;
+    running = false;
+    cancelAnimationFrame(rafId);
+    btn.classList.remove('running');
+    btn.setAttribute('aria-pressed', 'false');
+  }
+  btn.addEventListener('click', function () { running ? stop() : start(); });
+
+  // any touch / wheel / key on the page itself stops it (the button handles its own tap)
+  function userTook(e) { if (running && !(e.target && e.target.closest && e.target.closest('#autoScrollBtn'))) stop(); }
+  document.addEventListener('touchstart', userTook, { passive: true });
+  document.addEventListener('wheel', userTook, { passive: true });
+  document.addEventListener('keydown', function (e) { if (e.key !== 'Tab') userTook(e); });
+  // stop when the screen is hidden or a different surah is opened
+  document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); });
+  window.addEventListener('hashchange', stop);
 })();
 </script>
 </body>

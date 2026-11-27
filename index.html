@@ -2747,7 +2747,7 @@ In the results, tap an ayah number (the link) to open that ayah.</div>
       if ((wsNav && !wsNav.hidden) || (wsInput && wsInput.value.trim())) { lastClick = 0; return; }
       var sec = t.closest('.ayah');
       if (!sec) return;
-      if (t.closest('button, a, input, select, textarea, label, .word-block, .settings-overlay, .chapter-sheet-overlay, .verse-sheet-overlay, .sources-overlay')) return;
+      if (t.closest('button, a, input, select, textarea, label, .settings-overlay, .chapter-sheet-overlay, .verse-sheet-overlay, .sources-overlay')) return;   // (words and the Arabic ayah line are allowed: a tap on them opens the box too)
       var sel = window.getSelection && window.getSelection();
       if (sel && String(sel).length) return;           // the user is selecting text
       // One tap opens the box. A second tap within 330 ms is the existing double tap

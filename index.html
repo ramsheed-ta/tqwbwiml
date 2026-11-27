@@ -1507,7 +1507,7 @@
   /* Floating up / down arrows (same light grey as the share icon) */
   .verse-nav {
     position: fixed;
-    left: 12px;
+    left: 31px;   /* was 12px: moved in towards the text */
     top: 50%;
     transform: translateY(-50%);
     z-index: 55;
@@ -1515,7 +1515,7 @@
     flex-direction: column;
     gap: 6px;
   }
-  .verse-nav-right { left: auto; right: 12px; }
+  .verse-nav-right { left: auto; right: 31px; }
   .verse-nav-btn {
     width: 48px;
     height: 48px;
@@ -1545,8 +1545,8 @@
 
   /* Second pair of arrows: straight from ayah to ayah. Same rows as the first pair, just inside it.
      (Narrower tap area, so it never covers the first pair's triangle.) */
-  .verse-nav-ayah { left: 45px; }
-  .verse-nav-ayah.verse-nav-right { left: auto; right: 45px; }
+  .verse-nav-ayah { left: 70px; }   /* was 45px; a little more gap between the two arrows than before */
+  .verse-nav-ayah.verse-nav-right { left: auto; right: 70px; }
   .verse-nav-ayah .verse-nav-btn { width: 34px; }
 
   /* ===== "Website under construction" banner =====
